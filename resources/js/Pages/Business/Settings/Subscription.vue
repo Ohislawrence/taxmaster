@@ -100,6 +100,38 @@
                     </span>
                 </h2>
 
+                <!-- Billing Cycle Toggle -->
+                <div class="mb-6 flex items-center gap-4">
+                    <span class="text-sm font-medium text-gray-700">Billing Cycle:</span>
+                    <div class="flex gap-2">
+                        <button
+                            @click="selectedBillingCycle = 'monthly'"
+                            :class="[
+                                'px-4 py-2 rounded-lg font-medium transition',
+                                selectedBillingCycle === 'monthly'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ]"
+                        >
+                            Monthly
+                        </button>
+                        <button
+                            @click="selectedBillingCycle = 'annual'"
+                            :class="[
+                                'px-4 py-2 rounded-lg font-medium transition relative',
+                                selectedBillingCycle === 'annual'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ]"
+                        >
+                            Annual
+                            <span class="text-xs absolute -top-2 -right-2 bg-green-500 text-white px-2 py-1 rounded">
+                                Save 20%
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-3 gap-6">
                     <div
                         v-for="(plan, planKey) in availablePlans"
@@ -115,11 +147,11 @@
                         <div class="mb-4">
                             <h3 class="text-xl font-bold text-gray-900">{{ plan.name }}</h3>
                             <p class="text-3xl font-bold text-gray-900 mt-2">
-                                ₦{{ formatNumber(plan.monthly_price) }}
-                                <span class="text-sm text-gray-600 font-normal">/month</span>
+                                ₦{{ formatNumber(selectedBillingCycle === 'annual' ? plan.annual_price : plan.monthly_price) }}
+                                <span class="text-sm text-gray-600 font-normal">/{{ selectedBillingCycle }}</span>
                             </p>
-                            <p class="text-sm text-gray-600 mt-1">
-                                or ₦{{ formatNumber(plan.annual_price) }}/year
+                            <p v-if="selectedBillingCycle === 'annual'" class="text-sm text-green-600 mt-1 font-medium">
+                                Save ₦{{ formatNumber(plan.monthly_price * 12 - plan.annual_price) }}/year
                             </p>
                         </div>
 
@@ -248,11 +280,12 @@ export default {
     data() {
         return {
             isUpgrading: null,
+            selectedBillingCycle: 'monthly',
         };
     },
     methods: {
         async upgradePlan(planKey) {
-            if (!confirm('Upgrade to this plan?')) return;
+            if (!confirm(`Upgrade to this plan (${this.selectedBillingCycle})?`)) return;
 
             this.isUpgrading = planKey;
             try {
@@ -267,6 +300,7 @@ export default {
                     },
                     body: JSON.stringify({
                         plan_type: planKey,
+                        billing_cycle: this.selectedBillingCycle,
                     }),
                 });
 

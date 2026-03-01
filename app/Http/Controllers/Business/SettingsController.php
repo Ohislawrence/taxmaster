@@ -150,6 +150,7 @@ class SettingsController
 
         $validated = $request->validate([
             'plan_type' => 'required|in:basic,professional,enterprise',
+            'billing_cycle' => 'required|in:monthly,annual',
         ]);
 
         $plan = SubscriptionPlan::where('slug', $validated['plan_type'])->first();
@@ -172,13 +173,13 @@ class SettingsController
             return response()->json(['error' => 'Cannot downgrade to a lower tier'], 422);
         }
 
-        // Update the subscription plan
-        $this->subscriptionService->upgradeSubscription($currentSubscription, $plan);
+        // Update the subscription plan with selected billing cycle
+        $this->subscriptionService->upgradeSubscription($currentSubscription, $plan, $validated['billing_cycle']);
 
         // Initialize Paystack payment for non-free plans
         if ($plan->monthly_price > 0) {
             try {
-                $paymentUrl = $this->initializePaystackPayment($business, $plan, $currentSubscription);
+                $paymentUrl = $this->initializePaystackPayment($business, $plan, $currentSubscription, $validated['billing_cycle']);
 
                 if (!$paymentUrl) {
                     return response()->json(['error' => 'Failed to initialize payment'], 500);
@@ -213,9 +214,10 @@ class SettingsController
     /**
      * Initialize Paystack payment for subscription upgrade
      */
-    private function initializePaystackPayment($business, $plan, $subscription)
+    private function initializePaystackPayment($business, $plan, $subscription, $billingCycle = 'monthly')
     {
-        $amount = $plan->monthly_price; // Use monthly price for upgrade
+        // Use annual price if yearly billing selected
+        $amount = $billingCycle === 'annual' ? $plan->annual_price : $plan->monthly_price;
         // Prefer business email, fallback to user email
         $email = $business->email ?: auth()->user()->email;
 
@@ -254,6 +256,7 @@ class SettingsController
         Log::debug('Paystack payment payload', [
             'email' => $payload['email'],
             'amount' => $payload['amount'],
+            'billing_cycle' => $billingCycle,
             'business_id' => $business->id,
         ]);
 
