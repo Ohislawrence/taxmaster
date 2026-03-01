@@ -36,10 +36,10 @@
                         <p class="text-gray-600 text-sm font-medium">Billing Cycle</p>
                         <p class="text-lg font-semibold text-gray-900">{{ currentSubscription.billing_cycle }}</p>
                     </div>
-                    <div v-if="currentSubscription.trial_ends_at">
+                    <div v-if="currentSubscription?.trial_ends_at">
                         <p class="text-gray-600 text-sm font-medium">Trial Ends</p>
                         <p class="text-lg font-semibold text-gray-900">
-                            {{ new Date(currentSubscription.trial_ends_at).toLocaleDateString() }}
+                            {{ new Date(currentSubscription?.trial_ends_at).toLocaleDateString() }}
                         </p>
                     </div>
                 </div>
@@ -48,13 +48,13 @@
                 <div class="mt-6 border-t border-gray-200 pt-6">
                     <h3 class="font-semibold text-gray-900 mb-3">Included Features</h3>
                     <ul class="space-y-2">
-                        <li v-if="currentSubscription.ai_analysis_included" class="flex items-center text-gray-700">
+                        <li v-if="currentSubscription?.ai_analysis_included" class="flex items-center text-gray-700">
                             <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                             </svg>
                             AI Tax Analysis
                         </li>
-                        <li v-if="currentSubscription.payment_automation" class="flex items-center text-gray-700">
+                        <li v-if="currentSubscription?.payment_automation" class="flex items-center text-gray-700">
                             <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                             </svg>
@@ -64,21 +64,21 @@
                             <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                             </svg>
-                            Max Staff: {{ currentSubscription.max_staff_members }}
+                            Max Staff: {{ currentSubscription?.max_staff_members }}
                         </li>
                         <li class="flex items-center text-gray-700">
                             <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                             </svg>
-                            Max Returns/Year: {{ currentSubscription.max_returns_per_year }}
+                            Max Returns/Year: {{ currentSubscription?.max_returns_per_year }}
                         </li>
                     </ul>
                 </div>
 
                 <!-- Renewal Info -->
-                <div v-if="currentSubscription.renews_at" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div v-if="currentSubscription?.renews_at" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <p class="text-sm text-blue-900">
-                        Next billing date: <strong>{{ new Date(currentSubscription.renews_at).toLocaleDateString() }}</strong>
+                        Next billing date: <strong>{{ new Date(currentSubscription?.renews_at).toLocaleDateString() }}</strong>
                     </p>
                 </div>
             </div>
@@ -237,7 +237,7 @@
 
 <script>
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 
 export default {
     components: { BusinessLayout },
@@ -256,10 +256,13 @@ export default {
 
             this.isUpgrading = planKey;
             try {
+                const page = usePage();
+                const csrfToken = page.props.csrf_token;
+
                 const response = await fetch(route('business.subscription.upgrade-plan'), {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-CSRF-Token': csrfToken,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
@@ -267,27 +270,38 @@ export default {
                     }),
                 });
 
-                if (response.ok) {
-                    alert('Plan upgraded successfully!');
-                    router.reload();
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // If payment URL is provided, redirect to Paystack
+                    if (data.payment_url) {
+                        window.location.href = data.payment_url;
+                    } else if (data.redirect) {
+                        // Free plan, redirect to subscription page
+                        window.location.href = data.redirect;
+                    } else {
+                        alert(data.message || 'Plan upgraded successfully!');
+                        router.reload();
+                    }
                 } else {
-                    alert('Failed to upgrade plan');
+                    alert(data.error || 'Failed to upgrade plan');
                 }
             } catch (error) {
                 console.error('Upgrade error:', error);
-                alert('An error occurred during upgrade');
+                alert('An error occurred while processing your upgrade. Please try again.');
             } finally {
                 this.isUpgrading = null;
             }
         },
 
-        getPlanName(planKey) {
+        getPlanName(planType) {
             const plans = {
-                basic: 'Basic Plan',
-                professional: 'Professional Plan',
-                enterprise: 'Enterprise Plan',
+                free: 'Free',
+                basic: 'Basic',
+                professional: 'Professional',
+                enterprise: 'Enterprise',
             };
-            return plans[planKey] || planKey;
+            return plans[planType] || 'Unknown Plan';
         },
 
         getStatusClass(status) {
@@ -296,6 +310,7 @@ export default {
                 cancelled: 'bg-red-100 text-red-800',
                 suspended: 'bg-orange-100 text-orange-800',
                 pending: 'bg-yellow-100 text-yellow-800',
+                pending_payment: 'bg-blue-100 text-blue-800',
             };
             return classes[status] || 'bg-gray-100 text-gray-800';
         },
