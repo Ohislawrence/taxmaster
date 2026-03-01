@@ -218,16 +218,25 @@ class SettingsController
         $amount = $plan->monthly_price; // Use monthly price for upgrade
         // Prefer business email, fallback to user email
         $email = $business->email ?: auth()->user()->email;
-        
-        // Ensure email is valid and not empty
-        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            Log::error('Invalid email for Paystack payment', [
-                'business_email' => $business->email,
-                'user_email' => auth()->user()->email,
-                'user_id' => auth()->id(),
-                'business_id' => $business->id,
-            ]);
+
+        // Ensure email is valid format
+        if (empty($email)) {
             throw new \Exception('Valid email is required for payment. Please ensure your business or account email is set.');
+        }
+
+        // Convert .test domain to valid domain for Paystack (used in local development)
+        if (str_ends_with($email, '.test')) {
+            // Replace .test with .example.com for Paystack (valid test domain)
+            $email = str_replace('.test', '.example.com', $email);
+            Log::debug('Converted test email for Paystack', [
+                'original_email' => $business->email ?: auth()->user()->email,
+                'converted_email' => $email,
+            ]);
+        }
+
+        // Final validation
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \Exception('Invalid email format. Please contact support.');
         }
 
         $payload = [
@@ -241,7 +250,7 @@ class SettingsController
                 'type' => 'subscription_upgrade',
             ],
         ];
-        
+
         Log::debug('Paystack payment payload', [
             'email' => $payload['email'],
             'amount' => $payload['amount'],
