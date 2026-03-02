@@ -1,10 +1,10 @@
 <template>
     <BusinessLayout>
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-6 px-3 sm:px-0">
             <!-- Header -->
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div class="flex-1">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
                         Compliance Calendar
                         <span
                             class="ml-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700"
@@ -13,18 +13,18 @@
                             i
                         </span>
                     </h1>
-                    <p class="text-gray-600 mt-1">Track your tax deadlines and compliance requirements</p>
+                    <p class="text-sm sm:text-base text-gray-600 mt-1">Track your tax deadlines and compliance requirements</p>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center gap-2 justify-between sm:justify-start">
                     <button
                         @click="previousMonth"
                         class="p-2 hover:bg-gray-100 rounded-lg transition"
                     >
-                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 sm:w-6 h-5 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <span class="text-lg font-semibold text-gray-900 min-w-48 text-center">
+                    <span class="text-base sm:text-lg font-semibold text-gray-900 px-2 sm:px-4 text-center">
                         {{ currentMonth.toLocaleDateString('en-NG', { month: 'long', year: 'numeric' }) }}
                     </span>
                     <button

@@ -2,39 +2,39 @@
     <BusinessLayout>
         <Head :title="`${taxReturn.return_type} - ${taxReturn.tax_period}`" />
 
-        <div class="py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-            <div class="mb-8">
-                <Link href="/business/tax-returns" class="text-blue-600 hover:underline">&larr; Back to Tax Returns</Link>
-                <div class="flex justify-between items-start mt-4">
-                    <div>
-                        <h1 class="text-3xl font-bold text-gray-900">{{ taxReturn.return_type }} - {{ taxReturn.tax_period }}</h1>
-                        <p class="text-gray-600 mt-1">Due by {{ formatDate(taxReturn.due_date) }}</p>
+        <div class="py-4 sm:py-8 px-3 sm:px-4 lg:px-8 max-w-4xl mx-auto">
+            <div class="mb-6 sm:mb-8">
+                <Link href="/business/tax-returns" class="text-blue-600 hover:underline text-sm">&larr; Back to Tax Returns</Link>
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mt-4">
+                    <div class="flex-1">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ taxReturn.return_type }} - {{ taxReturn.tax_period }}</h1>
+                        <p class="text-sm sm:text-base text-gray-600 mt-1">Due by {{ formatDate(taxReturn.due_date) }}</p>
                     </div>
-                    <span :class="getStatusColor(taxReturn.status)" class="px-4 py-2 rounded-full font-medium">
+                    <span :class="getStatusColor(taxReturn.status)" class="px-4 py-2 rounded-full font-medium text-sm w-full sm:w-auto text-center">
                         {{ taxReturn.status.charAt(0).toUpperCase() + taxReturn.status.slice(1) }}
                     </span>
                 </div>
             </div>
 
             <!-- Main Content Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 <!-- Left Column -->
-                <div class="lg:col-span-2 space-y-6">
+                <div class="lg:col-span-2 space-y-4 sm:space-y-6">
                     <!-- Summary Card -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Tax Summary</h2>
-                        <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">Tax Summary</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="border-b border-gray-200 pb-4">
-                                <p class="text-gray-600 text-sm">Total Tax Due</p>
-                                <p class="text-2xl font-bold text-red-600 mt-1">₦{{ formatCurrency(taxReturn.total_tax_due) }}</p>
+                                <p class="text-gray-600 text-xs sm:text-sm">Total Tax Due</p>
+                                <p class="text-xl sm:text-2xl font-bold text-red-600 mt-1">₦{{ formatCurrency(taxReturn.total_tax_due) }}</p>
                             </div>
                             <div class="border-b border-gray-200 pb-4">
-                                <p class="text-gray-600 text-sm">Amount Paid</p>
-                                <p class="text-2xl font-bold text-green-600 mt-1">₦{{ formatCurrency(taxReturn.amount_paid) }}</p>
+                                <p class="text-gray-600 text-xs sm:text-sm">Amount Paid</p>
+                                <p class="text-xl sm:text-2xl font-bold text-green-600 mt-1">₦{{ formatCurrency(taxReturn.amount_paid) }}</p>
                             </div>
                             <div class="pt-4">
-                                <p class="text-gray-600 text-sm">Outstanding Balance</p>
-                                <p class="text-2xl font-bold" :class="taxReturn.balance > 0 ? 'text-orange-600' : 'text-green-600'" >
+                                <p class="text-gray-600 text-xs sm:text-sm">Outstanding Balance</p>
+                                <p class="text-xl sm:text-2xl font-bold" :class="taxReturn.balance > 0 ? 'text-orange-600' : 'text-green-600'" >
                                     ₦{{ formatCurrency(taxReturn.balance) }}
                                 </p>
                             </div>
