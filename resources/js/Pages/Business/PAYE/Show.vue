@@ -2,20 +2,20 @@
     <BusinessLayout>
         <Head :title="`PAYE Return - ${payeReturn.period_label}`" />
 
-        <div class="py-8 px-4 sm:px-6 lg:px-8">
+        <div class="py-4 sm:py-8 px-3 sm:px-4 lg:px-8">
             <!-- Header -->
-            <div class="mb-8">
-                <Link :href="route('business.paye.index')" class="text-blue-600 hover:text-blue-800 mb-4 inline-flex items-center">
+            <div class="mb-6 sm:mb-8">
+                <Link :href="route('business.paye.index')" class="text-blue-600 hover:text-blue-800 mb-4 inline-flex items-center text-sm">
                     ← Back to PAYE Returns
                 </Link>
-                <div class="flex justify-between items-start mt-4">
-                    <div>
-                        <h1 class="text-3xl font-bold text-gray-900">{{ payeReturn.period_label }}</h1>
-                        <p class="text-gray-600 mt-1">PAYE Return Details</p>
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mt-4">
+                    <div class="flex-1">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ payeReturn.period_label }}</h1>
+                        <p class="text-sm sm:text-base text-gray-600 mt-1">PAYE Return Details</p>
                     </div>
                     <span
                         :class="getStatusBadgeClass(payeReturn.status)"
-                        class="px-4 py-2 rounded-full text-sm font-bold uppercase"
+                        class="px-4 py-2 rounded-full text-xs sm:text-sm font-bold uppercase w-full sm:w-auto text-center"
                     >
                         {{ payeReturn.status }}
                     </span>
@@ -23,26 +23,26 @@
             </div>
 
             <!-- Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
-                    <p class="text-sm text-blue-600 font-medium">Total Gross Pay</p>
-                    <p class="text-3xl font-bold text-blue-900">₦{{ formatCurrency(payeReturn.total_gross_pay) }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div class="bg-blue-50 rounded-lg p-4 sm:p-6 border border-blue-200">
+                    <p class="text-xs sm:text-sm text-blue-600 font-medium">Total Gross Pay</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-blue-900 mt-2">₦{{ formatCurrency(payeReturn.total_gross_pay) }}</p>
                     <p class="text-xs text-blue-600 mt-2">{{ payeReturn.staff_count }} staff members</p>
                 </div>
-                <div class="bg-green-50 rounded-lg p-6 border border-green-200">
-                    <p class="text-sm text-green-600 font-medium">PAYE Deducted</p>
-                    <p class="text-3xl font-bold text-green-900">₦{{ formatCurrency(payeReturn.total_tax_deducted) }}</p>
+                <div class="bg-green-50 rounded-lg p-4 sm:p-6 border border-green-200">
+                    <p class="text-xs sm:text-sm text-green-600 font-medium">PAYE Deducted</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-green-900 mt-2">₦{{ formatCurrency(payeReturn.total_tax_deducted) }}</p>
                     <p class="text-xs text-green-600 mt-2">Total tax liability</p>
                 </div>
-                <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
-                    <p class="text-sm text-purple-600 font-medium">Average PAYE Rate</p>
-                    <p class="text-3xl font-bold text-purple-900">{{ averageRate }}%</p>
+                <div class="bg-purple-50 rounded-lg p-4 sm:p-6 border border-purple-200">
+                    <p class="text-xs sm:text-sm text-purple-600 font-medium">Average PAYE Rate</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-purple-900 mt-2">{{ averageRate }}%</p>
                     <p class="text-xs text-purple-600 mt-2">Effective tax rate</p>
                 </div>
             </div>
 
             <!-- Return Information -->
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Return Information</h2>
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>

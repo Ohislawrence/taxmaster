@@ -2,20 +2,20 @@
     <BusinessLayout>
         <Head :title="`${staff.full_name} - Staff`" />
 
-        <div class="py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-            <div class="flex justify-between items-start mb-8">
-                <div>
-                    <Link href="/business/staff" class="text-blue-600 hover:underline">&larr; Back to Staff</Link>
-                    <h1 class="text-3xl font-bold text-gray-900 mt-4">{{ staff.full_name }}</h1>
-                    <p class="text-gray-600 mt-1">{{ staff.position }} {{ staff.department ? `• ${staff.department}` : '' }}</p>
+        <div class="py-4 sm:py-8 px-3 sm:px-4 lg:px-8 max-w-4xl mx-auto">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6 sm:mb-8">
+                <div class="flex-1">
+                    <Link href="/business/staff" class="text-blue-600 hover:underline text-sm">&larr; Back to Staff</Link>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mt-4">{{ staff.full_name }}</h1>
+                    <p class="text-sm sm:text-base text-gray-600 mt-1">{{ staff.position }} {{ staff.department ? `• ${staff.department}` : '' }}</p>
                 </div>
-                <div class="flex gap-2">
-                    <Link :href="`/business/staff/${staff.id}/edit`" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <Link :href="`/business/staff/${staff.id}/edit`" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-center text-sm">
                         Edit
                     </Link>
                     <button 
                         @click="deleteStaff"
-                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium"
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm"
                     >
                         Delete
                     </button>
@@ -23,31 +23,31 @@
             </div>
 
             <!-- Grid Layout -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 <!-- Left Column -->
-                <div class="lg:col-span-2 space-y-6">
+                <div class="lg:col-span-2 space-y-4 sm:space-y-6">
                     <!-- Personal Information -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h2>
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">Personal Information</h2>
                         <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <p class="text-gray-600 text-sm">Email</p>
-                                    <p class="font-medium text-gray-900 mt-1">{{ staff.email }}</p>
+                                    <p class="text-gray-600 text-xs sm:text-sm">Email</p>
+                                    <p class="font-medium text-gray-900 mt-1 text-sm">{{ staff.email }}</p>
                                 </div>
                                 <div>
-                                    <p class="text-gray-600 text-sm">Phone</p>
-                                    <p class="font-medium text-gray-900 mt-1">{{ staff.phone || 'N/A' }}</p>
+                                    <p class="text-gray-600 text-xs sm:text-sm">Phone</p>
+                                    <p class="font-medium text-gray-900 mt-1 text-sm">{{ staff.phone || 'N/A' }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Employment Information -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Employment Information</h2>
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">Employment Information</h2>
                         <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <p class="text-gray-600 text-sm">Position</p>
                                     <p class="font-medium text-gray-900 mt-1">{{ staff.position }}</p>

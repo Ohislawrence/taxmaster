@@ -1,15 +1,15 @@
 <template>
     <BusinessLayout>
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-6 px-3 sm:px-0">
             <!-- Header -->
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Bank Accounts</h1>
-                    <p class="text-gray-600 mt-1">Connect your bank accounts to auto-import transactions</p>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div class="flex-1">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Bank Accounts</h1>
+                    <p class="text-sm sm:text-base text-gray-600 mt-1">Connect your bank accounts to auto-import transactions</p>
                 </div>
                 <button
                     @click="showConnectModal = true"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition flex items-center space-x-2"
+                    class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center sm:justify-start space-x-2"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -19,22 +19,22 @@
             </div>
 
             <!-- Connected Accounts -->
-            <div v-if="accounts.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div v-if="accounts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div
                     v-for="account in accounts"
                     :key="account.id"
-                    class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
+                    class="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-lg transition"
                 >
                     <!-- Bank Info -->
-                    <div class="flex items-start justify-between mb-4">
-                        <div>
-                            <h3 class="font-semibold text-gray-900">{{ account.bank_name }}</h3>
-                            <p class="text-sm text-gray-600">{{ account.account_name }}</p>
+                    <div class="flex items-start justify-between mb-4 gap-2">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 text-sm sm:text-base">{{ account.bank_name }}</h3>
+                            <p class="text-xs sm:text-sm text-gray-600">{{ account.account_name }}</p>
                             <p class="text-xs text-gray-500 mt-1">{{ account.account_number }}</p>
                         </div>
                         <div
                             :class="account.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                            class="px-2 py-1 rounded text-xs font-medium"
+                            class="px-2 py-1 rounded text-xs font-medium whitespace-nowrap"
                         >
                             {{ account.is_active ? 'Active' : 'Inactive' }}
                         </div>
@@ -43,7 +43,7 @@
                     <!-- Balance -->
                     <div class="mb-4 p-3 bg-gray-50 rounded">
                         <p class="text-xs text-gray-600 uppercase tracking-wide">Balance</p>
-                        <p class="text-xl font-bold text-gray-900">₦{{ formatCurrency(account.balance) }}</p>
+                        <p class="text-lg sm:text-xl font-bold text-gray-900 mt-1">₦{{ formatCurrency(account.balance) }}</p>
                     </div>
 
                     <!-- Sync Info -->
@@ -56,13 +56,13 @@
 
                     <!-- Transaction Count -->
                     <div class="mb-4 p-2 bg-blue-50 rounded text-sm">
-                        <p class="text-gray-700">
+                        <p class="text-gray-700 text-xs sm:text-sm">
                             <span class="font-bold text-blue-600">{{ account.transactions_count }}</span> transactions
                         </p>
                     </div>
 
                     <!-- Actions -->
-                    <div class="flex gap-2">
+                    <div class="flex flex-col sm:flex-row gap-2">
                         <button
                             @click="syncAccount(account)"
                             :disabled="syncing === account.id"

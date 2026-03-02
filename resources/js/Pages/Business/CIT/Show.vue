@@ -2,18 +2,18 @@
   <BusinessLayout>
     <Head title="CIT Return Details" />
 
-    <div class="space-y-6 max-w-4xl mx-auto">
+    <div class="space-y-4 sm:space-y-6 px-3 sm:px-0 max-w-4xl mx-auto">
       <!-- Page Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">CIT Return - {{ citReturn.period }}</h1>
-          <p class="mt-2 text-gray-600">View and manage your corporate income tax return</p>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex-1">
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">CIT Return - {{ citReturn.period }}</h1>
+          <p class="mt-2 text-sm sm:text-base text-gray-600">View and manage your corporate income tax return</p>
         </div>
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
           <Link
             v-if="citReturn.status === 'draft'"
             :href="route('business.cit.edit', citReturn.id)"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           >
             <i class="fas fa-edit mr-2"></i>
             Edit
@@ -22,7 +22,7 @@
             v-if="citReturn.status === 'submitted'"
             href="#"
             @click.prevent="generateRRR"
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+            class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
           >
             <i class="fas fa-receipt mr-2"></i>
             Generate Payment RRR
@@ -31,8 +31,8 @@
       </div>
 
       <!-- Status Card -->
-      <div class="bg-white shadow rounded-lg p-6">
-        <div class="flex items-center justify-between">
+      <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p class="text-gray-600 text-sm font-medium">Current Status</p>
             <div class="mt-2">
@@ -41,7 +41,7 @@
               </span>
             </div>
           </div>
-          <div class="text-right">
+          <div class="text-left sm:text-right">
             <p class="text-gray-600 text-sm font-medium">Due Date</p>
             <p class="text-lg font-bold text-gray-900 mt-1">{{ formatDate(citReturn.due_date) }}</p>
           </div>

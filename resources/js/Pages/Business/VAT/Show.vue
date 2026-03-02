@@ -2,18 +2,18 @@
   <BusinessLayout>
     <Head :title="`VAT Return - ${vat.period}`" />
 
-    <div class="space-y-6">
+    <div class="space-y-4 sm:space-y-6 px-3 sm:px-0">
       <!-- Page Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">VAT Return - {{ vat.period }}</h1>
-          <p class="mt-2 text-gray-600">{{ formatFormType(vat.form_type) }}</p>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex-1">
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">VAT Return - {{ vat.period }}</h1>
+          <p class="mt-2 text-sm sm:text-base text-gray-600">{{ formatFormType(vat.form_type) }}</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Link
             v-if="vat.status === 'draft'"
             :href="route('business.vat.edit', vat.id)"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
           >
             <i class="fas fa-edit mr-2"></i>
             Edit
@@ -21,14 +21,14 @@
           <Link
             v-if="['submitted', 'accepted'].includes(vat.status)"
             :href="generatePaymentRRR"
-            class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
           >
             <i class="fas fa-credit-card mr-2"></i>
             Pay VAT
           </Link>
           <Link
             :href="route('business.vat.index')"
-            class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+            class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm"
           >
             <i class="fas fa-arrow-left mr-2"></i>
             Back
@@ -37,23 +37,23 @@
       </div>
 
       <!-- Status & Timeline -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between">
+      <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
               <span :class="getStatusClass(vat.status)" class="px-4 py-2 rounded-full text-sm font-semibold">
                 {{ formatStatus(vat.status) }}
               </span>
-              <span v-if="vat.due_date" class="text-gray-600">
+              <span v-if="vat.due_date" class="text-sm sm:text-base text-gray-600">
                 Due: {{ formatDate(vat.due_date) }}
               </span>
             </div>
           </div>
-          <div class="text-right">
-            <p v-if="vat.submitted_at" class="text-sm text-gray-600">
+          <div class="text-left sm:text-right">
+            <p v-if="vat.submitted_at" class="text-xs sm:text-sm text-gray-600">
               Submitted: {{ formatDate(vat.submitted_at) }}
             </p>
-            <p v-if="vat.filed_at" class="text-sm text-gray-600">
+            <p v-if="vat.filed_at" class="text-xs sm:text-sm text-gray-600">
               Filed: {{ formatDate(vat.filed_at) }}
             </p>
           </div>
