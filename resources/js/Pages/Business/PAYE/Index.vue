@@ -132,14 +132,20 @@
                             Showing {{ returns.from }} to {{ returns.to }} of {{ returns.total }} returns
                         </div>
                         <div class="flex gap-2">
-                            <Link
-                                v-for="link in returns.links"
-                                :key="link.label"
-                                :href="link.url"
-                                :class="link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
-                                class="px-4 py-2 rounded border text-sm font-medium"
-                                v-html="link.label"
-                            />
+                            <template v-for="link in returns.links" :key="link.label">
+                                <Link
+                                    v-if="link.url"
+                                    :href="link.url"
+                                    :class="link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                                    class="px-4 py-2 rounded border text-sm font-medium"
+                                    v-html="link.label"
+                                />
+                                <span
+                                    v-else
+                                    class="px-4 py-2 rounded border text-sm font-medium bg-white text-gray-400 cursor-not-allowed"
+                                    v-html="link.label"
+                                />
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -153,8 +159,8 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
 
 const props = defineProps({
-    returns: Object,
-    stats: Object,
+    returns: { type: Object, default: () => ({ data: [], links: [], from: 0, to: 0, total: 0 }) },
+    stats: { type: Object, default: () => ({ total_returns: 0, total_tax_collected: 0, pending_returns: 0, this_month_tax: 0 }) },
 });
 
 const formatCurrency = (amount) => {

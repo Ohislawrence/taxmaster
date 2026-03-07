@@ -45,6 +45,9 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             app(\App\Services\PaymentRecoveryService::class)->processFailedPayments();
         })->dailyAt('10:00')->name('payment-recovery-suggestions');
+
+        // Report invoices to NRS every hour
+        $schedule->command('invoices:report-nrs')->hourly()->runInBackground();
     }
 
     /**

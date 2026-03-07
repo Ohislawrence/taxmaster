@@ -18,13 +18,87 @@ class GovernmentPaymentService
     private string $merchantId;
     private string $apiKey;
     private string $serviceTypeId;
+    private string $environment;
+
+    /**
+     * Remita sandbox credentials for testing
+     */
+    private const SANDBOX_BASE_URL = 'https://remitademo.net/remita/exapp/api/v1/send/api';
+    private const PRODUCTION_BASE_URL = 'https://login.remita.net/remita/exapp/api/v1/send/api';
+
+    /**
+     * Tax types that are always paid to FIRS (federal)
+     */
+    private const FEDERAL_TAX_TYPES = ['VAT', 'CIT'];
 
     public function __construct()
     {
-        $this->remitaBaseUrl = (string) config('services.remita.base_url', 'https://login.remita.net/remita/exapp/api/v1/send/api');
+        $this->environment = (string) config('services.remita.environment', 'sandbox');
         $this->merchantId = (string) config('services.remita.merchant_id', '');
         $this->apiKey = (string) config('services.remita.api_key', '');
         $this->serviceTypeId = (string) config('services.remita.service_type_id', '');
+
+        // Auto-select base URL based on environment if not explicitly set
+        $defaultUrl = $this->environment === 'production'
+            ? self::PRODUCTION_BASE_URL
+            : self::SANDBOX_BASE_URL;
+
+        $this->remitaBaseUrl = (string) config('services.remita.base_url', $defaultUrl);
+    }
+
+    /**
+     * Resolve the correct Remita Service Type ID based on tax type and state.
+     *
+     * - VAT and CIT always go to FIRS (federal).
+     * - PAYE always goes to the staff's state SIRS.
+     * - WHT goes to FIRS for companies, or state SIRS for individuals.
+     *
+     * @param string $taxType  PAYE|VAT|CIT|WHT
+     * @param string|null $stateCode  Two-letter state code (e.g., 'LA' for Lagos)
+     * @param string|null $beneficiaryType  'company'|'individual' (only for WHT)
+     * @return string
+     */
+    public function resolveServiceTypeId(string $taxType, ?string $stateCode = null, ?string $beneficiaryType = null): string
+    {
+        // Federal taxes always go to FIRS
+        if (in_array($taxType, self::FEDERAL_TAX_TYPES, true)) {
+            return (string) config('nigerian_states.remita_service_types.firs', $this->serviceTypeId);
+        }
+
+        // WHT: route based on beneficiary type
+        if ($taxType === 'WHT') {
+            if ($beneficiaryType === 'individual' && $stateCode) {
+                $stateServiceType = config("nigerian_states.remita_service_types.{$stateCode}");
+                return $stateServiceType ?: (string) config('nigerian_states.remita_service_types.firs', $this->serviceTypeId);
+            }
+            // Companies → FIRS
+            return (string) config('nigerian_states.remita_service_types.firs', $this->serviceTypeId);
+        }
+
+        // PAYE: always goes to the state SIRS
+        if ($taxType === 'PAYE' && $stateCode) {
+            $stateServiceType = config("nigerian_states.remita_service_types.{$stateCode}");
+            return $stateServiceType ?: $this->serviceTypeId;
+        }
+
+        // Fallback to default
+        return $this->serviceTypeId;
+    }
+
+    /**
+     * Check if Remita is configured with real credentials
+     */
+    public function isConfigured(): bool
+    {
+        return !empty($this->merchantId) && !empty($this->apiKey);
+    }
+
+    /**
+     * Check if running in sandbox/demo mode
+     */
+    public function isSandbox(): bool
+    {
+        return $this->environment !== 'production' || !$this->isConfigured();
     }
 
     /**
@@ -40,17 +114,28 @@ class GovernmentPaymentService
         // Prepare payment details based on tax type
         $paymentDetails = $this->preparePaymentDetails($taxType, $return, $business);
 
+        // Resolve state-aware service type ID
+        $stateCode = $return->tax_state ?? $business->state ?? null;
+        $beneficiaryType = $return->beneficiary_type ?? null;
+        $resolvedServiceTypeId = $this->resolveServiceTypeId($taxType, $stateCode, $beneficiaryType);
+
         // For now, generate a mock RRR until Remita integration is fully set up
-        if (empty($this->merchantId) || empty($this->apiKey)) {
+        if (!$this->isConfigured()) {
+            Log::info('Remita not configured - generating mock RRR', [
+                'environment' => $this->environment,
+                'tax_type' => $taxType,
+                'state_code' => $stateCode,
+                'resolved_service_type_id' => $resolvedServiceTypeId,
+            ]);
             return $this->generateMockRRR($paymentDetails);
         }
 
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Authorization' => 'remitaConsumerKey=' . $this->merchantId . ',remitaConsumerToken=' . $this->generateHash($paymentDetails),
+                'Authorization' => 'remitaConsumerKey=' . $this->merchantId . ',remitaConsumerToken=' . $this->generateHash($paymentDetails, $resolvedServiceTypeId),
             ])->post($this->remitaBaseUrl . '/echannelsvc/merchant/api/paymentinit', [
-                'serviceTypeId' => $this->serviceTypeId,
+                'serviceTypeId' => $resolvedServiceTypeId,
                 'amount' => $paymentDetails['amount'],
                 'orderId' => $paymentDetails['order_id'],
                 'payerName' => $paymentDetails['payer_name'],
@@ -244,10 +329,22 @@ class GovernmentPaymentService
 
         if ($return instanceof PayeReturn) {
             $amount = $return->total_tax_deducted;
-            $description = "PAYE Payment for {$return->period_label}";
+            $stateCode = $return->tax_state ?? $business->state;
+            $stateName = config("nigerian_states.state_options.{$stateCode}", $stateCode);
+            $description = "PAYE Payment for {$return->period_label} — {$stateName} SIRS";
         } elseif ($return instanceof WhtReturn) {
             $amount = $return->total_wht_deducted;
-            $description = "WHT Payment for {$return->period_label}";
+            $authority = ($return->beneficiary_type === 'individual') ? 'SIRS' : 'FIRS';
+            $stateCode = $return->tax_state ?? $business->state;
+            $stateName = config("nigerian_states.state_options.{$stateCode}", $stateCode);
+            $description = "WHT Payment for {$return->period_label} — {$authority}";
+            if ($authority === 'SIRS') {
+                $description .= " ({$stateName})";
+            }
+        } else {
+            // CIT, VAT or other return types
+            $amount = $return->total_tax ?? $return->amount ?? 0;
+            $description = "{$taxType} Payment for " . ($return->period_label ?? $return->period ?? 'N/A') . ' — FIRS';
         }
 
         return [
@@ -265,11 +362,13 @@ class GovernmentPaymentService
      * Generate hash for Remita API authentication
      *
      * @param array $paymentDetails
+     * @param string|null $serviceTypeId  Resolved service type ID (state-aware)
      * @return string
      */
-    private function generateHash(array $paymentDetails): string
+    private function generateHash(array $paymentDetails, ?string $serviceTypeId = null): string
     {
-        $hashString = $this->merchantId . $this->serviceTypeId . $paymentDetails['order_id'] . $paymentDetails['amount'] . $this->apiKey;
+        $effectiveServiceTypeId = $serviceTypeId ?: $this->serviceTypeId;
+        $hashString = $this->merchantId . $effectiveServiceTypeId . $paymentDetails['order_id'] . $paymentDetails['amount'] . $this->apiKey;
         return hash('sha512', $hashString);
     }
 

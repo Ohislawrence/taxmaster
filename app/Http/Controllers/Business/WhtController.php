@@ -7,6 +7,7 @@ use App\Models\WhtTransaction;
 use App\Models\WhtReturn;
 use App\Services\WHTCalculationService;
 use App\Services\GovernmentPaymentService;
+use App\Services\ReturnPdfGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Inertia\Inertia;
@@ -68,6 +69,7 @@ class WhtController extends Controller
         $validated = $request->validate([
             'transaction_date' => 'required|date',
             'transaction_type' => 'required|in:' . implode(',', array_keys($this->whtService->getAllWHTRates())),
+            'beneficiary_type' => 'required|in:company,individual',
             'vendor_name' => 'required|string|max:255',
             'vendor_tin' => 'nullable|string|max:50',
             'gross_amount' => 'required|numeric|min:0',
@@ -88,6 +90,7 @@ class WhtController extends Controller
             'business_id' => $business->id,
             'transaction_date' => $validated['transaction_date'],
             'transaction_type' => $validated['transaction_type'],
+            'beneficiary_type' => $validated['beneficiary_type'],
             'vendor_name' => $validated['vendor_name'],
             'vendor_tin' => $validated['vendor_tin'],
             'gross_amount' => $calculation['gross_amount'],
@@ -180,6 +183,38 @@ class WhtController extends Controller
             ->orderBy('period', 'desc')
             ->paginate(12);
 
+        // Manually append computed attributes with error handling
+        $returns->getCollection()->transform(function ($return) {
+            try {
+                $return->period_label = $return->period ? $return->period_label : 'Unknown Period';
+                $return->status_label = $return->status ? $return->status_label : 'Unknown';
+                $return->filed_date_formatted = $return->filed_date ? $return->filed_date_formatted : null;
+            } catch (\Exception $e) {
+                $return->period_label = 'Unknown Period';
+                $return->status_label = 'Unknown';
+                $return->filed_date_formatted = null;
+            }
+
+            if ($return->payments && $return->payments->count() > 0) {
+                $return->payments->transform(function ($payment) {
+                    try {
+                        $payment->payment_date_formatted = $payment->payment_date ? $payment->payment_date_formatted : null;
+                        $payment->payment_method_label = $payment->payment_method ? $payment->payment_method_label : 'N/A';
+                        $payment->tax_type_label = $payment->tax_type ? $payment->tax_type_label : 'Unknown';
+                        $payment->status_label = $payment->status ? $payment->status_label : 'Unknown';
+                    } catch (\Exception $e) {
+                        $payment->payment_date_formatted = null;
+                        $payment->payment_method_label = 'N/A';
+                        $payment->tax_type_label = 'Unknown';
+                        $payment->status_label = 'Unknown';
+                    }
+                    return $payment;
+                });
+            }
+
+            return $return;
+        });
+
         return Inertia::render('Business/WHT/Returns', [
             'returns' => $returns,
         ]);
@@ -225,6 +260,34 @@ class WhtController extends Controller
         $this->authorize('view', $whtReturn);
 
         $whtReturn->load(['payments', 'business']);
+
+        // Manually append computed attributes with error handling
+        try {
+            $whtReturn->period_label = $whtReturn->period ? $whtReturn->period_label : 'Unknown Period';
+            $whtReturn->status_label = $whtReturn->status ? $whtReturn->status_label : 'Unknown';
+            $whtReturn->filed_date_formatted = $whtReturn->filed_date ? $whtReturn->filed_date_formatted : null;
+        } catch (\Exception $e) {
+            $whtReturn->period_label = 'Unknown Period';
+            $whtReturn->status_label = 'Unknown';
+            $whtReturn->filed_date_formatted = null;
+        }
+
+        if ($whtReturn->payments && $whtReturn->payments->count() > 0) {
+            $whtReturn->payments->transform(function ($payment) {
+                try {
+                    $payment->payment_date_formatted = $payment->payment_date ? $payment->payment_date_formatted : null;
+                    $payment->payment_method_label = $payment->payment_method ? $payment->payment_method_label : 'N/A';
+                    $payment->tax_type_label = $payment->tax_type ? $payment->tax_type_label : 'Unknown';
+                    $payment->status_label = $payment->status ? $payment->status_label : 'Unknown';
+                } catch (\Exception $e) {
+                    $payment->payment_date_formatted = null;
+                    $payment->payment_method_label = 'N/A';
+                    $payment->tax_type_label = 'Unknown';
+                    $payment->status_label = 'Unknown';
+                }
+                return $payment;
+            });
+        }
 
         return Inertia::render('Business/WHT/ReturnDetails', [
             'whtReturn' => $whtReturn,
@@ -313,6 +376,24 @@ class WhtController extends Controller
         $schedule = $this->whtService->generateWHTSchedule($business->id, $validated['period']);
 
         return response()->json($schedule);
+    }
+
+    /**
+     * Export WHT return as PDF
+     */
+    public function exportReturnPdf(WhtReturn $whtReturn)
+    {
+        $this->authorize('view', $whtReturn);
+
+        $generator = new ReturnPdfGenerator();
+        $pdf = $generator->generateWhtReturnPdf($whtReturn);
+
+        $filename = 'wht-return-' . $whtReturn->period . '.pdf';
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     private function resolveBusiness(Request $request)

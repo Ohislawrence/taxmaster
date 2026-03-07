@@ -4,24 +4,43 @@ namespace App\Services;
 
 use App\Models\WhtTransaction;
 use App\Models\WhtReturn;
+use App\Models\Business;
 use Carbon\Carbon;
 
 class WHTCalculationService
 {
     /**
-     * WHT rates by transaction type (Nigerian rates)
+     * WHT rates by transaction type for COMPANIES (Nigerian FIRS rates)
      */
-    private const WHT_RATES = [
+    private const COMPANY_RATES = [
         'dividends' => 10.0,
         'interest' => 10.0,
         'rent' => 10.0,
         'royalties' => 10.0,
-        'commissions' => 5.0,
+        'commissions' => 10.0,
         'consultancy' => 10.0,
         'contracts' => 5.0,
         'management_fees' => 10.0,
         'directors_fees' => 10.0,
         'professional_fees' => 10.0,
+        'technical_fees' => 10.0,
+    ];
+
+    /**
+     * WHT rates by transaction type for INDIVIDUALS (Nigerian FIRS rates)
+     */
+    private const INDIVIDUAL_RATES = [
+        'dividends' => 10.0,
+        'interest' => 10.0,
+        'rent' => 10.0,
+        'royalties' => 5.0,
+        'commissions' => 5.0,
+        'consultancy' => 5.0,
+        'contracts' => 5.0,
+        'management_fees' => 5.0,
+        'directors_fees' => 10.0,
+        'professional_fees' => 5.0,
+        'technical_fees' => 5.0,
     ];
 
     /**
@@ -30,11 +49,12 @@ class WHTCalculationService
      * @param float $grossAmount
      * @param string $transactionType
      * @param float|null $customRate Optional custom rate to override default
+     * @param string $entityType 'company' or 'individual'
      * @return array
      */
-    public function calculateWHT(float $grossAmount, string $transactionType, ?float $customRate = null): array
+    public function calculateWHT(float $grossAmount, string $transactionType, ?float $customRate = null, string $entityType = 'company'): array
     {
-        $rate = $customRate ?? $this->getWHTRate($transactionType);
+        $rate = $customRate ?? $this->getWHTRate($transactionType, $entityType);
         $whtAmount = round(($grossAmount * $rate) / 100, 2);
         $netAmount = round($grossAmount - $whtAmount, 2);
 
@@ -44,6 +64,7 @@ class WHTCalculationService
             'wht_amount' => $whtAmount,
             'net_amount' => $netAmount,
             'transaction_type' => $transactionType,
+            'entity_type' => $entityType,
         ];
     }
 
@@ -51,21 +72,24 @@ class WHTCalculationService
      * Get WHT rate for a transaction type
      *
      * @param string $transactionType
+     * @param string $entityType 'company' or 'individual'
      * @return float
      */
-    public function getWHTRate(string $transactionType): float
+    public function getWHTRate(string $transactionType, string $entityType = 'company'): float
     {
-        return self::WHT_RATES[$transactionType] ?? 0;
+        $rates = $entityType === 'individual' ? self::INDIVIDUAL_RATES : self::COMPANY_RATES;
+        return $rates[$transactionType] ?? 0;
     }
 
     /**
      * Get all WHT rates
      *
+     * @param string $entityType 'company' or 'individual'
      * @return array
      */
-    public function getAllWHTRates(): array
+    public function getAllWHTRates(string $entityType = 'company'): array
     {
-        return self::WHT_RATES;
+        return $entityType === 'individual' ? self::INDIVIDUAL_RATES : self::COMPANY_RATES;
     }
 
     /**
@@ -74,11 +98,12 @@ class WHTCalculationService
      * @param float $netAmount
      * @param string $transactionType
      * @param float|null $customRate
+     * @param string $entityType 'company' or 'individual'
      * @return array
      */
-    public function reverseCalculateGross(float $netAmount, string $transactionType, ?float $customRate = null): array
+    public function reverseCalculateGross(float $netAmount, string $transactionType, ?float $customRate = null, string $entityType = 'company'): array
     {
-        $rate = $customRate ?? $this->getWHTRate($transactionType);
+        $rate = $customRate ?? $this->getWHTRate($transactionType, $entityType);
         $grossAmount = round($netAmount / (1 - ($rate / 100)), 2);
         $whtAmount = round($grossAmount - $netAmount, 2);
 
@@ -88,6 +113,7 @@ class WHTCalculationService
             'wht_rate' => $rate,
             'wht_amount' => $whtAmount,
             'transaction_type' => $transactionType,
+            'entity_type' => $entityType,
         ];
     }
 
@@ -143,6 +169,7 @@ class WHTCalculationService
 
         $scheduleByType = [];
         $totalWHT = 0;
+        $beneficiaryTypes = [];
 
         foreach ($transactions as $transaction) {
             $type = $transaction->transaction_type;
@@ -164,6 +191,11 @@ class WHTCalculationService
             $scheduleByType[$type]['total_wht'] += $transaction->wht_amount;
             $scheduleByType[$type]['total_net'] += $transaction->net_amount;
             $totalWHT += $transaction->wht_amount;
+
+            // Track beneficiary types for routing
+            if ($transaction->beneficiary_type) {
+                $beneficiaryTypes[] = $transaction->beneficiary_type;
+            }
         }
 
         // Round all values
@@ -173,12 +205,19 @@ class WHTCalculationService
             $scheduleByType[$type]['total_net'] = round($data['total_net'], 2);
         }
 
+        // Determine dominant beneficiary type
+        $uniqueBeneficiaryTypes = array_unique($beneficiaryTypes);
+        $dominantBeneficiaryType = count($uniqueBeneficiaryTypes) === 1
+            ? $uniqueBeneficiaryTypes[0]
+            : 'company'; // Default to company (FIRS) when mixed
+
         return [
             'period' => $period,
             'business_id' => $businessId,
             'schedule' => array_values($scheduleByType),
             'total_wht_deducted' => round($totalWHT, 2),
             'transaction_count' => $transactions->count(),
+            'beneficiary_type' => $dominantBeneficiaryType,
         ];
     }
 
@@ -193,6 +232,10 @@ class WHTCalculationService
     {
         $schedule = $this->generateWHTSchedule($businessId, $period);
 
+        // Resolve the business state for tax routing
+        $business = Business::find($businessId);
+        $taxState = $business->state ?? null;
+
         return WhtReturn::updateOrCreate(
             [
                 'business_id' => $businessId,
@@ -202,6 +245,8 @@ class WHTCalculationService
                 'total_wht_deducted' => $schedule['total_wht_deducted'],
                 'transaction_count' => $schedule['transaction_count'],
                 'schedule_data' => $schedule['schedule'],
+                'beneficiary_type' => $schedule['beneficiary_type'],
+                'tax_state' => $taxState,
                 'status' => 'draft',
             ]
         );

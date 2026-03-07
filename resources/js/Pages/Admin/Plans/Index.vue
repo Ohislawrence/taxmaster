@@ -91,18 +91,29 @@
         Showing {{ plans.from }} to {{ plans.to }} of {{ plans.total }} plans
       </div>
       <div class="space-x-2">
-        <Link
-          v-for="link in plans.links"
-          :key="link.label"
-          :href="link.url"
-          :class="[
-            'px-3 py-2 rounded text-sm font-medium',
-            link.active
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          ]"
-          v-html="link.label"
-        />
+        <template v-for="link in plans.links" :key="link.label">
+          <Link
+            v-if="link.url"
+            :href="link.url"
+            :class="[
+              'px-3 py-2 rounded text-sm font-medium',
+              link.active
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ]"
+            v-html="link.label"
+          />
+          <span
+            v-else
+            :class="[
+              'px-3 py-2 rounded text-sm font-medium cursor-not-allowed',
+              link.active
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-400'
+            ]"
+            v-html="link.label"
+          />
+        </template>
       </div>
     </div>
   </div>

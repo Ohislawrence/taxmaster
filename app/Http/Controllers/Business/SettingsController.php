@@ -61,7 +61,7 @@ class SettingsController
             'city' => 'required|string',
             'address' => 'required|string',
             'business_type' => 'required|string',
-            'tax_identification_number' => 'nullable|string',
+            'tax_identification_number' => ['nullable', 'string', 'regex:/^\d{8,14}(-\d{1,4})?$/'],
             'registration_number' => 'nullable|string',
             'annual_revenue' => 'nullable|numeric|min:0',
             'industry' => 'nullable|string',

@@ -28,7 +28,6 @@ class GovernmentPayment extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
-        'payment_date' => 'date',
     ];
 
     /**
@@ -103,6 +102,17 @@ class GovernmentPayment extends Model
             'failed' => 'red',
             default => 'gray',
         };
+    }
+
+    /**
+     * Get formatted payment date
+     */
+    public function getPaymentDateFormattedAttribute(): ?string
+    {
+        if (!$this->payment_date) {
+            return null;
+        }
+        return \Carbon\Carbon::parse($this->payment_date)->format('M d, Y');
     }
 
     /**

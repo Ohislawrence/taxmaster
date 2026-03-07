@@ -61,7 +61,10 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'info' => fn () => $request->session()->get('info'),
                 'message' => fn () => $request->session()->get('message'),
+                'upgrade_modal' => fn () => $request->session()->get('upgrade_modal'),
             ],
             'csrf_token' => csrf_token(),
             'subscription' => [

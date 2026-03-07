@@ -13,7 +13,7 @@
                     <Link :href="`/business/staff/${staff.id}/edit`" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-center text-sm">
                         Edit
                     </Link>
-                    <button 
+                    <button
                         @click="deleteStaff"
                         class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm"
                     >
@@ -126,12 +126,30 @@
                             <Link :href="`/business/staff/${staff.id}/tax-analysis`" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg text-center font-medium transition">
                                 View Tax Analysis
                             </Link>
-                            <button 
+                            <button
                                 @click="generatePayslip"
                                 class="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg text-center font-medium transition"
                             >
                                 Generate Payslip
                             </button>
+                            <!-- Month selector for payslip -->
+                            <div v-if="showPayslipPicker" class="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Select month</label>
+                                <div class="flex gap-2">
+                                    <select v-model="payslipMonth" class="flex-1 border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                                        <option v-for="m in months" :key="m.value" :value="m.value">{{ m.label }}</option>
+                                    </select>
+                                    <select v-model="payslipYear" class="w-20 border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                                        <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
+                                    </select>
+                                </div>
+                                <a
+                                    :href="`/business/staff/${staff.id}/payslip/${payslipYear}/${payslipMonth}`"
+                                    class="block mt-2 text-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
+                                >
+                                    Download PDF
+                                </a>
+                            </div>
                         </div>
                     </div>
 
@@ -144,7 +162,7 @@
                             {{ staff.status === 'active' ? 'Active Employee' : 'Inactive Employee' }}
                         </p>
                         <p :class="staff.status === 'active' ? 'text-green-700' : 'text-red-700'" class="text-sm">
-                            {{ staff.status === 'active' 
+                            {{ staff.status === 'active'
                                 ? 'This employee is included in all tax calculations.'
                                 : 'This employee is not included in tax calculations.' }}
                         </p>
@@ -156,7 +174,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import BusinessLayout from '@/Layouts/BusinessLayout.vue'
 
@@ -164,6 +182,22 @@ const props = defineProps({
     staff: Object,
     monthlyTax: Number,
     annualTax: Number,
+});
+
+const showPayslipPicker = ref(false);
+const payslipMonth = ref(new Date().getMonth() + 1);
+const payslipYear = ref(new Date().getFullYear());
+
+const months = [
+    { value: 1, label: 'January' }, { value: 2, label: 'February' }, { value: 3, label: 'March' },
+    { value: 4, label: 'April' }, { value: 5, label: 'May' }, { value: 6, label: 'June' },
+    { value: 7, label: 'July' }, { value: 8, label: 'August' }, { value: 9, label: 'September' },
+    { value: 10, label: 'October' }, { value: 11, label: 'November' }, { value: 12, label: 'December' },
+];
+
+const years = computed(() => {
+    const current = new Date().getFullYear();
+    return [current, current - 1, current - 2];
 });
 
 const yearsEmployed = computed(() => {
@@ -197,6 +231,6 @@ const deleteStaff = () => {
 };
 
 const generatePayslip = () => {
-    alert('Payslip generation coming soon');
+    showPayslipPicker.value = !showPayslipPicker.value;
 };
 </script>

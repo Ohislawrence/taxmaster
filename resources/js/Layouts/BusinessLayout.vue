@@ -1,5 +1,52 @@
 <template>
     <div class="min-h-screen bg-gray-100">
+        <!-- Flash Messages -->
+        <transition
+            enter-active-class="transition ease-out duration-300"
+            enter-from-class="opacity-0 translate-y-[50px]"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition ease-in duration-200"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div
+                v-if="flashMessage"
+                :class="[
+                    'fixed bottom-4 sm:bottom-6 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[9999] sm:max-w-md w-auto px-4 py-3 rounded-lg shadow-2xl',
+                    flashMessage.type === 'success' ? 'bg-green-50 text-green-900 border-2 border-green-300' : '',
+                    flashMessage.type === 'error' ? 'bg-red-50 text-red-900 border-2 border-red-300' : '',
+                    flashMessage.type === 'warning' ? 'bg-yellow-50 text-yellow-900 border-2 border-yellow-300' : '',
+                    flashMessage.type === 'info' ? 'bg-blue-50 text-blue-900 border-2 border-blue-300' : ''
+                ]"
+            >
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-2 flex-1">
+                        <svg v-if="flashMessage.type === 'success'" class="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        <svg v-if="flashMessage.type === 'error'" class="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                        <svg v-if="flashMessage.type === 'warning'" class="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <svg v-if="flashMessage.type === 'info'" class="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                        <p class="text-sm font-medium break-words">{{ flashMessage.message }}</p>
+                    </div>
+                    <button
+                        @click="dismissFlash"
+                        class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </transition>
+
         <!-- Navigation Header -->
         <nav class="bg-white shadow-sm sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,17 +103,17 @@
 
         <div class="flex flex-col md:flex-row">
             <!-- Mobile Menu Drawer -->
-            <div 
+            <div
                 v-if="showMobileMenu && auth?.user"
                 class="md:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
                 @click="showMobileMenu = false"
             ></div>
-            
+
             <!-- Sidebar -->
-            <aside 
-                v-if="auth?.user" 
+            <aside
+                v-if="auth?.user"
                 :class="showMobileMenu ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
-                class="md:relative fixed left-0 top-16 md:top-auto w-64 bg-white shadow-sm transition-transform duration-300 z-40 md:z-auto md:min-h-screen md:sticky md:top-16 md:shadow-sm max-h-[calc(100vh-4rem)] md:max-h-screen overflow-y-auto"
+                class="fixed md:sticky left-0 top-16 w-64 bg-white shadow-sm transition-transform duration-300 z-40 md:z-auto md:shadow-sm max-h-[calc(100vh-4rem)] md:max-h-screen overflow-y-auto"
             >
                 <nav class="px-4 py-6 space-y-2">
                     <!-- Get Started Guide -->
@@ -76,7 +123,7 @@
                         class="flex items-center space-x-3 px-4 py-3 rounded transition"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                         </svg>
                         <span>Get Started</span>
@@ -298,7 +345,7 @@
         </div>
 
         <!-- Feature Upgrade Modal -->
-        <div 
+        <div
             v-if="showUpgradeModal"
             class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[100] p-4"
             @click.self="closeUpgradeModal"
@@ -343,6 +390,12 @@
                 </div>
             </div>
         </div>
+
+        <!-- Floating AI Chat Widget -->
+        <TaxMasterChat v-if="auth?.user" />
+
+        <!-- Cookie Consent Banner -->
+        <CookieConsent />
     </div>
 </template>
 
@@ -350,6 +403,8 @@
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, watchEffect } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import TaxMasterChat from '@/Components/TaxMasterChat.vue';
+import CookieConsent from '@/Components/CookieConsent.vue';
 
 const page = usePage();
 const auth = computed(() => page.props.auth);
@@ -357,12 +412,60 @@ const showUserMenu = ref(false);
 const showMobileMenu = ref(false);
 const showUpgradeModal = ref(false);
 const upgradeModalData = ref(null);
+const flashMessage = ref(null);
+let flashTimeout = null;
+
+/**
+ * Show flash message
+ */
+const showFlash = (type, message) => {
+    console.log('Flash message triggered:', { type, message });
+
+    if (flashTimeout) {
+        clearTimeout(flashTimeout);
+    }
+
+    flashMessage.value = { type, message };
+
+    // Auto-dismiss after 5 seconds
+    flashTimeout = setTimeout(() => {
+        flashMessage.value = null;
+    }, 5000);
+};
+
+/**
+ * Dismiss flash message manually
+ */
+const dismissFlash = () => {
+    if (flashTimeout) {
+        clearTimeout(flashTimeout);
+    }
+    flashMessage.value = null;
+};
 
 // Watch for flash data changes
 watchEffect(() => {
+    console.log('Page props changed:', {
+        flash: page.props.flash,
+        allProps: Object.keys(page.props)
+    });
+
     if (page.props.flash?.upgrade_modal?.show) {
         upgradeModalData.value = page.props.flash.upgrade_modal;
         showUpgradeModal.value = true;
+    }
+
+    // Handle flash messages
+    if (page.props.flash?.success) {
+        showFlash('success', page.props.flash.success);
+    } else if (page.props.flash?.error) {
+        showFlash('error', page.props.flash.error);
+    } else if (page.props.flash?.warning) {
+        showFlash('warning', page.props.flash.warning);
+    } else if (page.props.flash?.info) {
+        showFlash('info', page.props.flash.info);
+    } else if (page.props.flash?.message) {
+        showFlash('info', page.props.flash.message);
     }
 });
 

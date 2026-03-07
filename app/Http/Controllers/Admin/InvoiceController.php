@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Services\EInvoice\EInvoiceService;
 
 class InvoiceController
 {
@@ -182,5 +183,33 @@ class InvoiceController
             Log::error('Error downloading invoice PDF', ['error' => $e->getMessage()]);
             return back()->with('error', 'Failed to download PDF.');
         }
+    }
+
+    /**
+     * Generate and return a signed, JAdES-compliant invoice (JSON)
+     */
+    public function generateJadesInvoice(Invoice $invoice)
+    {
+        $business = $invoice->business;
+        $nrsCredential = config('services.nrs.secret'); // Store your NRS credential in config/services.php
+        $ecdsaPrivateKeyPem = file_get_contents(storage_path('app/ecdsa_private.pem'));
+
+        // Map invoice and business data to UBL fields (expand as needed)
+        $invoiceData = [
+            'invoiceNumber' => $invoice->invoice_number,
+            'issueDate' => $invoice->invoice_date->format('Y-m-d'),
+            'sellerName' => $business->name,
+            'sellerTIN' => $business->tax_identification_number,
+            'buyerName' => $invoice->data['buyer_name'] ?? '',
+            'buyerTIN' => $invoice->data['buyer_tin'] ?? '',
+            'totalAmount' => $invoice->total,
+            'vatAmount' => $invoice->tax,
+            'currency' => 'NGN',
+            // ...add all other required UBL fields
+        ];
+
+        $jadesInvoice = EInvoiceService::generateJAdESInvoice($invoiceData, $nrsCredential, $ecdsaPrivateKeyPem);
+
+        return response()->json($jadesInvoice);
     }
 }

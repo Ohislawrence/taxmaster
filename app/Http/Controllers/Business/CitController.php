@@ -7,6 +7,7 @@ use App\Models\CitReturn;
 use App\Models\Business;
 use App\Models\User;
 use App\Services\GovernmentPaymentService;
+use App\Services\ReturnPdfGenerator;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -96,25 +97,56 @@ class CitController extends Controller
 
         $validated = $request->validate([
             'period' => 'required|string|max:7',
-            'gross_profit' => 'required|numeric|min:0',
-            'adjustments' => 'nullable|numeric',
+            'turnover' => 'required|numeric|min:0',
+            'gross_assets' => 'nullable|numeric|min:0',
+            'paid_up_capital' => 'nullable|numeric|min:0',
+            'revenue' => 'required|numeric|min:0',
+            'cost_of_goods_sold' => 'nullable|numeric|min:0',
+            'depreciation' => 'nullable|numeric|min:0',
+            'amortization' => 'nullable|numeric|min:0',
+            'other_add_backs' => 'nullable|numeric|min:0',
+            'capital_allowances' => 'nullable|numeric|min:0',
+            'allowable_expenses' => 'nullable|numeric|min:0',
+            'other_deductions' => 'nullable|numeric|min:0',
+            'withholding_tax' => 'nullable|numeric|min:0',
+            'advance_tax' => 'nullable|numeric|min:0',
             'reviewer_id' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
             'status' => 'nullable|in:draft,submitted',
         ]);
 
-        // Calculate using adjustments as other_deductions
+        // Determine CIT rate based on turnover (Finance Act 2019)
+        $turnover = $validated['turnover'];
+        if ($turnover < 25000000) {
+            $citRate = 0;
+        } elseif ($turnover <= 100000000) {
+            $citRate = 0.20;
+        } else {
+            $citRate = 0.30;
+        }
+
         $citReturn = CitReturn::create([
             'business_id' => $business->id,
             'period' => $validated['period'],
-            'gross_profit' => $validated['gross_profit'],
-            'other_deductions' => $validated['adjustments'] ?? 0,
+            'turnover' => $validated['turnover'],
+            'gross_assets' => $validated['gross_assets'] ?? 0,
+            'paid_up_capital' => $validated['paid_up_capital'] ?? 0,
+            'revenue' => $validated['revenue'],
+            'cost_of_goods_sold' => $validated['cost_of_goods_sold'] ?? 0,
+            'depreciation' => $validated['depreciation'] ?? 0,
+            'amortization' => $validated['amortization'] ?? 0,
+            'other_add_backs' => $validated['other_add_backs'] ?? 0,
+            'capital_allowances' => $validated['capital_allowances'] ?? 0,
+            'allowable_expenses' => $validated['allowable_expenses'] ?? 0,
+            'other_deductions' => $validated['other_deductions'] ?? 0,
+            'withholding_tax' => $validated['withholding_tax'] ?? 0,
+            'advance_tax' => $validated['advance_tax'] ?? 0,
+            'cit_rate' => $citRate,
             'reviewed_by' => $validated['reviewer_id'],
             'notes' => $validated['notes'],
             'status' => $validated['status'] ?? 'draft',
             'due_date' => $this->calculateDueDate($validated['period']),
             'form_data' => [],
-            'turnover' => $validated['gross_profit'], // Use gross profit for minimum tax calc
         ]);
 
         // Perform tax calculations
@@ -127,19 +159,24 @@ class CitController extends Controller
 
     /**
      * Calculate due date based on period
+     * CIT returns are due within 6 months after the end of the financial year
+     * (18 months for companies in their first year of assessment)
      */
-    private function calculateDueDate(string $period): string
+    private function calculateDueDate(string $period, bool $isFirstYear = false): string
     {
-        // CIT due 90 days after end of financial year
-        // Assuming financial year ends Dec 31
-        list($year, $month) = explode('-', $period);
-        
-        return now()
+        $parts = explode('-', $period);
+        $year = (int) $parts[0];
+
+        // Financial year assumed to end Dec 31
+        $yearEnd = now()
             ->setYear($year)
             ->setMonth(12)
-            ->setDay(31)
-            ->addDays(90)
-            ->toDateString();
+            ->setDay(31);
+
+        // 6 months for normal companies, 18 months for first-year companies
+        $monthsAllowed = $isFirstYear ? 18 : 6;
+
+        return $yearEnd->addMonths($monthsAllowed)->toDateString();
     }
 
     /**
@@ -207,20 +244,54 @@ class CitController extends Controller
 
         $validated = $request->validate([
             'period' => 'required|string|max:7',
-            'gross_profit' => 'required|numeric|min:0',
-            'adjustments' => 'nullable|numeric',
+            'turnover' => 'required|numeric|min:0',
+            'gross_assets' => 'nullable|numeric|min:0',
+            'paid_up_capital' => 'nullable|numeric|min:0',
+            'revenue' => 'required|numeric|min:0',
+            'cost_of_goods_sold' => 'nullable|numeric|min:0',
+            'depreciation' => 'nullable|numeric|min:0',
+            'amortization' => 'nullable|numeric|min:0',
+            'other_add_backs' => 'nullable|numeric|min:0',
+            'capital_allowances' => 'nullable|numeric|min:0',
+            'allowable_expenses' => 'nullable|numeric|min:0',
+            'other_deductions' => 'nullable|numeric|min:0',
+            'withholding_tax' => 'nullable|numeric|min:0',
+            'advance_tax' => 'nullable|numeric|min:0',
             'reviewer_id' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
+            'status' => 'nullable|in:draft,submitted',
         ]);
+
+        // Determine CIT rate based on turnover (Finance Act 2019)
+        $turnover = $validated['turnover'];
+        if ($turnover < 25000000) {
+            $citRate = 0;
+        } elseif ($turnover <= 100000000) {
+            $citRate = 0.20;
+        } else {
+            $citRate = 0.30;
+        }
 
         $citReturn->update([
             'period' => $validated['period'],
-            'gross_profit' => $validated['gross_profit'],
-            'other_deductions' => $validated['adjustments'] ?? 0,
+            'turnover' => $validated['turnover'],
+            'gross_assets' => $validated['gross_assets'] ?? 0,
+            'paid_up_capital' => $validated['paid_up_capital'] ?? 0,
+            'revenue' => $validated['revenue'],
+            'cost_of_goods_sold' => $validated['cost_of_goods_sold'] ?? 0,
+            'depreciation' => $validated['depreciation'] ?? 0,
+            'amortization' => $validated['amortization'] ?? 0,
+            'other_add_backs' => $validated['other_add_backs'] ?? 0,
+            'capital_allowances' => $validated['capital_allowances'] ?? 0,
+            'allowable_expenses' => $validated['allowable_expenses'] ?? 0,
+            'other_deductions' => $validated['other_deductions'] ?? 0,
+            'withholding_tax' => $validated['withholding_tax'] ?? 0,
+            'advance_tax' => $validated['advance_tax'] ?? 0,
+            'cit_rate' => $citRate,
             'reviewed_by' => $validated['reviewer_id'],
             'notes' => $validated['notes'],
+            'status' => $validated['status'] ?? $citReturn->status,
             'due_date' => $this->calculateDueDate($validated['period']),
-            'turnover' => $validated['gross_profit'], // Use gross profit for minimum tax calc
         ]);
 
         // Recalculate
@@ -337,6 +408,28 @@ class CitController extends Controller
 
         return redirect()->route('business.cit.show', $citReturn->id)
             ->with('success', 'CIT return status updated successfully');
+    }
+
+    /**
+     * Export CIT return as PDF
+     */
+    public function exportPdf(CitReturn $citReturn)
+    {
+        $business = auth()->user()->ownedBusiness;
+
+        if ($citReturn->business_id !== $business->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $generator = new ReturnPdfGenerator();
+        $pdf = $generator->generateCitReturnPdf($citReturn);
+
+        $filename = 'cit-return-' . $citReturn->period . '.pdf';
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     /**

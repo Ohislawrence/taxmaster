@@ -86,48 +86,65 @@
                             <span>{{ formatCurrency(invoice.tax) }}</span>
                         </div>
                         <div class="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-300 pt-2">
-                            <span>Total:</span>
-                            <span>{{ formatCurrency(invoice.total) }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
-                <div class="flex gap-3 flex-wrap">
-                    <button
-                        v-if="invoice.status === 'draft'"
-                        @click="resendInvoice"
-                        :disabled="isSending"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                            <!-- QR Code, NRS Status & Actions -->
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <h2 class="text-lg font-semibold text-gray-900 mb-4">Invoice QR Code, NRS Status & Actions</h2>
+                                <div class="flex flex-col sm:flex-row gap-6 items-center">
+                                    <div v-if="qrCodeData">
+                                        <img :src="qrCodeData" alt="Invoice QR Code" class="w-40 h-40 border rounded" />
+                                        <p class="text-xs text-gray-500 mt-2">Scan to verify invoice</p>
+                                    </div>
+                                    <div class="flex flex-col gap-3">
+                                        <div class="mb-2">
+                                            <span class="text-sm font-medium text-gray-700">NRS Reporting Status:</span>
+                                            <span class="ml-2 px-2 py-1 rounded text-xs"
+                                                  :class="nrsStatus === 'reported' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                                                {{ nrsStatus === 'reported' ? 'Reported' : 'Pending' }}
+                                            </span>
+                                        </div>
+                                        <button
+                                            v-if="invoice.status === 'draft'"
+                                            @click="resendInvoice"
+                                            :disabled="isSending"
+                                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                                        >
+                                            {{ isSending ? 'Sending...' : 'Send Invoice' }}
+                                        </button>
+                                        <button
+                                            v-if="invoice.status !== 'paid'"
+                                            @click="markPaidModal = true"
+                                            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                                        >
+                                            Mark as Paid
+                                        </button>
+                                        <button
+                                            v-if="invoice.status !== 'cancelled' && invoice.status !== 'paid'"
+                                            @click="cancelModal = true"
+                                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                                        >
+                                            Cancel Invoice
+                                        </button>
+                                        <a
+                                            v-if="invoice.pdf_path"
+                                            :href="route('admin.invoices.pdf.download', invoice.id)"
+                                            class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 inline-block"
+                                        >
+                                            Download PDF
+                                        </a>
+                                        <a
+                                            :href="route('admin.invoices.jades', invoice.id)"
+                                            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 inline-block"
+                                            target="_blank"
+                                        >
+                                            Download Signed E-Invoice (JAdES JSON)
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 inline-block"
+                        target="_blank"
                     >
-                        {{ isSending ? 'Sending...' : 'Send Invoice' }}
-                    </button>
-
-                    <button
-                        v-if="invoice.status !== 'paid'"
-                        @click="markPaidModal = true"
-                        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                    >
-                        Mark as Paid
-                    </button>
-
-                    <button
-                        v-if="invoice.status !== 'cancelled' && invoice.status !== 'paid'"
-                        @click="cancelModal = true"
-                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                    >
-                        Cancel Invoice
-                    </button>
-
-                    <a
-                        v-if="invoice.pdf_path"
-                        :href="route('admin.invoices.pdf.download', invoice.id)"
-                        class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 inline-block"
-                    >
-                        Download PDF
+                        Download Signed E-Invoice (JAdES JSON)
                     </a>
                 </div>
             </div>
@@ -224,9 +241,27 @@ export default {
             cancelForm: {
                 reason: '',
             },
+            qrCodeData: null,
+            nrsStatus: 'pending', // stub, replace with real status if available
         };
     },
+    mounted() {
+        this.fetchQrCode();
+        this.fetchNrsStatus();
+    },
     methods: {
+        fetchQrCode() {
+            fetch(`/business/invoices/${this.invoice.id}/qr`)
+                .then(res => res.json())
+                .then(data => {
+                    this.qrCodeData = data.qr;
+                });
+        },
+        fetchNrsStatus() {
+            // TODO: Replace with real NRS status fetch if available
+            // For now, stub as 'reported' if invoice.status is 'paid', else 'pending'
+            this.nrsStatus = this.invoice.status === 'paid' ? 'reported' : 'pending';
+        },
         async resendInvoice() {
             this.isSending = true;
             try {

@@ -98,6 +98,12 @@ class SubscribeController extends Controller
         // Initialize Paystack payment
         $paymentUrl = $this->initializePaystackPayment($business, $plan, $subscription, $validated['billing_cycle']);
 
+        if (!$paymentUrl) {
+            return response()->json([
+                'error' => 'Failed to initialize payment. Please try again.',
+            ], 500);
+        }
+
         return response()->json([
             'success' => true,
             'payment_url' => $paymentUrl,
@@ -113,7 +119,7 @@ class SubscribeController extends Controller
         $reference = $request->query('reference');
 
         if (!$reference) {
-            return redirect('/plans')->with('error', 'Invalid payment reference.');
+            return redirect(route('business.plans.index'))->with('error', 'Invalid payment reference.');
         }
 
         $business = auth()->user()->currentBusiness;
@@ -122,7 +128,7 @@ class SubscribeController extends Controller
             ->first();
 
         if (!$subscription) {
-            return redirect('/plans')->with('error', 'Subscription not found.');
+            return redirect(route('business.plans.index'))->with('error', 'Subscription not found.');
         }
 
         // Verify payment with Paystack
@@ -135,7 +141,7 @@ class SubscribeController extends Controller
                 ->with('success', 'Payment successful! Your subscription is now active.');
         }
 
-        return redirect('/plans')
+        return redirect(route('business.plans.index'))
             ->with('error', 'Payment verification failed. Please try again.');
     }
 
@@ -145,10 +151,24 @@ class SubscribeController extends Controller
     private function initializePaystackPayment(Business $business, SubscriptionPlan $plan, $subscription, $billingCycle)
     {
         $amount = $billingCycle === 'annual' ? $plan->annual_price : $plan->monthly_price;
+        $email = $business->email ?: $business->owner?->email;
+
+        if (empty($email)) {
+            return null;
+        }
+
+        if (str_ends_with($email, '.test')) {
+            $email = str_replace('.test', '.example.com', $email);
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
 
         $payload = [
-            'email' => $business->owner->email,
+            'email' => $email,
             'amount' => $amount * 100, // Paystack uses kobo
+            'callback_url' => route('business.plans.payment-callback'),
             'metadata' => [
                 'subscription_id' => $subscription->id,
                 'business_id' => $business->id,

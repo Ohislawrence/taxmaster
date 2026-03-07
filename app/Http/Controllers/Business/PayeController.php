@@ -8,6 +8,7 @@ use App\Models\PayeSchedule;
 use App\Models\BusinessStaff;
 use App\Services\PAYECalculationService;
 use App\Services\GovernmentPaymentService;
+use App\Services\ReturnPdfGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Inertia\Inertia;
@@ -66,11 +67,18 @@ class PayeController extends Controller
     {
         $business = $this->resolveBusiness($request);
 
-        // Get active staff members
+        // Get active staff members with tax_state for multi-state grouping
         $staff = BusinessStaff::where('business_id', $business->id)
             ->where('status', 'active')
             ->orderBy('first_name')
-            ->get(['id', 'first_name', 'last_name', 'designation', 'monthly_salary']);
+            ->get(['id', 'first_name', 'last_name', 'designation', 'monthly_salary', 'tax_state']);
+
+        // Append effective_tax_state (falls back to business state)
+        $staff->each(function ($member) use ($business) {
+            $member->effective_tax_state = $member->tax_state ?: $business->state;
+            $stateName = config("nigerian_states.state_options.{$member->effective_tax_state}");
+            $member->tax_state_name = $stateName ?: $member->effective_tax_state;
+        });
 
         // Suggest next period based on last return
         $lastReturn = PayeReturn::where('business_id', $business->id)
@@ -84,6 +92,8 @@ class PayeController extends Controller
         return Inertia::render('Business/PAYE/Create', [
             'staff' => $staff,
             'suggestedPeriod' => $suggestedPeriod,
+            'businessState' => $business->state,
+            'nigerianStates' => config('nigerian_states.state_options'),
         ]);
     }
 
@@ -133,6 +143,14 @@ class PayeController extends Controller
             ];
         }
 
+        // Determine tax_state from staff members
+        $staffIds = collect($validated['schedules'])->pluck('staff_id');
+        $staffMembers = BusinessStaff::whereIn('id', $staffIds)->get();
+        $taxStates = $staffMembers->map(fn($s) => $s->effective_tax_state ?? $business->state)->unique();
+
+        // If all staff share one state, use it; otherwise default to business state
+        $taxState = $taxStates->count() === 1 ? $taxStates->first() : $business->state;
+
         // Create PAYE return
         $payeReturn = PayeReturn::create([
             'business_id' => $business->id,
@@ -141,6 +159,7 @@ class PayeController extends Controller
             'total_tax_deducted' => $totalTaxDeducted,
             'staff_count' => count($validated['schedules']),
             'schedule_data' => $scheduleData,
+            'tax_state' => $taxState,
             'status' => 'draft',
         ]);
 
@@ -237,19 +256,60 @@ class PayeController extends Controller
      */
     public function calculatePreview(Request $request)
     {
+        $business = $this->resolveBusiness($request);
+
         $validated = $request->validate([
-            'gross_pay' => 'required|numeric|min:0',
-            'allowances' => 'nullable|array',
-            'reliefs' => 'nullable|array',
+            'period' => 'required|date_format:Y-m',
+            'staff_ids' => 'required|array|min:1',
+            'staff_ids.*' => 'required|exists:business_staff,id',
         ]);
 
-        $calculation = $this->payeService->calculateMonthlyPAYE(
-            $validated['gross_pay'],
-            $validated['allowances'] ?? [],
-            $validated['reliefs'] ?? []
-        );
+        // Get selected staff members belonging to this business
+        $staffMembers = BusinessStaff::where('business_id', $business->id)
+            ->whereIn('id', $validated['staff_ids'])
+            ->get();
 
-        return response()->json($calculation);
+        if ($staffMembers->isEmpty()) {
+            return response()->json(['error' => 'No valid staff members found.'], 422);
+        }
+
+        $schedules = [];
+        $totalGrossPay = 0;
+        $totalTaxDeducted = 0;
+
+        foreach ($staffMembers as $staff) {
+            $grossPay = (float) $staff->monthly_salary;
+
+            $calculation = $this->payeService->calculateMonthlyPAYE($grossPay);
+
+            $schedules[] = [
+                'staff_id' => $staff->id,
+                'staff_name' => $staff->full_name,
+                'designation' => $staff->designation,
+                'gross_pay' => $grossPay,
+                'allowances' => $calculation['allowances'],
+                'reliefs' => $calculation['reliefs'],
+                'total_reliefs' => $calculation['total_reliefs'],
+                'taxable_income' => $calculation['taxable_income'],
+                'paye_due' => $calculation['paye_due'],
+                'net_pay' => $calculation['net_pay'],
+                'effective_rate' => $calculation['effective_rate'],
+            ];
+
+            $totalGrossPay += $grossPay;
+            $totalTaxDeducted += $calculation['paye_due'];
+        }
+
+        return response()->json([
+            'period' => $validated['period'],
+            'schedules' => $schedules,
+            'total_gross_pay' => round($totalGrossPay, 2),
+            'total_tax_deducted' => round($totalTaxDeducted, 2),
+            'total_net_pay' => round($totalGrossPay - $totalTaxDeducted, 2),
+            'total_reliefs' => round(collect($schedules)->sum('total_reliefs'), 2),
+            'total_taxable' => round(collect($schedules)->sum('taxable_income'), 2),
+            'staff_count' => count($schedules),
+        ]);
     }
 
     private function resolveBusiness(Request $request)
@@ -264,5 +324,118 @@ class PayeController extends Controller
         }
 
         return $business;
+    }
+
+    /**
+     * Export PAYE return as PDF
+     */
+    public function exportPdf(PayeReturn $payeReturn)
+    {
+        $this->authorize('view', $payeReturn);
+
+        $generator = new ReturnPdfGenerator();
+        $pdf = $generator->generatePayeReturnPdf($payeReturn);
+
+        $filename = 'paye-return-' . $payeReturn->period . '.pdf';
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Generate annual PAYE return (Form H1)
+     * Aggregates all monthly returns for a given tax year.
+     */
+    public function generateFormH1(Request $request)
+    {
+        $business = $this->resolveBusiness($request);
+
+        $validated = $request->validate([
+            'year' => 'required|integer|min:2020|max:' . (date('Y') + 1),
+        ]);
+
+        $year = $validated['year'];
+
+        // Check if annual return already exists
+        $existingAnnual = PayeReturn::where('business_id', $business->id)
+            ->where('period', $year)
+            ->where('return_type', 'annual')
+            ->first();
+
+        if ($existingAnnual) {
+            return back()->withErrors(['year' => "An annual Form H1 return already exists for {$year}."]);
+        }
+
+        // Get all monthly returns for the year
+        $monthlyReturns = PayeReturn::where('business_id', $business->id)
+            ->where('period', 'like', $year . '-%')
+            ->where('return_type', 'monthly')
+            ->orderBy('period')
+            ->get();
+
+        if ($monthlyReturns->isEmpty()) {
+            return back()->withErrors(['year' => "No monthly PAYE returns found for {$year}. File monthly returns first."]);
+        }
+
+        // Aggregate data from all monthly returns
+        $totalGrossPay = $monthlyReturns->sum('total_gross_pay');
+        $totalTaxDeducted = $monthlyReturns->sum('total_tax_deducted');
+
+        // Build annual schedule from all monthly schedules
+        $annualSchedule = [];
+        $staffAggregation = [];
+
+        foreach ($monthlyReturns as $return) {
+            if (!empty($return->schedule_data)) {
+                foreach ($return->schedule_data as $entry) {
+                    $staffId = $entry['staff_id'] ?? null;
+                    if ($staffId) {
+                        if (!isset($staffAggregation[$staffId])) {
+                            $staffAggregation[$staffId] = [
+                                'staff_id' => $staffId,
+                                'months_count' => 0,
+                                'total_gross' => 0,
+                                'total_tax' => 0,
+                            ];
+                        }
+                        $staffAggregation[$staffId]['months_count']++;
+                        $staffAggregation[$staffId]['total_gross'] += $entry['calculation']['total_gross'] ?? $entry['calculation']['gross_pay'] ?? 0;
+                        $staffAggregation[$staffId]['total_tax'] += $entry['calculation']['paye_due'] ?? 0;
+                    }
+                }
+            }
+        }
+
+        $annualSchedule = array_values($staffAggregation);
+
+        // Get unique staff count
+        $uniqueStaffCount = count($staffAggregation);
+
+        // Create annual Form H1 return
+        $formH1 = PayeReturn::create([
+            'business_id' => $business->id,
+            'period' => (string) $year,
+            'return_type' => 'annual',
+            'total_gross_pay' => $totalGrossPay,
+            'total_tax_deducted' => $totalTaxDeducted,
+            'staff_count' => $uniqueStaffCount,
+            'schedule_data' => [
+                'monthly_returns' => $monthlyReturns->map(fn($r) => [
+                    'period' => $r->period,
+                    'total_gross_pay' => $r->total_gross_pay,
+                    'total_tax_deducted' => $r->total_tax_deducted,
+                    'staff_count' => $r->staff_count,
+                    'status' => $r->status,
+                ])->toArray(),
+                'staff_annual_summary' => $annualSchedule,
+            ],
+            'status' => 'draft',
+            'notes' => "Annual Form H1 for {$year}. Generated from {$monthlyReturns->count()} monthly returns.",
+        ]);
+
+        return redirect()->route('business.paye.show', $formH1)
+            ->with('success', "Annual Form H1 for {$year} generated successfully from {$monthlyReturns->count()} monthly returns.");
     }
 }

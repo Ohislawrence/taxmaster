@@ -2,180 +2,182 @@
     <BusinessLayout>
         <Head title="Dashboard" />
 
-        <div class="py-8 px-4 sm:px-6 lg:px-8">
+        <div class="py-4 sm:py-8 px-3 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
             <!-- Subscription Status Banner -->
-            <SubscriptionBanner :currentSubscription="currentSubscription" :usageStats="usageStats" class="mb-8" />
+            <SubscriptionBanner :currentSubscription="currentSubscription" :usageStats="usageStats" class="mb-2 sm:mb-4" />
 
             <!-- Get Started Widget -->
-            <GetStartedWidget :showWidget="true" class="mb-8" />
+            <GetStartedWidget :showWidget="true" class="mb-2 sm:mb-6" />
 
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Welcome, {{ business.name }}</h1>
-                <p class="text-gray-600 mt-1">{{ business.description || 'Manage your business tax compliance and finances' }}</p>
+            <div class="mb-4 sm:mb-8">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Welcome, {{ business.name }}</h1>
+                <p class="text-xs sm:text-base text-gray-600 mt-1">{{ business.description || 'Manage your business tax compliance and finances' }}</p>
             </div>
 
             <!-- Quick Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-gray-600 text-sm font-medium">Bank Balance</div>
-                    <div class="text-3xl font-bold text-green-600 mt-2">₦{{ formatCurrency(stats.bank_balance) }}</div>
-                    <Link href="/business/bank-accounts" class="text-blue-600 text-sm mt-2 hover:underline">View Accounts →</Link>
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-8">
+                <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                    <div class="text-gray-600 text-xs sm:text-sm font-medium">Bank Balance</div>
+                    <div class="text-lg sm:text-3xl font-bold text-green-600 mt-1 sm:mt-2">₦{{ formatCurrency(stats.bank_balance) }}</div>
+                    <Link :href="route('business.banks.index')" class="text-blue-600 text-xs sm:text-sm mt-1 sm:mt-2 hover:underline block">View Accounts →</Link>
                 </div>
 
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-gray-600 text-sm font-medium">This Month Income</div>
-                    <div class="text-3xl font-bold text-blue-600 mt-2">₦{{ formatCurrency(stats.monthly_income) }}</div>
-                    <p class="text-gray-500 text-xs mt-2">Expenses: ₦{{ formatCurrency(stats.monthly_expenses) }}</p>
+                <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                    <div class="text-gray-600 text-xs sm:text-sm font-medium">This Month Income</div>
+                    <div class="text-lg sm:text-3xl font-bold text-blue-600 mt-1 sm:mt-2">₦{{ formatCurrency(stats.monthly_income) }}</div>
+                    <p class="text-gray-500 text-xs mt-1">Expenses: ₦{{ formatCurrency(stats.monthly_expenses) }}</p>
                 </div>
 
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-gray-600 text-sm font-medium">Pending Deadlines</div>
-                    <div class="text-3xl font-bold text-yellow-600 mt-2">{{ stats.pending_deadlines }}</div>
-                    <p v-if="stats.overdue_deadlines > 0" class="text-red-600 text-sm mt-2 font-semibold">{{ stats.overdue_deadlines }} overdue!</p>
-                    <Link v-else href="/business/compliance" class="text-blue-600 text-sm mt-2 hover:underline">View Calendar →</Link>
+                <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                    <div class="text-gray-600 text-xs sm:text-sm font-medium">Pending Deadlines</div>
+                    <div class="text-lg sm:text-3xl font-bold text-yellow-600 mt-1 sm:mt-2">{{ stats.pending_deadlines }}</div>
+                    <p v-if="stats.overdue_deadlines > 0" class="text-red-600 text-xs sm:text-sm mt-1 font-semibold">{{ stats.overdue_deadlines }} overdue!</p>
+                    <Link v-else href="/business/compliance" class="text-blue-600 text-xs sm:text-sm mt-1 hover:underline block">View Calendar →</Link>
                 </div>
 
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-gray-600 text-sm font-medium">VAT Pending</div>
-                    <div class="text-3xl font-bold text-orange-600 mt-2">₦{{ formatCurrency(stats.vat_pending) }}</div>
-                    <Link href="/business/vat-returns" class="text-blue-600 text-sm mt-2 hover:underline">View VAT →</Link>
+                <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                    <div class="text-gray-600 text-xs sm:text-sm font-medium">VAT Pending</div>
+                    <div class="text-lg sm:text-3xl font-bold text-orange-600 mt-1 sm:mt-2">₦{{ formatCurrency(stats.vat_pending) }}</div>
+                    <Link :href="route('business.vat.index')" class="text-blue-600 text-xs sm:text-sm mt-1 hover:underline block">View VAT →</Link>
                 </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <Link href="/business/bank-accounts" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center font-medium">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8">
+                <Link :href="route('business.banks.index')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-4 py-2 rounded-lg text-center font-medium text-xs sm:text-sm">
                     🏦 Bank Accounts
                 </Link>
-                <Link href="/business/transactions/create" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-center font-medium">
-                    + Record Transaction
+                <Link :href="route('business.transactions.index')" class="bg-green-600 hover:bg-green-700 text-white px-2 sm:px-4 py-2 rounded-lg text-center font-medium text-xs sm:text-sm">
+                    + Transaction
                 </Link>
-                <Link href="/business/vat-returns" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-center font-medium">
-                    📊 VAT Returns
+                <Link :href="route('business.vat.index')" class="bg-purple-600 hover:bg-purple-700 text-white px-2 sm:px-4 py-2 rounded-lg text-center font-medium text-xs sm:text-sm">
+                    📊 VAT
                 </Link>
-                <Link href="/business/compliance" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-center font-medium">
+                <Link href="/business/compliance" class="bg-orange-600 hover:bg-orange-700 text-white px-2 sm:px-4 py-2 rounded-lg text-center font-medium text-xs sm:text-sm">
                     📅 Compliance
                 </Link>
             </div>
 
             <!-- Upcoming Compliance Deadlines -->
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900">📅 Upcoming Deadlines (Next 30 Days)</h2>
-                    <Link href="/business/compliance" class="text-blue-600 hover:text-blue-800">View Calendar</Link>
+            <div class="bg-white rounded-lg shadow p-3 sm:p-6 mb-4 sm:mb-6">
+                <div class="flex justify-between items-center mb-3 sm:mb-4">
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-900">📅 Upcoming Deadlines</h2>
+                    <Link href="/business/compliance" class="text-blue-600 hover:text-blue-800 text-xs sm:text-sm">View Calendar</Link>
                 </div>
-                <div v-if="upcomingDeadlines.length > 0" class="space-y-3">
+                <div v-if="upcomingDeadlines.length > 0" class="space-y-2 sm:space-y-3">
                     <div
                         v-for="deadline in upcomingDeadlines"
                         :key="deadline.id"
-                        class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                        class="flex items-start justify-between gap-2 p-2 sm:p-4 border rounded-lg hover:bg-gray-50 text-sm"
                     >
                         <div class="flex-1">
-                            <p class="font-medium text-gray-900">{{ deadline.deadline_type }}</p>
-                            <p class="text-sm text-gray-600">{{ deadline.description }}</p>
+                            <p class="font-medium text-gray-900 text-sm">{{ deadline.deadline_type }}</p>
+                            <p class="text-xs sm:text-sm text-gray-600">{{ deadline.description }}</p>
                         </div>
-                        <div class="text-right">
-                            <p class="text-sm font-semibold text-gray-900">{{ formatDate(deadline.due_date) }}</p>
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-xs sm:text-sm font-semibold text-gray-900">{{ formatDate(deadline.due_date) }}</p>
                             <span
                                 :class="getDaysUntilClass(deadline.due_date)"
-                                class="text-xs px-2 py-1 rounded-full"
+                                class="text-xs px-2 py-1 rounded-full inline-block mt-1"
                             >
                                 {{ getDaysUntil(deadline.due_date) }}
                             </span>
                         </div>
                     </div>
                 </div>
-                <div v-else class="text-center py-8 text-gray-500">
+                <div v-else class="text-center py-6 sm:py-8 text-gray-500 text-sm">
                     🎉 No upcoming deadlines! You're all caught up.
                 </div>
             </div>
 
             <!-- Bank Accounts & Recent Transactions -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                 <!-- Bank Accounts -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-gray-900">🏦 Bank Accounts</h2>
-                        <Link href="/business/bank-accounts" class="text-blue-600 hover:text-blue-800">Manage</Link>
+                <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                    <div class="flex justify-between items-center mb-3 sm:mb-4">
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-900">🏦 Bank Accounts</h2>
+                        <Link :href="route('business.banks.index')" class="text-blue-600 hover:text-blue-800 text-xs sm:text-sm">Manage</Link>
                     </div>
-                    <div v-if="bankAccounts.length > 0" class="space-y-3">
+                    <div v-if="bankAccounts.length > 0" class="space-y-2 sm:space-y-3">
                         <div
                             v-for="account in bankAccounts"
                             :key="account.id"
-                            class="flex justify-between items-center p-3 border rounded-lg"
+                            class="flex justify-between items-center p-2 sm:p-3 border rounded-lg text-sm"
                         >
                             <div>
-                                <p class="font-medium text-gray-900">{{ account.bank_name }}</p>
-                                <p class="text-sm text-gray-600">{{ account.account_number }}</p>
+                                <p class="font-medium text-gray-900 text-sm">{{ account.bank_name }}</p>
+                                <p class="text-xs text-gray-600">{{ account.account_number }}</p>
                             </div>
-                            <div class="text-right">
-                                <p class="font-bold text-green-600">₦{{ formatCurrency(account.balance) }}</p>
+                            <div class="text-right flex-shrink-0">
+                                <p class="font-bold text-green-600 text-sm">₦{{ formatCurrency(account.balance) }}</p>
                                 <p class="text-xs text-gray-500">{{ account.currency }}</p>
                             </div>
                         </div>
                     </div>
-                    <div v-else class="text-center py-8 text-gray-500">
+                    <div v-else class="text-center py-6 sm:py-8 text-gray-500 text-xs sm:text-sm">
                         No bank accounts connected yet.
-                        <Link href="/business/bank-accounts" class="text-blue-600 hover:underline block mt-2">Connect account</Link>
+                        <Link :href="route('business.banks.index')" class="text-blue-600 hover:underline block mt-2">Connect account</Link>
                     </div>
                 </div>
 
                 <!-- Recent Transactions -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-gray-900">💰 Recent Transactions</h2>
-                        <Link href="/business/transactions" class="text-blue-600 hover:text-blue-800">View All</Link>
+                <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                    <div class="flex justify-between items-center mb-3 sm:mb-4">
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-900">💰 Recent Transactions</h2>
+                        <Link href="/business/transactions" class="text-blue-600 hover:text-blue-800 text-xs sm:text-sm">View All</Link>
                     </div>
-                    <div v-if="recentTransactions.length > 0" class="space-y-2">
+                    <div v-if="recentTransactions.length > 0" class="space-y-1 sm:space-y-2">
                         <div
                             v-for="transaction in recentTransactions"
                             :key="transaction.id"
-                            class="flex justify-between items-center p-2 hover:bg-gray-50 rounded"
+                            class="flex justify-between items-center p-1 sm:p-2 hover:bg-gray-50 rounded text-sm"
                         >
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-900">{{ transaction.description }}</p>
+                                <p class="text-xs sm:text-sm font-medium text-gray-900">{{ transaction.description }}</p>
                                 <p class="text-xs text-gray-500">{{ transaction.category }} • {{ formatDate(transaction.transaction_date) }}</p>
                             </div>
                             <p
                                 :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'"
-                                class="font-semibold text-sm"
+                                class="font-semibold text-xs sm:text-sm flex-shrink-0"
                             >
                                 {{ transaction.type === 'income' ? '+' : '-' }}₦{{ formatCurrency(transaction.amount) }}
                             </p>
                         </div>
                     </div>
-                    <div v-else class="text-center py-8 text-gray-500">
+                    <div v-else class="text-center py-6 sm:py-8 text-gray-500 text-xs sm:text-sm">
                         No transactions yet.
-                        <Link href="/business/transactions/create" class="text-blue-600 hover:underline block mt-2">Record transaction</Link>
+                        <Link :href="route('business.transactions.index')" class="text-blue-600 hover:underline block mt-2">Record transaction</Link>
                     </div>
                 </div>
             </div>
 
             <!-- Recent VAT Returns -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900">📊 Recent VAT Returns</h2>
-                    <Link href="/business/vat-returns" class="text-blue-600 hover:text-blue-800">View All</Link>
+            <div class="bg-white rounded-lg shadow p-3 sm:p-6">
+                <div class="flex justify-between items-center mb-3 sm:mb-4">
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-900">📊 Recent VAT</h2>
+                    <Link :href="route('business.vat.index')" class="text-blue-600 hover:text-blue-800 text-xs sm:text-sm">View All</Link>
                 </div>
-                <div v-if="recentVatReturns.length > 0" class="overflow-x-auto">
-                    <table class="w-full">
+
+                <!-- Desktop Table View -->
+                <div v-if="recentVatReturns.length > 0" class="hidden sm:block overflow-x-auto">
+                    <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b">
-                                <th class="text-left py-2 px-4 font-medium text-gray-600">Period</th>
-                                <th class="text-right py-2 px-4 font-medium text-gray-600">Output VAT</th>
-                                <th class="text-right py-2 px-4 font-medium text-gray-600">Input VAT</th>
-                                <th class="text-right py-2 px-4 font-medium text-gray-600">Net VAT</th>
-                                <th class="text-left py-2 px-4 font-medium text-gray-600">Status</th>
+                                <th class="text-left py-2 px-3 font-medium text-gray-600 text-xs">Period</th>
+                                <th class="text-right py-2 px-3 font-medium text-gray-600 text-xs">Output VAT</th>
+                                <th class="text-right py-2 px-3 font-medium text-gray-600 text-xs">Input VAT</th>
+                                <th class="text-right py-2 px-3 font-medium text-gray-600 text-xs">Net VAT</th>
+                                <th class="text-left py-2 px-3 font-medium text-gray-600 text-xs">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="vatReturn in recentVatReturns" :key="vatReturn.id" class="border-b hover:bg-gray-50">
-                                <td class="py-3 px-4 font-medium">{{ vatReturn.period_label }}</td>
-                                <td class="py-3 px-4 text-right">₦{{ formatCurrency(vatReturn.output_vat) }}</td>
-                                <td class="py-3 px-4 text-right">₦{{ formatCurrency(vatReturn.input_vat) }}</td>
-                                <td class="py-3 px-4 text-right font-semibold text-orange-600">₦{{ formatCurrency(vatReturn.net_vat) }}</td>
-                                <td class="py-3 px-4">
-                                    <span :class="getVatStatusClass(vatReturn.status)" class="px-3 py-1 rounded-full text-sm font-medium capitalize">
+                                <td class="py-2 px-3 font-medium text-sm">{{ vatReturn.period_label }}</td>
+                                <td class="py-2 px-3 text-right text-xs">₦{{ formatCurrency(vatReturn.output_vat) }}</td>
+                                <td class="py-2 px-3 text-right text-xs">₦{{ formatCurrency(vatReturn.input_vat) }}</td>
+                                <td class="py-2 px-3 text-right font-semibold text-orange-600 text-xs">₦{{ formatCurrency(vatReturn.net_vat) }}</td>
+                                <td class="py-2 px-3">
+                                    <span :class="getVatStatusClass(vatReturn.status)" class="px-2 py-1 rounded-full text-xs font-medium capitalize inline-block">
                                         {{ vatReturn.status_label }}
                                     </span>
                                 </td>
@@ -183,8 +185,37 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-else class="text-center py-8 text-gray-500">
-                    No VAT returns yet. <Link href="/business/vat-returns" class="text-blue-600 hover:underline">Get started</Link>
+
+                <!-- Mobile Card View -->
+                <div v-if="recentVatReturns.length > 0" class="sm:hidden divide-y divide-gray-200">
+                    <div v-for="vatReturn in recentVatReturns" :key="vatReturn.id" class="py-3 space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm">{{ vatReturn.period_label }}</p>
+                                <span :class="getVatStatusClass(vatReturn.status)" class="px-2 py-1 rounded-full text-xs font-medium capitalize inline-block mt-1">
+                                    {{ vatReturn.status_label }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            <div>
+                                <p class="text-gray-600">Output</p>
+                                <p class="font-semibold text-gray-900">₦{{ formatCurrency(vatReturn.output_vat) }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Input</p>
+                                <p class="font-semibold text-gray-900">₦{{ formatCurrency(vatReturn.input_vat) }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Net</p>
+                                <p class="font-semibold text-orange-600">₦{{ formatCurrency(vatReturn.net_vat) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else class="text-center py-6 sm:py-8 text-gray-500 text-sm">
+                    No VAT returns yet. <Link :href="route('business.vat.index')" class="text-blue-600 hover:underline">Get started</Link>
                 </div>
             </div>
         </div>
@@ -194,7 +225,9 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
-import SubscriptionBanner from '@/Components/Business/SubscriptionBanner.vue';import GetStartedWidget from '@/Components/GetStarted/Widget.vue';
+import SubscriptionBanner from '@/Components/Business/SubscriptionBanner.vue';
+import GetStartedWidget from '@/Components/GetStarted/Widget.vue';
+
 defineProps({
     business: Object,
     stats: Object,
@@ -246,4 +279,3 @@ function getVatStatusClass(status) {
     return classes[status] || 'bg-gray-100 text-gray-800';
 }
 </script>
-

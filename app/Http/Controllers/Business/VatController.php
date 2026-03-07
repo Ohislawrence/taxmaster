@@ -7,6 +7,7 @@ use App\Models\VatReturn;
 use App\Models\Business;
 use App\Models\User;
 use App\Services\GovernmentPaymentService;
+use App\Services\ReturnPdfGenerator;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -152,7 +153,7 @@ class VatController extends Controller
     private function calculateDueDate(string $period): string
     {
         list($year, $month) = explode('-', $period);
-        
+
         return \Carbon\Carbon::createFromDate($year, $month, 1)
             ->endOfMonth()
             ->addDays(21)
@@ -371,6 +372,28 @@ class VatController extends Controller
         return response()->json([
             'success' => true,
             'calculations' => $vatReturn->getCalculationSummary(),
+        ]);
+    }
+
+    /**
+     * Export VAT return as PDF
+     */
+    public function exportPdf(VatReturn $vatReturn)
+    {
+        $business = auth()->user()->ownedBusiness;
+
+        if ($vatReturn->business_id !== $business->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $generator = new ReturnPdfGenerator();
+        $pdf = $generator->generateVatReturnPdf($vatReturn);
+
+        $filename = 'vat-return-' . $vatReturn->period . '.pdf';
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
 

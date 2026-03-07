@@ -24,11 +24,13 @@ class PAYECalculationService
      * Standard relief allowances (2023)
      */
     private const RELIEF_CONSTANTS = [
-        'CRA' => 0.20, // Consolidated Relief Allowance - 20% of gross or NGN 200,000 (whichever is higher)
-        'MIN_CRA' => 200000,
+        'CRA_RATE' => 0.20, // Consolidated Relief Allowance - 20% of gross income
+        'CRA_FIXED' => 200000, // Fixed component: ₦200,000
+        'CRA_VARIABLE' => 0.01, // Variable component: 1% of gross income
         'PENSION_RATE' => 0.08, // 8% pension contribution
-        'NHF_RATE' => 0.025, // 2.5% National Housing Fund
+        'NHF_RATE' => 0.025, // 2.5% National Housing Fund (mandatory)
         'NHIS_RATE' => 0.05, // 5% NHIS contribution (on basic salary only)
+        'MINIMUM_TAX_RATE' => 0.01, // 1% minimum tax on gross income (PITA S.37)
     ];
 
     /**
@@ -77,6 +79,18 @@ class PAYECalculationService
             $monthlyTax = round($expectedCumulativeTax - $cumulativeTax, 2);
         }
 
+        // Apply minimum tax rule (PITA Section 37)
+        // Minimum tax = 1% of gross income per annum
+        // If computed tax < minimum tax, use minimum tax instead
+        $annualMinimumTax = $annualGross * self::RELIEF_CONSTANTS['MINIMUM_TAX_RATE'];
+        $monthlyMinimumTax = round($annualMinimumTax / 12, 2);
+        $isMinimumTaxApplied = false;
+
+        if ($monthlyTax < $monthlyMinimumTax && $totalGross > 0) {
+            $monthlyTax = $monthlyMinimumTax;
+            $isMinimumTaxApplied = true;
+        }
+
         return [
             'gross_pay' => $grossPay,
             'total_gross' => $totalGross,
@@ -86,6 +100,8 @@ class PAYECalculationService
             'taxable_income' => $taxableIncome,
             'annual_taxable_income' => $annualTaxableIncome,
             'paye_due' => max(0, $monthlyTax),
+            'minimum_tax_applied' => $isMinimumTaxApplied,
+            'minimum_tax_amount' => $monthlyMinimumTax,
             'net_pay' => $totalGross - max(0, $monthlyTax),
             'effective_rate' => $totalGross > 0 ? round(($monthlyTax / $totalGross) * 100, 2) : 0,
         ];
@@ -102,9 +118,11 @@ class PAYECalculationService
     {
         $reliefs = [];
 
-        // CRA - 20% of gross or NGN 200,000 (whichever is higher)
-        $craCalculated = $grossPay * self::RELIEF_CONSTANTS['CRA'];
-        $reliefs['CRA'] = max($craCalculated, self::RELIEF_CONSTANTS['MIN_CRA']);
+        // CRA = 20% of gross income + higher of (₦200,000 or 1% of gross income)
+        // Per PITA as amended by Finance Act 2020
+        $craPercentage = $grossPay * self::RELIEF_CONSTANTS['CRA_RATE'];
+        $craVariable = max(self::RELIEF_CONSTANTS['CRA_FIXED'], $grossPay * self::RELIEF_CONSTANTS['CRA_VARIABLE']);
+        $reliefs['CRA'] = $craPercentage + $craVariable;
 
         // Pension - 8% of gross (if not provided)
         if (isset($additionalReliefs['pension'])) {
@@ -113,9 +131,12 @@ class PAYECalculationService
             $reliefs['pension'] = $grossPay * self::RELIEF_CONSTANTS['PENSION_RATE'];
         }
 
-        // NHF - 2.5% of gross (if applicable)
+        // NHF - 2.5% of basic salary (mandatory per NHF Act 1992)
+        // Auto-calculated unless a specific amount is provided
         if (isset($additionalReliefs['NHF'])) {
             $reliefs['NHF'] = $additionalReliefs['NHF'];
+        } else {
+            $reliefs['NHF'] = $grossPay * self::RELIEF_CONSTANTS['NHF_RATE'];
         }
 
         // NHIS - 5% of basic (if applicable)

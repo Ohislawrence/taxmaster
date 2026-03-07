@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\TracksStatusChanges;
+use App\Traits\HasStandardStatus;
+use App\Traits\HasTaxAuthority;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class VatReturn extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, TracksStatusChanges, HasStandardStatus, HasTaxAuthority;
 
     protected $table = 'vat_returns';
 
@@ -39,6 +42,7 @@ class VatReturn extends Model
         'credit_notes_received',
         'bad_debt_relief',
         'status',
+        'tax_authority',
         'due_date',
         'firs_reference',
         'notes',
@@ -102,23 +106,6 @@ class VatReturn extends Model
         } catch (\Exception $e) {
             return $this->period ?? 'N/A';
         }
-    }
-
-    /**
-     * Accessor: get status label
-     */
-    public function getStatusLabelAttribute(): string
-    {
-        $labels = [
-            'draft' => 'Draft',
-            'submitted' => 'Submitted',
-            'accepted' => 'Accepted',
-            'paid' => 'Paid',
-            'rejected' => 'Rejected',
-            'refund_pending' => 'Refund Pending',
-            'overdue' => 'Overdue',
-        ];
-        return $labels[$this->status] ?? ucfirst($this->status);
     }
 
     /**

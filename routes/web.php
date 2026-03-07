@@ -2,18 +2,47 @@
 
 use App\Http\Controllers\BusinessSetupController;
 use App\Http\Controllers\Webhooks\MonoWebhookController;
+use App\Http\Controllers\TestMonoController;
+use App\Models\SubscriptionPlan;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+// Blog public routes
+Route::get('/blog', fn () => Inertia::render('Blog/Index'))->name('blog.index');
+Route::get('/blog/{slug}', fn ($slug) => Inertia::render('Blog/Show', ['slug' => $slug]))->name('blog.show');
+
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('home');
+
+// Public marketing & legal pages
+Route::get('/pricing', function () {
+    $plans = SubscriptionPlan::active()->get();
+    return Inertia::render('Public/Pricing', [
+        'plans' => $plans,
+    ]);
+})->name('pricing');
+Route::get('/about', fn () => Inertia::render('Public/About'))->name('about');
+Route::get('/contact', fn () => Inertia::render('Public/Contact'))->name('contact');
+
+// Legal & compliance pages
+Route::get('/privacy', fn () => Inertia::render('Public/Privacy'))->name('privacy');
+Route::get('/terms', fn () => Inertia::render('Public/Terms'))->name('terms');
+Route::get('/data-protection', fn () => Inertia::render('Public/DataProtection'))->name('data-protection');
+Route::get('/cookie-policy', function () {
+    // If the CookiePolicy.vue page exists, render it; otherwise, show a placeholder
+    if (file_exists(resource_path('js/Pages/Public/CookiePolicy.vue'))) {
+        return Inertia::render('Public/CookiePolicy');
+    } else {
+        return Inertia::render('Public/Privacy', [
+            'notice' => 'Cookie Policy coming soon.'
+        ]);
+    }
+})->name('cookie-policy');
 
 // Mono webhook (no auth)
 Route::post('/webhooks/mono', [MonoWebhookController::class, 'handle'])->name('webhooks.mono');
@@ -48,6 +77,9 @@ Route::middleware([
         // Fallback to default dashboard
         return Inertia::render('Dashboard');
     })->name('dashboard');
+
+    // Test Mono Integration (localhost/test-mono)
+    Route::get('/test-mono', [TestMonoController::class, 'testMono'])->name('test.mono');
 });
 
 // Include admin routes

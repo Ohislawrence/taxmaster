@@ -92,11 +92,11 @@ class MonoIntegrationService
         $this->verifyCredentials();
 
         if (!$startDate) {
-            // Default: last 6 months
-            $startDate = now()->subMonths(6)->format('Y-m-d');
+            // Default: last 6 months - Mono requires dd-mm-yyyy format
+            $startDate = now()->subMonths(6)->format('d-m-Y');
         }
         if (!$endDate) {
-            $endDate = now()->format('Y-m-d');
+            $endDate = now()->format('d-m-Y');
         }
 
         try {
@@ -122,21 +122,36 @@ class MonoIntegrationService
             $transactions = $data['data'] ?? [];
             $syncedCount = 0;
 
+            Log::info('Mono transactions response structure', [
+                'account_id' => $bankAccount->id,
+                'keys' => array_keys($data),
+                'transaction_count' => count($transactions),
+                'sample' => !empty($transactions) ? array_keys($transactions[0] ?? []) : 'empty',
+            ]);
+
             foreach ($transactions as $txn) {
+                // Mono v2 may use 'id' or '_id' for transaction identifier
+                $txnId = $txn['_id'] ?? $txn['id'] ?? null;
+
+                if (!$txnId) {
+                    Log::warning('Skipping transaction without ID', ['txn' => $txn]);
+                    continue;
+                }
+
                 $transaction = Transaction::updateOrCreate(
                     [
-                        'mono_transaction_id' => $txn['_id'],
+                        'mono_transaction_id' => $txnId,
                     ],
                     [
                         'bank_account_id' => $bankAccount->id,
                         'business_id' => $bankAccount->business_id,
-                        'type' => $txn['type'], // debit or credit
-                        'amount' => abs($txn['amount']),
+                        'type' => $txn['type'] ?? 'unknown',
+                        'amount' => abs($txn['amount'] ?? 0) / 100, // Mono returns amounts in kobo
                         'currency' => $txn['currency'] ?? 'NGN',
-                        'description' => $txn['narration'] ?? '',
+                        'description' => $txn['narration'] ?? $txn['description'] ?? '',
                         'counterparty' => $txn['meta']['sender'] ?? $txn['meta']['recipient'] ?? null,
-                        'transaction_date' => $txn['date'],
-                        'balance' => $txn['balance'] ?? null,
+                        'transaction_date' => $txn['date'] ?? now(),
+                        'balance' => isset($txn['balance']) ? $txn['balance'] / 100 : null,
                         'meta' => $txn,
                     ]
                 );

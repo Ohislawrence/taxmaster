@@ -1,0 +1,39 @@
+<script setup>
+import PublicLayout from '@/Layouts/PublicLayout.vue';
+defineOptions({ layout: PublicLayout });
+</script>
+
+<template>
+    <section class="relative overflow-hidden bg-white pt-24 pb-12 sm:pt-32 sm:pb-16 lg:pt-40 lg:pb-20">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+        <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 relative">
+            <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-6">Terms of Service</h1>
+            <div class="prose prose-gray max-w-none text-gray-700">
+                <p>Welcome to TaxMaster. By using our website and services, you agree to the following terms and conditions. Please read them carefully.</p>
+                <h2>1. Acceptance of Terms</h2>
+                <p>By accessing or using TaxMaster, you agree to be bound by these Terms of Service and all applicable laws and regulations.</p>
+                <h2>2. Use of Service</h2>
+                <p>You may use TaxMaster only for lawful purposes. You are responsible for your account and all activity under it.</p>
+                <h2>3. Privacy</h2>
+                <p>Your privacy is important to us. Please review our Privacy Policy to understand how we collect, use, and protect your information.</p>
+                <h2>4. Intellectual Property</h2>
+                <p>All content, trademarks, and data on this site are the property of TaxMaster or its licensors. You may not copy, reproduce, or distribute any content without permission.</p>
+                <h2>5. Limitation of Liability</h2>
+                <p>TaxMaster is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of the service.</p>
+                <h2>6. Changes to Terms</h2>
+                <p>We may update these Terms at any time. Continued use of TaxMaster after changes means you accept the new terms.</p>
+                <h2>7. Contact</h2>
+                <p>If you have questions about these Terms, please <a href="/contact">contact us</a>.</p>
+            </div>
+        </div>
+    </section>
+</template>
+
+<style scoped>
+.prose h2 {
+    margin-top: 2rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2563eb;
+}
+</style>

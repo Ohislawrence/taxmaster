@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4">
-    <div class="max-w-7xl mx-auto space-y-12">
+  <BusinessLayout>
+    <div class="bg-gradient-to-b from-blue-50 to-white py-6 sm:py-12 px-3 sm:px-4">
+      <div class="max-w-7xl mx-auto space-y-8 sm:space-y-12">
       <!-- Header -->
       <div class="text-center space-y-4">
         <h1 class="text-4xl font-bold text-gray-900">
@@ -32,9 +33,9 @@
       </div>
 
       <!-- Plans Grid -->
-      <div class="grid md:grid-cols-4 gap-6">
+      <div class="grid md:grid-cols-3 gap-6">
         <div
-          v-for="plan in plans"
+          v-for="plan in plans.filter(p => p.slug !== 'free')"
           :key="plan.id"
           :class="[
             'relative bg-white rounded-lg shadow-lg overflow-hidden transition-all hover:shadow-xl',
@@ -93,72 +94,11 @@
 
             <!-- Features -->
             <div class="space-y-3 pt-6 border-t">
-              <div class="flex items-start gap-3">
+              <div v-for="(feature, index) in (plan.features || [])" :key="index" class="flex items-start gap-3">
                 <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
-                <div>
-                  <p class="font-semibold text-gray-900">{{ plan.max_returns_per_year }} Tax Returns/Year</p>
-                  <p class="text-sm text-gray-600">File up to {{ plan.max_returns_per_year }} returns annually</p>
-                </div>
-              </div>
-
-              <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                <p class="text-sm text-gray-700">
-                  <span class="font-semibold">{{ plan.max_staff_members }} Staff Members</span>
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                <p class="text-sm text-gray-700">
-                  <span class="font-semibold">{{ plan.storage_gb }} GB Storage</span>
-                </p>
-              </div>
-
-              <div
-                v-if="plan.ai_analysis_included"
-                class="flex items-start gap-3"
-              >
-                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                <p class="text-sm text-gray-700">AI Tax Analysis & Insights</p>
-              </div>
-
-              <div
-                v-if="plan.payment_automation"
-                class="flex items-start gap-3"
-              >
-                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                <p class="text-sm text-gray-700">Automated Payment Processing</p>
-              </div>
-
-              <div
-                v-if="plan.priority_support"
-                class="flex items-start gap-3"
-              >
-                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                <p class="text-sm text-gray-700">Priority Support (24/7)</p>
-              </div>
-
-              <div
-                v-if="plan.custom_branding"
-                class="flex items-start gap-3"
-              >
-                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                <p class="text-sm text-gray-700">Custom Branding</p>
+                <p class="text-sm text-gray-700">{{ feature }}</p>
               </div>
             </div>
           </div>
@@ -217,12 +157,14 @@
         </div>
       </div>
     </div>
-  </div>
+    </div>
+  </BusinessLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import BusinessLayout from '@/Layouts/BusinessLayout.vue';
 
 const page = usePage();
 const plans = ref(page.props.plans);
@@ -251,3 +193,7 @@ const selectPlan = (plan) => {
   window.location.href = `/business/plans/${plan.id}`;
 };
 </script>
+
+
+
+

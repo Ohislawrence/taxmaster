@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\TracksStatusChanges;
+use App\Traits\HasStandardStatus;
+use App\Traits\HasTaxAuthority;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CitReturn extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, TracksStatusChanges, HasStandardStatus, HasTaxAuthority;
 
     protected $table = 'cit_returns';
 
@@ -44,6 +47,7 @@ class CitReturn extends Model
         'late_filing_penalty',
         'payment_interest',
         'status',
+        'tax_authority',
         'firs_reference',
         'form_a_reference',
         'notes',
@@ -110,9 +114,9 @@ class CitReturn extends Model
     /**
      * Get government payments for this CIT return
      */
-    public function governmentPayments(): HasMany
+    public function governmentPayments(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
-        return $this->hasMany(GovernmentPayment::class, 'cit_return_id');
+        return $this->morphMany(GovernmentPayment::class, 'return');
     }
 
     /**
@@ -158,12 +162,36 @@ class CitReturn extends Model
     }
 
     /**
-     * Calculate CIT payable
+     * Determine CIT rate based on turnover (Finance Act 2019)
+     * Small: turnover < ₦25M = 0%
+     * Medium: ₦25M – ₦100M = 20%
+     * Large: > ₦100M = 30%
+     */
+    public function determineCITRate(): float
+    {
+        // If cit_rate was explicitly set (e.g. by controller), use it
+        if ($this->cit_rate !== null && $this->cit_rate > 0) {
+            return (float) $this->cit_rate;
+        }
+
+        $turnover = (float) ($this->turnover ?? 0);
+
+        if ($turnover < 25000000) {
+            return 0;
+        } elseif ($turnover <= 100000000) {
+            return 0.20;
+        }
+
+        return 0.30;
+    }
+
+    /**
+     * Calculate CIT payable using Nigerian rate tiers
      */
     public function calculateCITPayable(): void
     {
-        $citRate = $this->cit_rate ?? 0.30;
-        $this->cit_payable = $this->taxable_income * $citRate;
+        $this->cit_rate = $this->determineCITRate();
+        $this->cit_payable = ($this->taxable_income ?? 0) * $this->cit_rate;
     }
 
     /**
@@ -187,16 +215,25 @@ class CitReturn extends Model
 
     /**
      * Calculate tax due (higher of CIT or minimum tax)
+     * Small companies (turnover < ₦25M) are exempt from minimum tax
      */
     public function calculateTaxDue(): void
     {
         $this->calculateCITPayable();
         $this->calculateMinimumTax();
 
-        $this->tax_due = max(
-            $this->cit_payable ?? 0,
-            $this->minimum_tax_amount ?? 0
-        );
+        $turnover = (float) ($this->turnover ?? 0);
+
+        // Small companies pay 0% CIT and are exempt from minimum tax
+        if ($turnover < 25000000) {
+            $this->tax_due = 0;
+            $this->minimum_tax_amount = 0;
+        } else {
+            $this->tax_due = max(
+                $this->cit_payable ?? 0,
+                $this->minimum_tax_amount ?? 0
+            );
+        }
     }
 
     /**

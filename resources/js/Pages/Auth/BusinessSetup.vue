@@ -28,6 +28,21 @@
                 <!-- Form Card -->
                 <div class="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-12 border border-white/20">
                     <form @submit.prevent="submitForm">
+                        <!-- Error Banner -->
+                        <div v-if="hasErrors" class="mb-8 bg-red-500/20 border border-red-500/50 rounded-lg p-4">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-red-400 mt-0.5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div>
+                                    <h3 class="text-red-300 font-semibold text-sm">Please fix the following errors:</h3>
+                                    <ul class="mt-2 space-y-1">
+                                        <li v-for="(msg, field) in pageErrors" :key="field" class="text-red-400 text-sm">{{ msg }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Progress Steps -->
                         <div class="mb-10 hidden md:flex justify-between">
                             <div class="flex items-center">
@@ -54,27 +69,29 @@
                                 </span>
                                 Business Information
                             </h2>
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <!-- Business Name -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-200 mb-2">Business Name *</label>
-                                    <input 
-                                        v-model="form.name" 
+                                    <input
+                                        v-model="form.name"
                                         type="text"
                                         placeholder="Enter your business name"
                                         required
+                                        :class="{'border-red-500 ring-1 ring-red-500': pageErrors.name}"
                                         class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                     />
-                                    <p v-if="errors.name" class="text-red-400 text-sm mt-1">{{ errors.name[0] }}</p>
+                                    <p v-if="pageErrors.name" class="text-red-400 text-sm mt-1">{{ pageErrors.name }}</p>
                                 </div>
 
                                 <!-- Business Type -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-200 mb-2">Business Type *</label>
-                                    <select 
+                                    <select
                                         v-model="form.business_type"
                                         required
+                                        :class="{'border-red-500 ring-1 ring-red-500': pageErrors.business_type}"
                                         class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                     >
                                         <option value="" class="bg-gray-800 text-white">Select business type</option>
@@ -83,7 +100,7 @@
                                         <option value="limited_liability" class="bg-gray-800 text-white">Limited Liability Company</option>
                                         <option value="corporation" class="bg-gray-800 text-white">Corporation</option>
                                     </select>
-                                    <p v-if="errors.business_type" class="text-red-400 text-sm mt-1">{{ errors.business_type[0] }}</p>
+                                    <p v-if="pageErrors.business_type" class="text-red-400 text-sm mt-1">{{ pageErrors.business_type }}</p>
                                 </div>
                             </div>
 
@@ -92,27 +109,29 @@
                                 <!-- Tax ID -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-200 mb-2">Tax ID (TIN) *</label>
-                                    <input 
-                                        v-model="form.tax_identification_number" 
+                                    <input
+                                        v-model="form.tax_identification_number"
                                         type="text"
                                         placeholder="e.g., 00000000000"
                                         required
+                                        :class="{'border-red-500 ring-1 ring-red-500': pageErrors.tax_identification_number}"
                                         class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                     />
-                                    <p v-if="errors.tax_identification_number" class="text-red-400 text-sm mt-1">{{ errors.tax_identification_number[0] }}</p>
+                                    <p v-if="pageErrors.tax_identification_number" class="text-red-400 text-sm mt-1">{{ pageErrors.tax_identification_number }}</p>
                                 </div>
 
                                 <!-- Registration Number -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-200 mb-2">Registration Number *</label>
-                                    <input 
-                                        v-model="form.registration_number" 
+                                    <input
+                                        v-model="form.registration_number"
                                         type="text"
                                         placeholder="e.g., RC123456"
                                         required
+                                        :class="{'border-red-500 ring-1 ring-red-500': pageErrors.registration_number}"
                                         class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                     />
-                                    <p v-if="errors.registration_number" class="text-red-400 text-sm mt-1">{{ errors.registration_number[0] }}</p>
+                                    <p v-if="pageErrors.registration_number" class="text-red-400 text-sm mt-1">{{ pageErrors.registration_number }}</p>
                                 </div>
                             </div>
 
@@ -120,8 +139,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-200 mb-2">Industry</label>
-                                    <select 
+                                    <select
                                         v-model="form.industry"
+                                        :class="{'border-red-500 ring-1 ring-red-500': pageErrors.industry}"
                                         class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                     >
                                         <option value="" class="bg-gray-800 text-white">Select industry</option>
@@ -139,20 +159,21 @@
                                         <option value="agriculture" class="bg-gray-800 text-white">Agriculture & Mining</option>
                                         <option value="other" class="bg-gray-800 text-white">Other</option>
                                     </select>
-                                    <p v-if="errors.industry" class="text-red-400 text-sm mt-1">{{ errors.industry[0] }}</p>
+                                    <p v-if="pageErrors.industry" class="text-red-400 text-sm mt-1">{{ pageErrors.industry }}</p>
                                 </div>
                             </div>
 
                             <!-- Description -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-200 mb-2">Business Description</label>
-                                <textarea 
-                                    v-model="form.description" 
+                                <textarea
+                                    v-model="form.description"
                                     placeholder="Brief description of your business (optional)"
                                     rows="3"
+                                    :class="{'border-red-500 ring-1 ring-red-500': pageErrors.description}"
                                     class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
                                 ></textarea>
-                                <p v-if="errors.description" class="text-red-400 text-sm mt-1">{{ errors.description[0] }}</p>
+                                <p v-if="pageErrors.description" class="text-red-400 text-sm mt-1">{{ pageErrors.description }}</p>
                             </div>
                         </div>
 
@@ -164,32 +185,34 @@
                                 </span>
                                 Contact Information
                             </h2>
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Email -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-200 mb-2">Business Email *</label>
-                                    <input 
-                                        v-model="form.email" 
+                                    <input
+                                        v-model="form.email"
                                         type="email"
                                         placeholder="business@example.com"
                                         required
+                                        :class="{'border-red-500 ring-1 ring-red-500': pageErrors.email}"
                                         class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                     />
-                                    <p v-if="errors.email" class="text-red-400 text-sm mt-1">{{ errors.email[0] }}</p>
+                                    <p v-if="pageErrors.email" class="text-red-400 text-sm mt-1">{{ pageErrors.email }}</p>
                                 </div>
 
                                 <!-- Phone -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-200 mb-2">Business Phone *</label>
-                                    <input 
-                                        v-model="form.phone" 
+                                    <input
+                                        v-model="form.phone"
                                         type="tel"
                                         placeholder="+234 (0) 123 456 7890"
                                         required
+                                        :class="{'border-red-500 ring-1 ring-red-500': pageErrors.phone}"
                                         class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                     />
-                                    <p v-if="errors.phone" class="text-red-400 text-sm mt-1">{{ errors.phone[0] }}</p>
+                                    <p v-if="pageErrors.phone" class="text-red-400 text-sm mt-1">{{ pageErrors.phone }}</p>
                                 </div>
                             </div>
                         </div>
@@ -202,18 +225,19 @@
                                 </span>
                                 Business Address
                             </h2>
-                            
+
                             <!-- Full Address -->
                             <div class="mb-6">
                                 <label class="block text-sm font-semibold text-gray-200 mb-2">Street Address *</label>
-                                <input 
-                                    v-model="form.address" 
+                                <input
+                                    v-model="form.address"
                                     type="text"
                                     placeholder="e.g., 123 Business Street"
                                     required
+                                    :class="{'border-red-500 ring-1 ring-red-500': pageErrors.address}"
                                     class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                 />
-                                <p v-if="errors.address" class="text-red-400 text-sm mt-1">{{ errors.address[0] }}</p>
+                                <p v-if="pageErrors.address" class="text-red-400 text-sm mt-1">{{ pageErrors.address }}</p>
                             </div>
 
                             <!-- City, State -->
@@ -221,22 +245,24 @@
                                 <!-- City -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-200 mb-2">City *</label>
-                                    <input 
-                                        v-model="form.city" 
+                                    <input
+                                        v-model="form.city"
                                         type="text"
                                         placeholder="e.g., Lagos"
                                         required
+                                        :class="{'border-red-500 ring-1 ring-red-500': pageErrors.city}"
                                         class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                     />
-                                    <p v-if="errors.city" class="text-red-400 text-sm mt-1">{{ errors.city[0] }}</p>
+                                    <p v-if="pageErrors.city" class="text-red-400 text-sm mt-1">{{ pageErrors.city }}</p>
                                 </div>
 
                                 <!-- State -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-200 mb-2">State *</label>
-                                    <select 
+                                    <select
                                         v-model="form.state"
                                         required
+                                        :class="{'border-red-500 ring-1 ring-red-500': pageErrors.state}"
                                         class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                     >
                                         <option value="" class="bg-gray-800 text-white">Select state</option>
@@ -244,14 +270,14 @@
                                             {{ state }}
                                         </option>
                                     </select>
-                                    <p v-if="errors.state" class="text-red-400 text-sm mt-1">{{ errors.state[0] }}</p>
+                                    <p v-if="pageErrors.state" class="text-red-400 text-sm mt-1">{{ pageErrors.state }}</p>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Submit Button -->
                         <div class="border-t border-white/10 pt-10">
-                            <button 
+                            <button
                                 type="submit"
                                 :disabled="processing"
                                 class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold py-4 rounded-lg transition duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:hover:scale-100"
@@ -282,18 +308,19 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Head } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
+import { Head, usePage } from '@inertiajs/vue3'
 import { router } from '@inertiajs/vue3'
 import GuestLayout from '@/Layouts/GuestLayout.vue'
 
+const page = usePage()
+
 const props = defineProps({
     states: Array,
-    errors: {
-        type: Object,
-        default: () => ({}),
-    },
 });
+
+const pageErrors = computed(() => page.props.errors || {})
+const hasErrors = computed(() => Object.keys(pageErrors.value).length > 0)
 
 const processing = ref(false);
 const form = ref({

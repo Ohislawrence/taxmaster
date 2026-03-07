@@ -1,13 +1,18 @@
 <template>
     <BusinessLayout>
+        <Head title="Bank Accounts" />
         <div class="space-y-4 sm:space-y-6 px-3 sm:px-0">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div class="flex-1">
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Bank Accounts</h1>
                     <p class="text-sm sm:text-base text-gray-600 mt-1">Connect your bank accounts to auto-import transactions</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="font-medium">{{ bankAccountsCount }}</span> of <span class="font-medium">{{ bankAccountsLimit >= 999 ? 'Unlimited' : bankAccountsLimit }}</span> accounts linked
+                    </p>
                 </div>
                 <button
+                    v-if="canLinkMore"
                     @click="showConnectModal = true"
                     class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center sm:justify-start space-x-2"
                 >
@@ -16,6 +21,10 @@
                     </svg>
                     <span>Connect Bank</span>
                 </button>
+                <div v-else class="w-full sm:w-auto text-center">
+                    <p class="text-sm text-amber-600 font-medium">Account limit reached</p>
+                    <a href="/business/subscription" class="text-xs text-blue-600 hover:underline">Upgrade plan</a>
+                </div>
             </div>
 
             <!-- Connected Accounts -->
@@ -102,11 +111,16 @@
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">No bank accounts connected</h3>
                 <p class="text-gray-600 mb-6">Connect your first bank account to start syncing transactions automatically</p>
                 <button
+                    v-if="canLinkMore"
                     @click="showConnectModal = true"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition"
                 >
                     Connect Your Bank
                 </button>
+                <p v-else class="text-sm text-amber-600 font-medium">
+                    Your plan doesn't include bank account linking.
+                    <a href="/business/subscription" class="text-blue-600 hover:underline">Upgrade</a>
+                </p>
             </div>
 
             <!-- Connect Bank Modal -->
@@ -124,10 +138,27 @@
                         </button>
                     </div>
 
-                    <p class="text-gray-600 mb-6">
+                    <p class="text-gray-600 mb-4">
                         We'll securely connect your bank account to import transactions automatically.
                         Your credentials are never stored with us.
                     </p>
+
+                    <!-- BVN Input (only shown if no Mono customer ID yet) -->
+                    <div v-if="!monoCustomerId" class="mb-4">
+                        <label for="bvn" class="block text-sm font-medium text-gray-700 mb-1">Bank Verification Number (BVN)</label>
+                        <input
+                            id="bvn"
+                            v-model="bvnNumber"
+                            type="text"
+                            inputmode="numeric"
+                            maxlength="11"
+                            placeholder="Enter your BVN"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400"
+                            @input="bvnError = ''"
+                        />
+                        <p v-if="bvnError" class="mt-1 text-sm text-red-600">{{ bvnError }} </p>
+                        <p class="mt-1 text-xs text-gray-500">Required by Mono to verify your identity. Dial *565*0# to get your BVN.</p>
+                    </div>
 
                     <button
                         @click="initiateMonoAuth"
@@ -149,13 +180,24 @@
                 </div>
             </div>
 
-            <!-- Success Message -->
-            <Teleport to="#app">
+            <!-- Success/Error Message -->
+            <Teleport to="body">
                 <div
                     v-if="successMessage"
-                    class="fixed top-4 right-4 bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-lg shadow-lg"
+                    :class="successMessage.toLowerCase().includes('fail') || successMessage.toLowerCase().includes('error')
+                        ? 'bg-red-50 border-red-200 text-red-800'
+                        : 'bg-green-50 border-green-200 text-green-800'"
+                    class="fixed top-4 left-1/2 -translate-x-1/2 px-6 py-4 rounded-lg shadow-2xl border max-w-lg w-full mx-4"
+                    style="z-index: 99999;"
                 >
-                    {{ successMessage }}
+                    <div class="flex items-center justify-between gap-3">
+                        <span>{{ successMessage }}</span>
+                        <button @click="successMessage = ''" class="text-current opacity-60 hover:opacity-100 shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </Teleport>
         </div>
@@ -166,16 +208,27 @@
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import BusinessLayout from '@/Layouts/BusinessLayout.vue'
+import MonoConnect from '@mono.co/connect.js'
 
 const props = defineProps({
     accounts: Array,
     monoPublicKey: String,
+    customerName: String,
+    customerEmail: String,
+    monoCustomerId: String,
+    bankAccountsCount: { type: Number, default: 0 },
+    bankAccountsLimit: { type: Number, default: 0 },
+    canLinkMore: { type: Boolean, default: false },
 })
+
+const bankCallbackUrl = `${window.location.origin}/business/banks/callback`
 
 const showConnectModal = ref(false)
 const syncing = ref(null)
 const connecting = ref(false)
 const successMessage = ref('')
+const bvnNumber = ref('')
+const bvnError = ref('')
 
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-NG', {
@@ -245,45 +298,90 @@ const disconnectAccount = (account) => {
 }
 
 const initiateMonoAuth = () => {
-    connecting.value = true
-
-    // Load Mono SDK
-    const script = document.createElement('script')
-    script.src = 'https://cdn.getmono.co/mono.js'
-    script.onload = () => {
-        if (window.MonoConnect) {
-            const monoInstance = new window.MonoConnect({
-                key: props.monoPublicKey,
-                onClose: () => {
-                    connecting.value = false
-                },
-                onSuccess: (response) => {
-                    // Exchange code for account
-                    fetch(`/business/banks/callback`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content,
-                        },
-                        body: JSON.stringify({
-                            code: response.code,
-                        }),
-                    })
-                    .then(() => {
-                        showConnectModal.value = false
-                        successMessage.value = 'Bank account connected successfully!'
-                        setTimeout(() => {
-                            window.location.reload()
-                        }, 2000)
-                    })
-                    .catch((error) => {
-                        successMessage.value = 'Connection failed: ' + error.message
-                    })
-                },
-            })
-            monoInstance.open()
+    // Validate BVN only if we don't have a Mono customer ID
+    let bvn = ''
+    if (!props.monoCustomerId) {
+        bvn = bvnNumber.value.replace(/\s/g, '')
+        if (!bvn || bvn.length < 10 || bvn.length > 11 || !/^\d+$/.test(bvn)) {
+            bvnError.value = 'Please enter a valid BVN (10 or 11 digits)'
+            return
         }
     }
-    document.body.appendChild(script)
+
+    connecting.value = true
+
+    if (!props.monoPublicKey) {
+        connecting.value = false
+        successMessage.value = 'Mono public key is missing. Please check configuration.'
+        return
+    }
+
+    try {
+        const customer = {}
+
+        // If we already have a Mono customer ID, use it (name/email/identity not required)
+        if (props.monoCustomerId) {
+            customer.id = props.monoCustomerId
+        } else {
+            customer.name = props.customerName || 'User'
+            customer.email = props.customerEmail || 'user@example.com'
+            customer.identity = {
+                type: 'bvn',
+                number: bvn,
+            }
+        }
+
+        const monoInstance = new MonoConnect({
+            key: props.monoPublicKey,
+            data: { customer },
+            onLoad: () => {
+                connecting.value = false
+            },
+            onClose: () => {
+                connecting.value = false
+            },
+            onSuccess: (response) => {
+                // Exchange authorization code for account
+                fetch(bankCallbackUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({
+                        code: response.code,
+                        mono_customer_id: response.customer?.id || response.customer || null,
+                    }),
+                })
+                .then((res) => {
+                    if (!res.ok) {
+                        return res.text().then(text => {
+                            throw new Error(`HTTP ${res.status}: ${text}`)
+                        })
+                    }
+                    return res.json()
+                })
+                .then((data) => {
+                    showConnectModal.value = false
+                    successMessage.value = data.message || 'Bank account connected successfully!'
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 2000)
+                })
+                .catch((error) => {
+                    connecting.value = false
+                    successMessage.value = 'Connection failed: ' + error.message
+                })
+            },
+        })
+
+        monoInstance.setup()
+        monoInstance.open()
+    } catch (error) {
+        connecting.value = false
+        successMessage.value = 'Failed to initialize Mono: ' + error.message
+    }
 }
 </script>

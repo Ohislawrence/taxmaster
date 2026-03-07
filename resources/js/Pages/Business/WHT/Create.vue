@@ -58,6 +58,23 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Beneficiary Type <span class="text-red-500">*</span>
+                            </label>
+                            <select
+                                v-model="form.beneficiary_type"
+                                required
+                                class="w-full border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                            >
+                                <option value="company">Company (WHT remitted to FIRS)</option>
+                                <option value="individual">Individual (WHT remitted to State IRS)</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">
+                                WHT on companies goes to FIRS. WHT on individuals goes to the relevant State IRS.
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Vendor Name <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -186,6 +203,7 @@ const props = defineProps({
 const form = ref({
     transaction_date: new Date().toISOString().split('T')[0],
     transaction_type: '',
+    beneficiary_type: 'company',
     vendor_name: '',
     vendor_tin: '',
     gross_amount: '',

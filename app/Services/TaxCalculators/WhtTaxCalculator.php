@@ -5,9 +5,10 @@ namespace App\Services\TaxCalculators;
 class WhtTaxCalculator extends BaseTaxCalculator
 {
     /**
-     * Standard WHT rates for different transaction types
+     * WHT rates by entity type and transaction type (Nigerian FIRS rates)
+     * Companies are taxed at higher rates than individuals for most transaction types.
      */
-    protected array $whtRates = [
+    protected array $companyRates = [
         'dividends' => 10.00,
         'interest' => 10.00,
         'rent' => 10.00,
@@ -22,17 +23,33 @@ class WhtTaxCalculator extends BaseTaxCalculator
         'construction' => 5.00,
     ];
 
+    protected array $individualRates = [
+        'dividends' => 10.00,
+        'interest' => 10.00,
+        'rent' => 10.00,
+        'royalties' => 5.00,
+        'professional_fees' => 5.00,
+        'technical_fees' => 5.00,
+        'management_fees' => 5.00,
+        'consultancy' => 5.00,
+        'commission' => 5.00,
+        'directors_fees' => 10.00,
+        'contract' => 5.00,
+        'construction' => 5.00,
+    ];
+
     /**
      * Calculate WHT
-     * 
+     *
      * @param float $transactionAmount Amount of transaction
-     * @param array $params ['transaction_type' => '', 'is_final_tax' => false]
+     * @param array $params ['transaction_type' => '', 'entity_type' => 'company', 'is_final_tax' => false]
      * @return array WHT calculation breakdown
      */
     public function calculate(float $transactionAmount, array $params = []): array
     {
         $transactionType = $params['transaction_type'] ?? 'professional_fees';
-        $rate = $this->getWhtRate($transactionType);
+        $entityType = $params['entity_type'] ?? 'company';
+        $rate = $this->getWhtRate($transactionType, $entityType);
 
         // Calculate WHT amount
         $whtAmount = ($transactionAmount * $rate) / 100;
@@ -44,22 +61,24 @@ class WhtTaxCalculator extends BaseTaxCalculator
         return $this->formatResult([
             'gross_amount' => $this->roundCurrency($transactionAmount),
             'transaction_type' => $transactionType,
+            'entity_type' => $entityType,
             'wht_rate' => $rate . '%',
             'wht_amount' => $this->roundCurrency($whtAmount),
             'net_payable' => $this->roundCurrency($netPayable),
             'is_final_tax' => $isFinalTax,
-            'notes' => $isFinalTax 
-                ? 'WHT is treated as final tax - no further tax due' 
+            'notes' => $isFinalTax
+                ? 'WHT is treated as final tax - no further tax due'
                 : 'WHT can be offset against final tax liability',
         ]);
     }
 
     /**
-     * Get WHT rate for transaction type
+     * Get WHT rate for transaction type and entity type
      */
-    public function getWhtRate(string $transactionType): float
+    public function getWhtRate(string $transactionType, string $entityType = 'company'): float
     {
-        return $this->whtRates[$transactionType] ?? 5.00; // Default to 5%
+        $rates = $entityType === 'individual' ? $this->individualRates : $this->companyRates;
+        return $rates[$transactionType] ?? 5.00;
     }
 
     /**
@@ -75,7 +94,10 @@ class WhtTaxCalculator extends BaseTaxCalculator
         foreach ($transactions as $transaction) {
             $calculation = $this->calculate(
                 $transaction['amount'],
-                ['transaction_type' => $transaction['type'] ?? 'professional_fees']
+                [
+                    'transaction_type' => $transaction['type'] ?? 'professional_fees',
+                    'entity_type' => $transaction['entity_type'] ?? 'company',
+                ]
             );
 
             $results[] = array_merge($calculation, [
@@ -100,12 +122,24 @@ class WhtTaxCalculator extends BaseTaxCalculator
     }
 
     /**
-     * Get all available WHT rates
+     * Get all available WHT rates for an entity type
      */
-    public function getAvailableRates(): array
+    public function getAvailableRates(string $entityType = 'company'): array
     {
+        $rates = $entityType === 'individual' ? $this->individualRates : $this->companyRates;
         return array_map(function ($rate) {
             return $rate . '%';
-        }, $this->whtRates);
+        }, $rates);
+    }
+
+    /**
+     * Get all rates for both entity types
+     */
+    public function getAllRates(): array
+    {
+        return [
+            'company' => $this->getAvailableRates('company'),
+            'individual' => $this->getAvailableRates('individual'),
+        ];
     }
 }

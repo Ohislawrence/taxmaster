@@ -12,7 +12,15 @@ class WhtReturnPolicy
      */
     public function view(User $user, WhtReturn $whtReturn): bool
     {
-        return $user->business_id === $whtReturn->business_id;
+        return $user->ownedBusiness?->id === $whtReturn->business_id;
+    }
+
+    /**
+     * Determine if the user can create a WHT return
+     */
+    public function create(User $user): bool
+    {
+        return $user->ownedBusiness !== null;
     }
 
     /**
@@ -20,7 +28,7 @@ class WhtReturnPolicy
      */
     public function update(User $user, WhtReturn $whtReturn): bool
     {
-        return $user->business_id === $whtReturn->business_id;
+        return $user->ownedBusiness?->id === $whtReturn->business_id;
     }
 
     /**
@@ -28,7 +36,7 @@ class WhtReturnPolicy
      */
     public function delete(User $user, WhtReturn $whtReturn): bool
     {
-        return $user->business_id === $whtReturn->business_id
+        return $user->ownedBusiness?->id === $whtReturn->business_id
             && $whtReturn->status === 'draft';
     }
 }

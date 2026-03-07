@@ -10,17 +10,22 @@ use App\Http\Controllers\Business\SubscribeController;
 use App\Http\Controllers\Business\BankAccountController;
 use App\Http\Controllers\Business\TransactionController;
 use App\Http\Controllers\Business\ComplianceController;
+use App\Http\Controllers\Business\DataExportController;
 use App\Http\Controllers\Business\VatController;
 use App\Http\Controllers\Business\PayeController;
 use App\Http\Controllers\Business\CitController;
 use App\Http\Controllers\Business\WhtController;
 use App\Http\Controllers\Business\FinancialStatementController;
 use App\Http\Controllers\Business\CacFormController;
-use App\Http\Controllers\Business\BusinessSetupController;
+use App\Http\Controllers\BusinessSetupController;
 use App\Http\Controllers\Business\GetStartedController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setup', 'ensure.subscription'])->prefix('business')->name('business.')->group(function () {
+    // ERP Connectors (Phase 3)
+    Route::post('erp/sync/quickbooks', [App\Http\Controllers\Business\ERPController::class, 'syncQuickBooks']);
+    Route::post('erp/sync/xero', [App\Http\Controllers\Business\ERPController::class, 'syncXero']);
+    Route::post('erp/sync/sage', [App\Http\Controllers\Business\ERPController::class, 'syncSage']);
 
     //Add business
     Route::get('setup', [BusinessSetupController::class, 'create'])->name('setup');
@@ -29,6 +34,11 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
 
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Invoices (Phase 1 e-invoicing)
+    Route::get('invoices/{invoice}', [App\Http\Controllers\Business\InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('invoices/{invoice}/jades', [App\Http\Controllers\Business\InvoiceController::class, 'generateJadesInvoice'])->name('invoices.jades');
+    Route::get('invoices/{invoice}/qr', [App\Http\Controllers\Business\InvoiceController::class, 'qr']);
 
     // Get Started Guide
     Route::prefix('get-started')->name('get-started.')->group(function () {
@@ -53,13 +63,22 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
     Route::post('payments/webhook/paystack', [PaymentController::class, 'webhookPaystack'])->name('payments.webhook.paystack');
 
     // Staff Management
+    Route::get('staff/bulk-upload', [StaffController::class, 'bulkUploadForm'])->name('staff.bulk-upload');
+    Route::post('staff/bulk-upload/map-columns', [StaffController::class, 'mapColumns'])->name('staff.bulk-upload.map-columns');
+    Route::post('staff/bulk-upload', [StaffController::class, 'processBulkUpload'])->name('staff.bulk-upload.process');
+    Route::get('staff/download-template', [StaffController::class, 'downloadTemplate'])->name('staff.download-template');
     Route::resource('staff', StaffController::class);
     Route::get('staff/{staff}/tax-analysis', [StaffController::class, 'taxAnalysis'])->name('staff.tax-analysis');
+    Route::get('staff/{staff}/payslip', [StaffController::class, 'generatePayslip'])->name('staff.payslip');
+    Route::get('staff/{staff}/payslip/{year}/{month}', [StaffController::class, 'generatePayslip'])->name('staff.payslip.period');
 
     // Settings
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::get('settings/activity', [SettingsController::class, 'activityLog'])->name('settings.activity');
+
+    // NDPA Data Portability (Article 25)
+    Route::get('settings/export-data', [DataExportController::class, 'export'])->name('settings.export-data');
 
     // Subscription & Plans
     Route::get('plans', [SubscribeController::class, 'showPlans'])->name('plans.index')->withoutMiddleware(['ensure.business.setup', 'ensure.subscription']);
@@ -70,6 +89,7 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
     Route::post('subscription/cancel', [SubscribeController::class, 'cancel'])->name('subscription.cancel');
     Route::get('subscription', [SettingsController::class, 'subscription'])->name('subscription')->withoutMiddleware('ensure.subscription');
     Route::post('subscription/upgrade-plan', [SettingsController::class, 'upgradePlan'])->name('subscription.upgrade-plan')->withoutMiddleware('ensure.subscription');
+    Route::get('subscription/payment/callback', [SettingsController::class, 'paymentCallback'])->name('subscription.payment-callback')->withoutMiddleware(['ensure.business.setup', 'ensure.subscription']);
 
     // AI Module
     Route::middleware('subscription.features:use_ai_analysis')->group(function () {
@@ -123,6 +143,7 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
             Route::put('/{vatReturn}', [VatController::class, 'update'])->name('update');
             Route::put('/{vatReturn}/status', [VatController::class, 'updateStatus'])->name('update-status');
             Route::post('/{vatReturn}/generate-rrr', [VatController::class, 'generatePaymentRRR'])->name('generate-rrr');
+            Route::get('/{vatReturn}/export-pdf', [VatController::class, 'exportPdf'])->name('export-pdf');
             Route::post('/calculate-preview', [VatController::class, 'calculatePreview'])->name('calculate-preview');
         });
 
@@ -136,6 +157,7 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
             Route::put('/{citReturn}', [CitController::class, 'update'])->name('update');
             Route::put('/{citReturn}/status', [CitController::class, 'updateStatus'])->name('update-status');
             Route::post('/{citReturn}/generate-rrr', [CitController::class, 'generatePaymentRRR'])->name('generate-rrr');
+            Route::get('/{citReturn}/export-pdf', [CitController::class, 'exportPdf'])->name('export-pdf');
             Route::post('/calculate-preview', [CitController::class, 'calculatePreview'])->name('calculate-preview');
         });
 
@@ -144,9 +166,11 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
             Route::get('/', [PayeController::class, 'index'])->name('index');
             Route::get('/create', [PayeController::class, 'create'])->name('create');
             Route::post('/', [PayeController::class, 'store'])->name('store');
+            Route::post('/form-h1', [PayeController::class, 'generateFormH1'])->name('form-h1');
             Route::get('/{payeReturn}', [PayeController::class, 'show'])->name('show');
             Route::put('/{payeReturn}/status', [PayeController::class, 'updateStatus'])->name('update-status');
             Route::post('/{payeReturn}/generate-rrr', [PayeController::class, 'generatePaymentRRR'])->name('generate-rrr');
+            Route::get('/{payeReturn}/export-pdf', [PayeController::class, 'exportPdf'])->name('export-pdf');
             Route::post('/calculate-preview', [PayeController::class, 'calculatePreview'])->name('calculate-preview');
         });
 
@@ -164,6 +188,7 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
             Route::get('/returns', [WhtController::class, 'returns'])->name('returns');
             Route::post('/returns/generate', [WhtController::class, 'generateReturn'])->name('returns.generate');
             Route::get('/returns/{whtReturn}', [WhtController::class, 'showReturn'])->name('return.show');
+            Route::get('/returns/{whtReturn}/export-pdf', [WhtController::class, 'exportReturnPdf'])->name('return.export-pdf');
             Route::put('/returns/{whtReturn}/status', [WhtController::class, 'updateReturnStatus'])->name('return.update-status');
             Route::post('/returns/{whtReturn}/generate-rrr', [WhtController::class, 'generateReturnPaymentRRR'])->name('return.generate-rrr');
 

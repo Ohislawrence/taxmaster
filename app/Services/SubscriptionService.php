@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Business;
+use App\Models\BankAccount;
 use App\Models\SubscriptionPlan;
 use App\Models\BusinessSubscription;
 use Carbon\Carbon;
@@ -38,9 +39,9 @@ class SubscriptionService
         ?string $paymentMethod = null,
         ?string $transactionRef = null
     ): BusinessSubscription {
-        // Cancel any existing subscriptions
+        // Cancel any existing subscriptions (active, pending_payment, and pending)
         $business->subscriptions()
-            ->where('status', 'active')
+            ->whereIn('status', ['active', 'pending_payment', 'pending'])
             ->update(['status' => 'cancelled', 'cancelled_at' => now()]);
 
         $renews_at = $billingCycle === 'annual'
@@ -165,7 +166,8 @@ class SubscriptionService
     public function getActiveSubscription(Business $business): ?BusinessSubscription
     {
         return $business->subscriptions()
-            ->where('status', 'active')
+            ->with('plan')
+            ->whereIn('status', ['active', 'pending_payment', 'pending'])
             ->latest('created_at')
             ->first();
     }
@@ -247,6 +249,8 @@ class SubscriptionService
             'returns_this_year' => $returnsThisYear,
             'returns_limit' => $subscription->max_returns_per_year,
             'returns_percentage' => round(($returnsThisYear / $subscription->max_returns_per_year) * 100),
+            'bank_accounts_count' => BankAccount::where('business_id', $business->id)->where('is_active', true)->count(),
+            'bank_accounts_limit' => $subscription->plan?->max_bank_accounts ?? 0,
             'ai_analysis_available' => $subscription->ai_analysis_included,
             'payment_automation_available' => $subscription->payment_automation,
         ];
@@ -259,86 +263,94 @@ class SubscriptionService
     {
         $subscription = $this->getActiveSubscription($business);
 
-        if (!$subscription || $subscription->status !== 'active') {
+        // Allow features for 'active', 'pending_payment', and 'pending' subscriptions
+        if (!$subscription) {
             return $action === 'view' || $action === 'manage_profile';
         }
 
-        $planSlug = $subscription->plan?->slug ?? $subscription->plan_type;
-        
+        if (!in_array($subscription->status, ['active', 'pending_payment', 'pending'])) {
+            return $action === 'view' || $action === 'manage_profile';
+        }
+
+        // Use plan_type as authoritative source (set at subscription time)
+        $planSlug = $subscription->plan_type ?: ($subscription->plan?->slug ?? 'free');
+
         return match ($action) {
             // Staff management
             'add_staff' => $business->staff()->count() < $subscription->max_staff_members,
-            
+
             // Tax returns general
             'file_return' => $business->taxReturns()
                 ->whereYear('created_at', now()->year)
                 ->count() < $subscription->max_returns_per_year,
-            
+
             // Specific tax return types by plan
             'file_cit' => in_array($planSlug, ['basic', 'professional', 'enterprise']),
             'file_vat' => in_array($planSlug, ['basic', 'professional', 'enterprise']),
             'file_cgt' => in_array($planSlug, ['professional', 'enterprise']),
             'file_paye' => true, // All plans
             'file_wht' => true, // All plans
-            
+
             // AI features
             'use_ai_analysis' => $subscription->ai_analysis_included,
             'use_ai_chat' => in_array($planSlug, ['professional', 'enterprise']),
             'use_ai_optimization' => in_array($planSlug, ['professional', 'enterprise']),
-            
+
             // Payment automation
             'use_payment_automation' => $subscription->payment_automation,
             'use_payment_recovery' => in_array($planSlug, ['professional', 'enterprise']),
-            
+
             // Bank integration
-            'link_bank_account' => in_array($planSlug, ['basic', 'professional', 'enterprise']),
+            'link_bank_account' => BankAccount::where('business_id', $business->id)
+                ->where('is_active', true)
+                ->count() < ($subscription->plan?->max_bank_accounts ?? 0),
             'auto_sync_transactions' => in_array($planSlug, ['professional', 'enterprise']),
-            
+
             // Financial statements & reporting
             'generate_financial_statements' => in_array($planSlug, ['professional', 'enterprise']),
             'generate_cac_forms' => in_array($planSlug, ['professional', 'enterprise']),
             'export_pdf' => in_array($planSlug, ['professional', 'enterprise']),
             'advanced_reporting' => in_array($planSlug, ['professional', 'enterprise']),
-            
+
             // API access
             'use_api' => in_array($planSlug, ['professional', 'enterprise']),
-            
+
             // Support levels
             'priority_support' => in_array($planSlug, ['professional', 'enterprise']),
-            
+
             // Enterprise-only features
             'custom_branding' => $planSlug === 'enterprise',
             'white_label' => $planSlug === 'enterprise',
             'multi_business' => $planSlug === 'enterprise',
             'custom_integrations' => $planSlug === 'enterprise',
             'dedicated_account_manager' => $planSlug === 'enterprise',
-            
+
             // Storage check
             'upload_file' => $this->canUploadFile($business, $subscription),
-            
+
             // Default
             'access_premium_features' => true,
             default => true,
         };
     }
-    
+
     /**
      * Check if business can upload more files based on storage limit
      */
     protected function canUploadFile(Business $business, BusinessSubscription $subscription): bool
     {
-        $planSlug = $subscription->plan?->slug ?? $subscription->plan_type;
-        
+        $planSlug = $subscription->plan_type ?: ($subscription->plan?->slug ?? 'free');
+
         $storageLimits = [
             'free' => 1, // 1 GB
             'basic' => 5, // 5 GB
             'professional' => 50, // 50 GB
             'enterprise' => 500, // 500 GB
         ];
-        
+
         $limitGB = $storageLimits[$planSlug] ?? 1;
         $limitBytes = $limitGB * 1024 * 1024 * 1024;
-        
+
         // Get current storage usage (you may need to implement this)
         // For now, return true (you can add actual storage tracking later)
         return true;

@@ -336,21 +336,36 @@ const saveCategory = () => {
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
         },
         body: JSON.stringify({
             category: selectedCategory.value,
         }),
     })
-    .then(() => {
+    .then((res) => {
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`)
+        }
+        // Update the transaction in-place without page reload
+        const txn = props.transactions?.data?.find(t => t.id === currentTransaction.value.id)
+        if (txn) {
+            txn.category = selectedCategory.value
+            txn.user_verified = true
+            txn.ai_confidence = 1.0
+        }
         successMessage.value = 'Transaction categorized successfully'
         editingId.value = null
         selectedCategory.value = ''
         setTimeout(() => {
-            window.location.reload()
-        }, 1500)
+            successMessage.value = ''
+        }, 3000)
     })
-    .catch(() => {
-        successMessage.value = 'Failed to save category'
+    .catch((error) => {
+        successMessage.value = 'Failed to save category: ' + error.message
+        setTimeout(() => {
+            successMessage.value = ''
+        }, 3000)
     })
     .finally(() => {
         savingCategory.value = false

@@ -99,10 +99,11 @@ class TaxRelief extends Model
     {
         // Special handling for CRA (Consolidated Relief Allowance)
         if ($this->code === 'cra') {
-            // CRA = Higher of (1% of gross income) or (₦200,000 + 20% of gross income)
-            $option1 = $grossIncome * 0.01;
-            $option2 = 200000 + ($grossIncome * 0.20);
-            return max($option1, $option2);
+            // CRA = 20% of gross income + higher of (₦200,000 or 1% of gross income)
+            // Per PITA as amended by Finance Act 2020
+            $twentyPercent = $grossIncome * 0.20;
+            $higherOf = max(200000, $grossIncome * 0.01);
+            return $twentyPercent + $higherOf;
         }
 
         // For other formulas, you can implement a formula parser

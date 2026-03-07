@@ -28,7 +28,7 @@ class BankSyncFailedNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Bank Sync Failed - Action Required')
             ->greeting("Hello {$notifiable->name}")
-            ->line("Automatic sync failed for your {$bankAccount->bank_name} account ({$bankAccount->masked_account_number}).")
+            ->line("Automatic sync failed for your {$this->bankAccount->bank_name} account ({$this->bankAccount->masked_account_number}).")
             ->line("**Error:** {$this->error}")
             ->line("**Attempt:** {$this->attempts} of 3")
             ->action('Try Manual Sync', route('business.banks.index'))

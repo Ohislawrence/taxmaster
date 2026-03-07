@@ -111,23 +111,59 @@
                     </div>
                 </div>
 
+                <div class="grid grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Date Employed *
+                            <span
+                                class="ml-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700"
+                                title="Confirm the official start date used for payroll and statutory filings."
+                            >
+                                i
+                            </span>
+                        </label>
+                        <input
+                            v-model="form.date_employed"
+                            type="date"
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <p v-if="errors.date_employed" class="text-red-600 text-sm mt-1">{{ errors.date_employed[0] }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Status *
+                        </label>
+                        <select
+                            v-model="form.status"
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="active">Active</option>
+                            <option value="on_leave">On Leave</option>
+                            <option value="terminated">Terminated</option>
+                        </select>
+                        <p v-if="errors.status" class="text-red-600 text-sm mt-1">{{ errors.status[0] }}</p>
+                    </div>
+                </div>
+
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Date Employed *
+                        Tax State (PAYE)
                         <span
                             class="ml-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700"
-                            title="Confirm the official start date used for payroll and statutory filings."
-                        >
-                            i
-                        </span>
+                            title="State IRS where this employee's PAYE is remitted. Defaults to business state if not set."
+                        >i</span>
                     </label>
-                    <input
-                        v-model="form.date_employed"
-                        type="date"
-                        required
+                    <select
+                        v-model="form.tax_state"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <p v-if="errors.date_employed" class="text-red-600 text-sm mt-1">{{ errors.date_employed[0] }}</p>
+                    >
+                        <option value="">Use Business State (Default)</option>
+                        <option v-for="(name, code) in nigerianStates" :key="code" :value="code">{{ name }}</option>
+                    </select>
+                    <p v-if="errors.tax_state" class="text-red-600 text-sm mt-1">{{ errors.tax_state[0] }}</p>
                 </div>
 
                 <div class="flex gap-4">
@@ -154,6 +190,10 @@ import BusinessLayout from '@/Layouts/BusinessLayout.vue'
 
 const props = defineProps({
     staff: Object,
+    nigerianStates: {
+        type: Object,
+        default: () => ({}),
+    },
     errors: {
         type: Object,
         default: () => ({}),
@@ -170,6 +210,8 @@ const form = ref({
     monthly_salary: props.staff?.monthly_salary || '',
     employment_type: props.staff?.employment_type || 'full_time',
     date_employed: props.staff?.date_employed || '',
+    status: props.staff?.status || 'active',
+    tax_state: props.staff?.tax_state || '',
 });
 
 const submitForm = () => {

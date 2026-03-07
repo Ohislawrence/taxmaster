@@ -1,6 +1,6 @@
 <template>
     <BusinessLayout>
-        <Head :title="`WHT Return - ${whtReturn.period_label}`" />
+        <Head :title="`WHT Return - ${whtReturn?.period_label || 'Return'}`" />
 
         <div class="py-8 px-4 sm:px-6 lg:px-8">
             <!-- Header -->
@@ -10,7 +10,7 @@
                 </Link>
                 <div class="flex justify-between items-start mt-4">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">{{ whtReturn.period_label }}</h1>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ whtReturn?.period_label || 'WHT Return' }}</h1>
                         <p class="text-gray-600 mt-1">WHT Return Details</p>
                     </div>
                     <span
@@ -44,17 +44,17 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <p class="text-sm text-gray-600">Period</p>
-                        <p class="text-lg font-medium text-gray-900">{{ whtReturn.period_label }}</p>
+                        <p class="text-lg font-medium text-gray-900">{{ whtReturn?.period_label || 'N/A' }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Status</p>
-                        <p class="text-lg font-medium" :class="getStatusTextClass(whtReturn.status)">
-                            {{ whtReturn.status_label }}
+                        <p class="text-lg font-medium" :class="getStatusTextClass(whtReturn?.status)">
+                            {{ whtReturn?.status_label || 'Unknown' }}
                         </p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Filed Date</p>
-                        <p class="text-lg font-medium text-gray-900">{{ whtReturn.filed_date || 'Not filed' }}</p>
+                        <p class="text-lg font-medium text-gray-900">{{ whtReturn?.filed_date_formatted || 'Not filed' }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">FIRS Reference</p>
@@ -143,7 +143,7 @@
                         >
                             {{ payment.status }}
                         </span>
-                        <p class="text-sm text-gray-600">{{ payment.payment_date }}</p>
+                        <p class="text-sm text-gray-600">{{ payment.payment_date_formatted || 'Pending' }}</p>
                     </div>
                     <div class="grid md:grid-cols-3 gap-4">
                         <div>
@@ -152,11 +152,11 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Remita RRR</p>
-                            <p class="text-lg font-medium text-gray-900">{{ payment.remita_rrr }}</p>
+                            <p class="text-lg font-medium text-gray-900">{{ payment.remita_rrr || 'Pending' }}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Payment Method</p>
-                            <p class="text-lg font-medium text-gray-900">{{ payment.payment_method_label }}</p>
+                            <p class="text-lg font-medium text-gray-900">{{ payment.payment_method_label || 'N/A' }}</p>
                         </div>
                     </div>
                 </div>

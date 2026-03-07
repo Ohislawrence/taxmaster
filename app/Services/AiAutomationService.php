@@ -22,7 +22,7 @@ class AiAutomationService
             'transaction_description' => $transaction->description ?? $transaction->narration,
             'amount' => number_format($transaction->amount, 2),
             'merchant_name' => $transaction->merchant ?? 'Unknown',
-            'date' => $transaction->date->format('Y-m-d'),
+            'date' => $transaction->transaction_date?->format('Y-m-d') ?? ($transaction->date?->format('Y-m-d') ?? now()->format('Y-m-d')),
             'business_type' => $business->business_type ?? 'General',
             'similar_transactions' => $this->getSimilarTransactions($transaction, $business),
         ]);

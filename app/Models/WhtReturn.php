@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\TracksStatusChanges;
+use App\Traits\HasStandardStatus;
+use App\Traits\HasTaxAuthority;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +12,19 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class WhtReturn extends Model
 {
-    use HasFactory;
+    use HasFactory, TracksStatusChanges, HasStandardStatus, HasTaxAuthority;
+
+    /**
+     * WHT tax authority depends on beneficiary type:
+     * - company → FIRS (federal)
+     * - individual → SIRS (state)
+     */
+    public function getDefaultTaxAuthority(): string
+    {
+        return $this->beneficiary_type === 'individual'
+            ? self::TAX_AUTHORITY_SIRS
+            : self::TAX_AUTHORITY_FIRS;
+    }
 
     protected $fillable = [
         'business_id',
@@ -19,6 +34,9 @@ class WhtReturn extends Model
         'schedule_data',
         'filed_date',
         'status',
+        'tax_authority',
+        'beneficiary_type',
+        'tax_state',
         'firs_reference',
         'notes',
     ];
@@ -26,7 +44,6 @@ class WhtReturn extends Model
     protected $casts = [
         'schedule_data' => 'array',
         'total_wht_deducted' => 'decimal:2',
-        'filed_date' => 'date',
     ];
 
     /**
@@ -50,36 +67,22 @@ class WhtReturn extends Model
      */
     public function getPeriodLabelAttribute(): string
     {
+        if (!$this->period) {
+            return 'Unknown Period';
+        }
         $date = \Carbon\Carbon::createFromFormat('Y-m', $this->period);
         return $date->format('F Y');
     }
 
     /**
-     * Get status label
+     * Get formatted filed date
      */
-    public function getStatusLabelAttribute(): string
+    public function getFiledDateFormattedAttribute(): ?string
     {
-        return match($this->status) {
-            'draft' => 'Draft',
-            'filed' => 'Filed',
-            'paid' => 'Paid',
-            'overdue' => 'Overdue',
-            default => 'Unknown',
-        };
-    }
-
-    /**
-     * Get status color
-     */
-    public function getStatusColorAttribute(): string
-    {
-        return match($this->status) {
-            'draft' => 'gray',
-            'filed' => 'blue',
-            'paid' => 'green',
-            'overdue' => 'red',
-            default => 'gray',
-        };
+        if (!$this->filed_date) {
+            return null;
+        }
+        return \Carbon\Carbon::parse($this->filed_date)->format('M d, Y');
     }
 
     /**

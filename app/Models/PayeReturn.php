@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\TracksStatusChanges;
+use App\Traits\HasStandardStatus;
+use App\Traits\HasTaxAuthority;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,17 +13,28 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class PayeReturn extends Model
 {
-    use HasFactory;
+    use HasFactory, TracksStatusChanges, HasStandardStatus, HasTaxAuthority;
+
+    /**
+     * PAYE is a state tax administered by SIRS.
+     */
+    public function getDefaultTaxAuthority(): string
+    {
+        return self::TAX_AUTHORITY_SIRS;
+    }
 
     protected $fillable = [
         'business_id',
         'period',
+        'return_type',
         'total_gross_pay',
         'total_tax_deducted',
         'staff_count',
         'schedule_data',
         'filed_date',
         'status',
+        'tax_authority',
+        'tax_state',
         'firs_reference',
         'notes',
     ];
@@ -84,34 +98,6 @@ class PayeReturn extends Model
         } catch (\Exception $e) {
             return 'Invalid Period';
         }
-    }
-
-    /**
-     * Get status label
-     */
-    public function getStatusLabelAttribute(): string
-    {
-        return match($this->status) {
-            'draft' => 'Draft',
-            'filed' => 'Filed',
-            'paid' => 'Paid',
-            'overdue' => 'Overdue',
-            default => 'Unknown',
-        };
-    }
-
-    /**
-     * Get status color for UI
-     */
-    public function getStatusColorAttribute(): string
-    {
-        return match($this->status) {
-            'draft' => 'gray',
-            'filed' => 'blue',
-            'paid' => 'green',
-            'overdue' => 'red',
-            default => 'gray',
-        };
     }
 
     /**

@@ -138,6 +138,20 @@ class AiAgentService
      * Call the configured AI API
      */
     /**
+     * Call AI API for transaction categorization (public wrapper)
+     */
+    public function callAiForCategorization(string $prompt): ?string
+    {
+        $result = $this->callAiApi($prompt, 'categorization');
+
+        if ($result['success'] && !empty($result['analysis'])) {
+            return $result['analysis'];
+        }
+
+        return null;
+    }
+
+    /**
      * Call AI API based on provider
      */
     protected function callAiApi(string $prompt, string $actionType): array

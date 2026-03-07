@@ -27,11 +27,14 @@ class BusinessStaff extends Model
         'date_employed',
         'date_relieved',
         'status',
+        'tax_state',
         'taxable_income',
         'monthly_tax_due',
         'annual_tax_due',
         'metadata',
     ];
+
+    protected $appends = ['full_name'];
 
     protected $casts = [
         'monthly_salary' => 'decimal:2',
@@ -41,6 +44,8 @@ class BusinessStaff extends Model
         'date_employed' => 'date',
         'date_relieved' => 'date',
         'metadata' => 'array',
+        // NDPA 2023 — encrypt PII at rest
+        'tax_identification_number' => 'encrypted',
     ];
 
     /**
@@ -65,5 +70,27 @@ class BusinessStaff extends Model
     public function getJobTitleAttribute(): string
     {
         return $this->designation;
+    }
+
+    /**
+     * Get the tax state name (e.g., "Lagos", "FCT").
+     * Falls back to business state if staff has no explicit tax_state.
+     */
+    public function getTaxStateNameAttribute(): string
+    {
+        $code = $this->tax_state ?? $this->business?->state;
+        if (!$code) {
+            return 'Not Set';
+        }
+        return config("nigerian_states.state_options.{$code}", $code);
+    }
+
+    /**
+     * Get the effective tax state code.
+     * Falls back to business state if not explicitly set.
+     */
+    public function getEffectiveTaxStateAttribute(): ?string
+    {
+        return $this->tax_state ?? $this->business?->state;
     }
 }

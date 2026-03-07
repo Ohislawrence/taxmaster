@@ -83,14 +83,14 @@
 
                     <!-- Actions -->
                     <div class="flex gap-4">
-                        <button 
+                        <button
                             v-if="taxReturn.status === 'draft'"
                             @click="editReturn"
                             class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition"
                         >
                             Edit Return
                         </button>
-                        <button 
+                        <button
                             v-if="taxReturn.status === 'draft'"
                             @click="submitReturn"
                             :disabled="submitting"
@@ -98,14 +98,14 @@
                         >
                             {{ submitting ? 'Submitting...' : 'Submit Return' }}
                         </button>
-                        <button 
+                        <button
                             v-if="taxReturn.status === 'approved' && taxReturn.balance > 0"
                             @click="makePayment"
                             class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition"
                         >
                             Make Payment
                         </button>
-                        <button 
+                        <button
                             @click="requestAnalysis"
                             :disabled="analyzing"
                             class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium transition"

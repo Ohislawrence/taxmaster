@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\SyncFailureController;
 use App\Http\Controllers\Admin\AiAutomationController;
+use App\Http\Controllers\Admin\BlogController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -41,11 +42,18 @@ Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name(
 
     // Invoices Management
     Route::resource('invoices', InvoiceController::class)->only(['index', 'show']);
+
+        // Phase 2: PAYE Management (new admin UI)
+        Route::get('paye', [\App\Http\Controllers\Admin\PayeController::class, 'index'])->name('paye.index');
+        Route::get('paye/{id}', [\App\Http\Controllers\Admin\PayeController::class, 'show'])->name('paye.show');
+        Route::get('paye-statistics', [\App\Http\Controllers\Admin\PayeController::class, 'statistics'])->name('paye.statistics');
+        Route::get('paye-overdue', [\App\Http\Controllers\Admin\PayeController::class, 'overdueReport'])->name('paye.overdue');
     Route::post('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
     Route::post('invoices/{invoice}/resend', [InvoiceController::class, 'resend'])->name('invoices.resend');
     Route::post('invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('invoices.cancel');
     Route::get('invoices/{invoice}/pdf/view', [InvoiceController::class, 'viewPdf'])->name('invoices.pdf.view');
     Route::get('invoices/{invoice}/pdf/download', [InvoiceController::class, 'downloadPdf'])->name('invoices.pdf.download');
+    Route::get('invoices/{invoice}/jades', [InvoiceController::class, 'generateJadesInvoice'])->name('invoices.jades');
 
     // Backups Management
     Route::get('backups', [BackupController::class, 'index'])->name('backups.index');
@@ -115,4 +123,16 @@ Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name(
     Route::post('ai-automation/{aiSuggestion}/apply', [AiAutomationController::class, 'apply'])->name('ai-automation.apply');
     Route::post('ai-automation/{aiSuggestion}/dismiss', [AiAutomationController::class, 'dismiss'])->name('ai-automation.dismiss');
     Route::post('ai-automation/{aiSuggestion}/feedback', [AiAutomationController::class, 'feedback'])->name('ai-automation.feedback');
+
+    // Blog CRUD (Inertia pages + form actions)
+    Route::prefix('blog')->name('blog.')->group(function () {
+        Route::get('/', [BlogController::class, 'index'])->name('index');
+        Route::get('/create', [BlogController::class, 'create'])->name('create');
+        Route::get('/{id}/edit', [BlogController::class, 'edit'])->name('edit');
+
+        // Form actions (store, update, delete)
+        Route::post('/', [BlogController::class, 'store'])->name('store');
+        Route::put('/{id}', [BlogController::class, 'update'])->name('update');
+        Route::delete('/{id}', [BlogController::class, 'destroy'])->name('destroy');
+    });
 });

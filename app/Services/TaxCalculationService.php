@@ -28,11 +28,18 @@ class TaxCalculationService
         $deductions = $taxReturn->deductions;
         $taxableIncome = $grossIncome - $deductions;
 
-        // Get standard tax rate from config
-        $standardRate = config('taxmaster.tax.standard_rate', 0.10);
+        // Nigerian CIT tiers (Finance Act 2019)
+        // Small: turnover < ₦25M = 0%, Medium: ₦25M–₦100M = 20%, Large: > ₦100M = 30%
+        if ($grossIncome < 25_000_000) {
+            $citRate = 0;
+        } elseif ($grossIncome <= 100_000_000) {
+            $citRate = 0.20;
+        } else {
+            $citRate = 0.30;
+        }
 
         // Calculate tax on business income
-        $businessTax = $taxableIncome * $standardRate;
+        $businessTax = $taxableIncome * $citRate;
 
         // Calculate staff tax breakdown
         $staffTaxBreakdown = $this->calculateStaffTax($business, $taxPeriod);
@@ -47,7 +54,7 @@ class TaxCalculationService
             'staff_tax_breakdown' => $staffTaxBreakdown['breakdown'],
             'total_staff_tax' => $staffTaxBreakdown['total_staff_tax'],
             'total_tax_due' => $totalTax,
-            'tax_rate' => $standardRate,
+            'tax_rate' => $citRate,
         ];
     }
 
@@ -79,28 +86,14 @@ class TaxCalculationService
     }
 
     /**
-     * Calculate monthly tax for a staff member based on Nigerian tax rules
+     * Calculate monthly tax for a staff member using Nigerian PAYE progressive brackets
      */
     public function calculateMonthlyStaffTax(BusinessStaff $staff): float
     {
-        $monthlyIncome = $staff->monthly_salary;
+        $payeService = app(PAYECalculationService::class);
+        $result = $payeService->calculateMonthlyPAYE($staff->monthly_salary);
 
-        // Apply personal relief
-        $personalRelief = config('taxmaster.tax.personal_reliefs.personal', 500000) / 12;
-
-        $taxableIncome = max(0, $monthlyIncome - $personalRelief);
-
-        // Nigerian tax brackets (simplified - adjust based on actual tax rules)
-        $taxRate = 0.10; // 10% standard rate
-
-        if ($taxableIncome > 800000) {
-            $taxRate = 0.15;
-        }
-        if ($taxableIncome > 1500000) {
-            $taxRate = 0.20;
-        }
-
-        return $taxableIncome * $taxRate;
+        return $result['paye_due'];
     }
 
     /**

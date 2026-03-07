@@ -75,6 +75,10 @@ class DashboardController
             ]);
         }
 
+        // Auto-detect completed steps from actual business data
+        $progress->syncFromBusinessData($business);
+        $progress->refresh();
+
         // Get Started steps (simplified for dashboard widget)
         $steps = $this->getStepsForDashboard($business, $progress);
 
@@ -124,16 +128,30 @@ class DashboardController
             [
                 'id' => 'add_staff',
                 'order' => 4,
-                'title' => 'Set Up Staff',
+                'title' => 'Add Your Team Members',
                 'is_completed' => $progress->isStepCompleted('add_staff'),
                 'priority' => 'medium',
             ],
             [
-                'id' => 'file_return',
+                'id' => 'file_first_return',
                 'order' => 5,
                 'title' => 'File Your First Tax Return',
-                'is_completed' => $progress->isStepCompleted('file_return'),
+                'is_completed' => $progress->isStepCompleted('file_first_return'),
+                'priority' => 'high',
+            ],
+            [
+                'id' => 'sync_transactions',
+                'order' => 6,
+                'title' => 'Enable Transaction Sync',
+                'is_completed' => $progress->isStepCompleted('sync_transactions'),
                 'priority' => 'medium',
+            ],
+            [
+                'id' => 'check_limits',
+                'order' => 7,
+                'title' => 'Check Your Usage & Limits',
+                'is_completed' => $progress->isStepCompleted('check_limits'),
+                'priority' => 'low',
             ],
         ];
     }

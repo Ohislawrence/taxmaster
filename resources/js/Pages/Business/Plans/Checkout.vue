@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-12 px-4">
-    <div class="max-w-4xl mx-auto space-y-8">
+  <BusinessLayout>
+    <div class="bg-gray-50 py-6 sm:py-12 px-3 sm:px-4">
+      <div class="max-w-4xl mx-auto space-y-6 sm:space-y-8">
       <!-- Header -->
       <div class="text-center">
         <h1 class="text-3xl font-bold text-gray-900">Complete Your Subscription</h1>
@@ -191,18 +192,20 @@
         <p class="text-sm text-gray-700">
           By clicking "{{ plan.monthly_price === 0 ? 'Activate Free Plan' : 'Proceed to Payment' }}", you agree to our
           <a href="#" class="text-blue-600 hover:underline">Terms of Service</a> and
-          <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>. 
+          <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>.
           {{ plan.monthly_price === 0 ? 'Your account will be activated immediately.' : 'Your billing will start after successful payment.' }}
         </p>
       </div>
     </div>
-  </div>
+    </div>
+  </BusinessLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
+import BusinessLayout from '@/Layouts/BusinessLayout.vue';
 
 const page = usePage();
 const plan = ref(page.props.plan);
@@ -231,9 +234,12 @@ const proceedToPayment = async () => {
       if (response.data.payment_url) {
         // Redirect to Paystack payment
         window.location.href = response.data.payment_url;
-      } else {
+      } else if (response.data.redirect) {
         // Free plan activated
         window.location.href = response.data.redirect;
+      } else {
+        processing.value = false;
+        alert('Checkout response incomplete. Please try again.');
       }
     }
   } catch (error) {

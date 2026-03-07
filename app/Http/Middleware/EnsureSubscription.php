@@ -42,7 +42,7 @@ class EnsureSubscription
 
         // Check if business has an active subscription
         $activeSubscription = $business->subscriptions()
-            ->where('status', 'active')
+            ->whereIn('status', ['active', 'pending_payment', 'pending'])
             ->where('renews_at', '>', now())
             ->latest()
             ->first();
@@ -65,8 +65,8 @@ class EnsureSubscription
     protected function isExemptRoute(Request $request): bool
     {
         $routeName = $request->route()?->getName();
-        
-        return in_array($routeName, $this->exemptRoutes) || 
+
+        return in_array($routeName, $this->exemptRoutes) ||
                str_contains($routeName ?? '', 'logout');
     }
 }

@@ -48,6 +48,7 @@ return [
         'api_key' => env('REMITA_API_KEY'),
         'service_type_id' => env('REMITA_SERVICE_TYPE_ID'),
         'base_url' => env('REMITA_BASE_URL', 'https://login.remita.net/remita/exapp/api/v1/send/api'),
+        'environment' => env('REMITA_ENVIRONMENT', 'sandbox'), // 'sandbox' or 'production'
     ],
 
     'ai' => [
@@ -55,6 +56,18 @@ return [
         'enabled' => env('AI_ENABLED', true),
         'deepseek_key' => env('DEEPSEEK_API_KEY'),
         'gemini_key' => env('GEMINI_API_KEY'),
+    ],
+
+
+    'paystack' => [
+        'secret' => env('PAYSTACK_SECRET_KEY'),
+        'public' => env('PAYSTACK_PUBLIC_KEY'),
+        'base_url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
+    ],
+
+    'nrs' => [
+        'endpoint' => env('NRS_ENDPOINT', 'https://nrs.example.com/api/invoices'),
+        'api_key' => env('NRS_API_KEY'),
     ],
 
 ];

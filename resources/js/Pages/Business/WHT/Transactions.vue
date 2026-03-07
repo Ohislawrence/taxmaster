@@ -170,11 +170,15 @@
                             Showing {{ transactions.from }} to {{ transactions.to }} of {{ transactions.total }} transactions
                         </div>
                         <div class="flex gap-2">
-                            <Link
+                            <component
                                 v-for="link in transactions.links"
                                 :key="link.label"
-                                :href="link.url"
-                                :class="link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                                :is="link.url ? Link : 'span'"
+                                :href="link.url || undefined"
+                                :class="[
+                                    link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50',
+                                    !link.url ? 'opacity-50 cursor-not-allowed' : ''
+                                ]"
                                 class="px-4 py-2 rounded border text-sm font-medium"
                                 v-html="link.label"
                             />
@@ -192,9 +196,9 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
 
 const props = defineProps({
-    transactions: Object,
-    stats: Object,
-    transactionTypes: Array,
+    transactions: { type: Object, default: () => ({ data: [], links: [], from: 0, to: 0, total: 0 }) },
+    stats: { type: Object, default: () => ({ total_transactions: 0, total_wht_deducted: 0, this_month_wht: 0, pending_returns: 0 }) },
+    transactionTypes: { type: Array, default: () => [] },
 });
 
 const filters = ref({

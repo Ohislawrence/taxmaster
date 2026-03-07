@@ -1,46 +1,62 @@
 # Privacy Policy
 
-**Effective Date:** February 2026
+**Effective Date:** March 4, 2026
 
 ## 1. Introduction
 
-TaxMaster ("we," "our," or "us") is committed to protecting your privacy in compliance with the Nigeria Data Protection Regulation (NDPR), issued by the National Information Technology Development Agency (NITDA), and other applicable laws.
+TaxMaster ("we," "our," or "us") is committed to protecting your privacy in compliance with the **Nigeria Data Protection Act (NDPA) 2023**, enacted to regulate the processing of personal data and protect the rights of data subjects in Nigeria.
 
 This Privacy Policy explains:
 - What personal data we collect
+- The lawful basis for processing your data
 - How we use your data
-- Your rights and how to exercise them
+- Your rights under the NDPA and how to exercise them
 - How we protect your information
-- Contact information for privacy inquiries
+- Contact information for our Data Protection Officer
 
-## 2. Data We Collect
+## 2. Lawful Basis for Processing
 
-### 2.1 Account Information
+Under the NDPA 2023, we process personal data on the following lawful bases:
+- **Consent:** Where you have given clear consent for us to process your data for specific purposes
+- **Contractual necessity:** Processing necessary to perform our service agreement with you
+- **Legal obligation:** Processing required to comply with Nigerian tax laws, the Nigeria Tax Administration Act (NTAA) 2025, and regulatory requirements
+- **Legitimate interest:** Processing necessary for our legitimate business interests, balanced against your rights
+
+## 3. Data We Collect
+
+### 3.1 Account Information
 - Name, email address, phone number
-- Business name, registration number, tax ID
+- Business name, CAC registration number, Tax Identification Number (TIN)
 - Business address and industry type
 
-### 2.2 Financial Data
+### 3.2 Financial Data
 - Bank account information (via Mono secure integration)
 - Transaction histories and descriptions
-- Tax return information
+- Tax return information and computations
+- Payroll and staff salary data
 - Payment and billing records
 
-### 2.3 Technical Data
+### 3.3 Staff Data
+- Employee names, email addresses, phone numbers
+- Employee TINs and salary details
+- Pension and statutory deduction information
+
+### 3.4 Technical Data
 - IP addresses, browser type, and device information
 - Usage patterns and analytics
 - Login timestamps and activity logs
 
-## 3. How We Use Your Data
+## 4. How We Use Your Data
 
 We use your information to:
 - Provide and improve our tax management services
+- Compute taxes in accordance with Nigerian tax legislation
 - Process payments and generate invoices
-- Sync bank transactions securely
+- Sync bank transactions securely via authorized providers
 - Generate tax returns and compliance reports
-- Send service notifications and updates
+- Send service notifications, reminders, and updates
 - Prevent fraud and ensure security
-- Comply with legal and regulatory obligations
+- Comply with legal and regulatory obligations including the NTAA 2025
 
 ## 4. Data Protection Measures
 
@@ -59,83 +75,106 @@ We use your information to:
 - Role-based access control for team members
 - Regular security audits and penetration testing
 
-## 5. Your Rights Under NDPR
+## 6. Your Rights Under the NDPA 2023
 
-You have the right to:
-- **Access:** Request a copy of your personal data
-- **Correction:** Correct inaccurate or incomplete data
-- **Deletion:** Request deletion of your data (subject to legal obligations)
-- **Data Portability:** Receive your data in a structured, portable format
-- **Object:** Object to processing of your data for certain purposes
-- **Withdraw Consent:** Withdraw consent previously given
-- **Lodge a Complaint:** File a complaint with NITDA
+Under the Nigeria Data Protection Act 2023, you have the following rights:
+- **Right to be Informed:** Know how your data is being processed
+- **Right of Access:** Request a copy of your personal data held by us
+- **Right to Rectification:** Correct inaccurate or incomplete data
+- **Right to Erasure:** Request deletion of your data (subject to legal retention obligations under Nigerian tax laws)
+- **Right to Data Portability:** Receive your data in a structured, commonly used, machine-readable format
+- **Right to Restrict Processing:** Request restriction of processing in certain circumstances
+- **Right to Object:** Object to processing of your data for certain purposes
+- **Right to Withdraw Consent:** Withdraw consent at any time where consent is the basis for processing
+- **Right to Lodge a Complaint:** File a complaint with the Nigeria Data Protection Commission (NDPC)
 
-To exercise these rights, contact: **privacy@taxmaster.ng**
+To exercise these rights, contact our Data Protection Officer at: **dpo@taxmaster.ng**
 
-## 6. Data Sharing
+## 7. Data Sharing
 
 We do **NOT** sell your personal data. We only share data with:
-- **Service Providers:** Mono (for secure bank integration), Paystack (for payments)
-- **Legal Requirements:** Government agencies when required by law
+- **Service Providers:** Mono (for secure bank integration, regulated by CBN), Remita (for government payment processing), and hosting infrastructure providers
+- **Tax Authorities:** The Federal Inland Revenue Service (FIRS), State Internal Revenue Services (SIRS), or the Joint Revenue Board (JRB) when required by law
+- **Legal Requirements:** Government agencies or courts when required by law or valid legal process
 - **Your Authorization:** Third parties you explicitly authorize
 
-All service providers are contractually bound to protect your data according to this policy.
+All service providers are bound by data processing agreements as mandated by the NDPA 2023.
 
-## 7. Cookie Policy
+## 8. Cookie Policy
 
-We use cookies for:
+We use cookies and similar technologies for:
 - Session management and authentication
+- Security and fraud prevention
 - Analytics to understand how you use our platform
 - Remembering your preferences
 
-You can control cookies through your browser settings.
+You can control cookies through your browser settings. Disabling certain cookies may affect Platform functionality.
 
-## 8. Data Retention
+## 9. Data Retention
 
 We retain your data for:
 - **Account Data:** Duration of your subscription + 3 years
-- **Tax Records:** Duration of your subscription + 7 years (compliance requirement)
-- **Backups:** Immediately deleted when account is closed
-- **Legal Obligations:** As required by Nigerian tax authorities
+- **Tax Records:** Duration of your subscription + 7 years (as required by Nigerian tax laws — CITA Section 60, PITA Section 60)
+- **Financial Transactions:** 6 years after the relevant tax year
+- **Backups:** Deleted within 90 days of account closure
+- **Legal Obligations:** As required by Nigerian tax authorities and the NTAA 2025
 
-## 9. Third-Party Links
+When data is no longer needed, it is securely deleted or anonymized in accordance with Section 28 of the NDPA 2023.
+
+## 10. Cross-Border Data Transfers
+
+As we primarily operate within Nigeria, your data is stored in Nigeria. Any international transfers comply with the NDPA 2023 requirements, including:
+- Ensuring the receiving country provides adequate data protection
+- Using approved standard contractual clauses
+- Obtaining your explicit consent where required
+
+## 11. Third-Party Links
 
 Our platform may contain links to third-party services. We are not responsible for their privacy practices. Please review their privacy policies.
 
-## 10. International Data Transfers
+## 12. International Data Transfers
 
-As we operate within Nigeria, your data is primarily stored in Nigeria. Any international transfers comply with NDPR requirements.
+See Section 10 above for details on cross-border data transfers.
 
-## 11. Changes to This Policy
+## 13. Changes to This Policy
 
-We may update this Privacy Policy periodically. We will notify you of material changes via email or prominent notice on our platform.
+We may update this Privacy Policy periodically. We will notify you of material changes via email or prominent notice on our platform at least thirty (30) days before changes take effect.
 
-## 12. Compliance
+## 14. Compliance
 
 TaxMaster complies with:
-- Nigeria Data Protection Regulation (NDPR)
-- Nigerian Tax Laws
+- **Nigeria Data Protection Act (NDPA) 2023** — our primary data protection framework
+- **Nigeria Tax Administration Act (NTAA) 2025** — for tax record-keeping and reporting obligations
+- Nigerian Tax Laws (PITA, CITA, VATA, CGTA)
 - General Data Protection Principles
-- International data protection standards
+- International data protection best practices
 
-## 13. Data Breach Notification
+## 15. Data Protection Officer
+
+In compliance with the NDPA 2023, TaxMaster has appointed a Data Protection Officer (DPO) responsible for monitoring compliance, conducting data protection impact assessments, training staff, and serving as a point of contact with the Nigeria Data Protection Commission (NDPC).
+
+## 16. Data Breach Notification
 
 In the event of a data breach affecting your information, we will:
-- Notify you within 72 hours
-- Provide details of the breach
-- Suggest steps to protect yourself
+- Notify the Nigeria Data Protection Commission (NDPC) within 72 hours as required by the NDPA 2023
+- Notify affected data subjects without undue delay
+- Provide details of the nature and scope of the breach
+- Describe the measures taken to address and mitigate the breach
+- Suggest steps you can take to protect yourself
 
-## 14. Contact Us
+## 17. Contact Us
 
-For privacy inquiries or to exercise your rights:
+For privacy inquiries, to exercise your data rights, or to contact our Data Protection Officer:
 
-**Email:** privacy@taxmaster.ng  
-**Phone:** +234 (0) 800-TAXHELP  
-**Address:** TaxMaster Ltd, Lagos, Nigeria  
 **Data Protection Officer:** dpo@taxmaster.ng
+**General Inquiries:** privacy@taxmaster.ng
+**Phone:** +234 (0) 800-TAXHELP
+**Address:** TaxMaster Ltd, Lagos, Nigeria
+
+You also have the right to lodge a complaint with the **Nigeria Data Protection Commission (NDPC)** if you believe your data protection rights have been violated.
 
 ---
 
-**Last Updated:** February 26, 2026
+**Last Updated:** March 4, 2026
 
 Your privacy is our priority. Thank you for trusting TaxMaster with your tax and financial information.

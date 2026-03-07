@@ -37,6 +37,7 @@ class Business extends Model
         'incorporation_date',
         'has_staff',
         'staff_count',
+        'mono_customer_id',
     ];
 
     protected $casts = [
@@ -46,6 +47,9 @@ class Business extends Model
         'accounting_year_end' => 'date',
         'incorporation_date' => 'date',
         'has_staff' => 'boolean',
+        // NDPA 2023 — encrypt PII at rest
+        'tax_identification_number' => 'encrypted',
+        'registration_number' => 'encrypted',
     ];
 
     /**
@@ -162,6 +166,38 @@ class Business extends Model
     public function vatReturns(): HasMany
     {
         return $this->hasMany(VATReturn::class);
+    }
+
+    /**
+     * Get PAYE returns
+     */
+    public function payeReturns(): HasMany
+    {
+        return $this->hasMany(PayeReturn::class);
+    }
+
+    /**
+     * Get WHT returns
+     */
+    public function whtReturns(): HasMany
+    {
+        return $this->hasMany(WhtReturn::class);
+    }
+
+    /**
+     * Get CIT returns
+     */
+    public function citReturns(): HasMany
+    {
+        return $this->hasMany(CitReturn::class);
+    }
+
+    /**
+     * Get government payments
+     */
+    public function governmentPayments(): HasMany
+    {
+        return $this->hasMany(GovernmentPayment::class);
     }
 
     /**

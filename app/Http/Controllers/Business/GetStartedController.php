@@ -7,7 +7,9 @@ use App\Models\Business;
 use App\Models\GetStartedProgress;
 use App\Models\BankAccount;
 use App\Models\CitReturn;
+use App\Models\PayeReturn;
 use App\Models\VatReturn;
+use App\Models\WhtReturn;
 use App\Models\BusinessStaff;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,7 +22,7 @@ class GetStartedController extends Controller
     public function index(Request $request)
     {
         $business = $request->user()->ownedBusiness;
-        
+
         if (!$business) {
             return redirect()->route('business.setup');
         }
@@ -34,12 +36,12 @@ class GetStartedController extends Controller
         ]);
 
         // Mark steps as completed based on actual usage
-        $this->updateCompletedSteps($business, $progress);
+        $progress->syncFromBusinessData($business);
 
         // Prepare step data
         $steps = $this->getStepsData($business, $progress);
 
-        // Calculate overall progress
+        // Refresh after sync
         $progress->refresh();
 
         return Inertia::render('Business/GetStarted/Index', [
@@ -102,7 +104,7 @@ class GetStartedController extends Controller
         ]);
 
         $snoozeMinutes = $request->input('snooze_minutes', 0);
-        
+
         if ($snoozeMinutes > 0) {
             $progress->snoozeUntil($snoozeMinutes);
         } else {
@@ -130,76 +132,6 @@ class GetStartedController extends Controller
     }
 
     /**
-     * Update completed steps based on actual business data
-     */
-    private function updateCompletedSteps(Business $business, GetStartedProgress $progress)
-    {
-        $completedSteps = $progress->completed_steps ?? [];
-
-        // Step 1: Complete business profile (if settings are filled)
-        if ($business->email && $business->phone && $business->address && $business->business_type) {
-            if (!in_array('complete_profile', $completedSteps)) {
-                $completedSteps[] = 'complete_profile';
-            }
-        }
-
-        // Step 2: Link bank account (if has active bank accounts)
-        if (BankAccount::where('business_id', $business->id)->where('is_active', true)->exists()) {
-            if (!in_array('link_bank', $completedSteps)) {
-                $completedSteps[] = 'link_bank';
-            }
-        }
-
-        // Step 3: Choose subscription plan (if not on free plan)
-        $subscription = $business->activeSubscription();
-        if ($subscription && $subscription->plan && $subscription->plan->name !== 'Free') {
-            if (!in_array('choose_plan', $completedSteps)) {
-                $completedSteps[] = 'choose_plan';
-            }
-        }
-
-        // Step 4: Set up staff (if has staff)
-        if (BusinessStaff::where('business_id', $business->id)->count() > 0) {
-            if (!in_array('add_staff', $completedSteps)) {
-                $completedSteps[] = 'add_staff';
-            }
-        }
-
-        // Step 5: File first PAYE/WHT return
-        if (in_array('file_first_return', $completedSteps) === false) {
-            // User may have manually marked, don't include in auto-detection
-        }
-
-        // Step 6: Link Mono bank API (if has synced transactions)
-        if (BankAccount::where('business_id', $business->id)->where('last_synced_at', '!=', null)->exists()) {
-            if (!in_array('sync_transactions', $completedSteps)) {
-                $completedSteps[] = 'sync_transactions';
-            }
-        }
-
-        // Step 7: Check subscription limits (if has multiple staff/returns)
-        if (BusinessStaff::where('business_id', $business->id)->count() >= 3 ||
-            CitReturn::where('business_id', $business->id)->count() >= 2) {
-            if (!in_array('check_limits', $completedSteps)) {
-                $completedSteps[] = 'check_limits';
-            }
-        }
-
-        // Update if changed
-        if ($completedSteps !== $progress->completed_steps) {
-            $progress->completed_steps = $completedSteps;
-            $totalSteps = 7;
-            $progress->completion_percentage = (int) ((count($completedSteps) / $totalSteps) * 100);
-            
-            if (count($completedSteps) === $totalSteps && !$progress->completed_at) {
-                $progress->completed_at = now();
-            }
-            
-            $progress->save();
-        }
-    }
-
-    /**
      * Get structured step data for frontend
      */
     private function getStepsData(Business $business, GetStartedProgress $progress): array
@@ -207,7 +139,9 @@ class GetStartedController extends Controller
         $bankAccountCount = BankAccount::where('business_id', $business->id)->count();
         $staffCount = BusinessStaff::where('business_id', $business->id)->count();
         $planName = $business->activeSubscription()?->plan?->name ?? 'Free';
-        $hasReturns = CitReturn::where('business_id', $business->id)->exists() || 
+        $hasReturns = PayeReturn::where('business_id', $business->id)->exists() ||
+                     WhtReturn::where('business_id', $business->id)->exists() ||
+                     CitReturn::where('business_id', $business->id)->exists() ||
                      VatReturn::where('business_id', $business->id)->exists();
 
         return [
@@ -315,7 +249,9 @@ class GetStartedController extends Controller
                 'estimated_time' => '10 min',
                 'priority' => 'high',
                 'progress_indicators' => [
-                    'Returns filed: ' . (CitReturn::where('business_id', $business->id)->count() + 
+                    'Returns filed: ' . (PayeReturn::where('business_id', $business->id)->count() +
+                                         WhtReturn::where('business_id', $business->id)->count() +
+                                         CitReturn::where('business_id', $business->id)->count() +
                                          VatReturn::where('business_id', $business->id)->count()),
                 ],
             ],
@@ -360,7 +296,7 @@ class GetStartedController extends Controller
                 'estimated_time' => '5 min',
                 'priority' => 'low',
                 'progress_indicators' => [
-                    'Staff: ' . $staffCount . ' of ' . ($business->activeSubscription()?->plan?->staff_limit ?? 1),
+                    'Staff: ' . $staffCount . ' of ' . ($business->activeSubscription()?->plan?->max_staff_members ?? 1),
                 ],
             ],
         ];

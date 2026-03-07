@@ -161,6 +161,12 @@ class TransactionController extends Controller
             $request->sub_category
         );
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => 'Transaction category updated successfully.',
+            ]);
+        }
+
         return back()->with('success', 'Transaction category updated successfully.');
     }
 

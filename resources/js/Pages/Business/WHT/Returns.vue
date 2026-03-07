@@ -41,7 +41,7 @@
                         <div class="flex items-start justify-between mb-4">
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900">
-                                    {{ whtReturn.period_label }}
+                                    {{ whtReturn?.period_label || 'Unknown Period' }}
                                 </h3>
                                 <p class="text-sm text-gray-600 mt-1">
                                     {{ whtReturn.transaction_count }} transactions
@@ -58,7 +58,7 @@
                         <div class="grid md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded">
                             <div>
                                 <p class="text-xs text-gray-600 uppercase tracking-wide">Period</p>
-                                <p class="text-sm font-bold text-gray-900">{{ whtReturn.period }}</p>
+                                <p class="text-sm font-bold text-gray-900">{{ whtReturn.period || 'N/A' }}</p>
                             </div>
                             <div>
                                 <p class="text-xs text-gray-600 uppercase tracking-wide">Total WHT</p>
@@ -67,7 +67,7 @@
                             <div>
                                 <p class="text-xs text-gray-600 uppercase tracking-wide">Filed Date</p>
                                 <p class="text-sm font-medium text-gray-900">
-                                    {{ whtReturn.filed_date || 'Not filed' }}
+                                    {{ whtReturn.filed_date_formatted || 'Not filed' }}
                                 </p>
                             </div>
                             <div>
@@ -87,7 +87,7 @@
                                 <div>
                                     <p class="text-xs text-blue-600 uppercase tracking-wide">Payment</p>
                                     <p class="text-sm font-bold text-blue-900">
-                                        RRR: {{ payment.remita_rrr }}
+                                        RRR: {{ payment.remita_rrr || 'Pending' }}
                                     </p>
                                 </div>
                                 <span
@@ -120,10 +120,11 @@
                             Showing {{ returns.from }} to {{ returns.to }} of {{ returns.total }} returns
                         </div>
                         <div class="flex gap-2">
-                            <Link
+                            <component
                                 v-for="link in returns.links"
                                 :key="link.label"
-                                :href="link.url"
+                                :is="link.url ? Link : 'span'"
+                                :href="link.url || undefined"
                                 :class="link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
                                 class="px-4 py-2 rounded border text-sm font-medium"
                                 v-html="link.label"
@@ -179,7 +180,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
 
 const props = defineProps({
-    returns: Object,
+    returns: { type: Object, default: () => ({ data: [], links: [], from: 0, to: 0, total: 0 }) },
 });
 
 const showGenerateModal = ref(false);

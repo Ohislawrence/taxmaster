@@ -7,42 +7,43 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionCategorizationService
 {
-    protected $aiAgentService;
-
-    public function __construct(AiAgentService $aiAgentService)
-    {
-        $this->aiAgentService = $aiAgentService;
-    }
-
     /**
      * Categorize a single transaction using AI
      */
     public function categorize(Transaction $transaction): array
     {
-        $prompt = $this->buildCategorizationPrompt($transaction);
-
+        // Try AI categorization if configured
         try {
-            $response = $this->aiAgentService->chat($prompt);
-            $category = $this->parseCategorizationResponse($response);
+            $business = $transaction->business;
 
-            $transaction->update([
-                'category' => $category['category'],
-                'sub_category' => $category['sub_category'] ?? null,
-                'confidence' => $category['confidence'] ?? 0.8,
-                'vat_applicable' => $category['vat_applicable'] ?? false,
-                'is_business_expense' => $category['is_business_expense'] ?? true,
-            ]);
+            if ($business && config('services.deepseek.api_key')) {
+                $aiService = new AiAgentService($business);
+                $prompt = $this->buildCategorizationPrompt($transaction);
+                $response = $aiService->callAiForCategorization($prompt);
 
-            return $category;
+                if ($response) {
+                    $category = $this->parseCategorizationResponse($response);
+
+                    $transaction->update([
+                        'category' => $category['category'],
+                        'sub_category' => $category['sub_category'] ?? null,
+                        'confidence' => $category['confidence'] ?? 0.8,
+                        'vat_applicable' => $category['vat_applicable'] ?? false,
+                        'is_business_expense' => $category['is_business_expense'] ?? true,
+                    ]);
+
+                    return $category;
+                }
+            }
         } catch (\Exception $e) {
-            Log::error('Transaction categorization failed', [
+            Log::warning('AI categorization unavailable, using rule-based', [
                 'transaction_id' => $transaction->id,
                 'error' => $e->getMessage(),
             ]);
-
-            // Fallback to rule-based categorization
-            return $this->ruleBasedCategorization($transaction);
         }
+
+        // Fallback to rule-based categorization
+        return $this->ruleBasedCategorization($transaction);
     }
 
     /**
@@ -50,15 +51,18 @@ class TransactionCategorizationService
      */
     protected function buildCategorizationPrompt(Transaction $transaction): string
     {
+        $date = $transaction->transaction_date?->format('Y-m-d') ?? 'Unknown';
+        $amount = number_format($transaction->amount, 2);
+
         return <<<PROMPT
 You are a Nigerian tax expert. Categorize this transaction for tax purposes.
 
 Transaction Details:
 - Type: {$transaction->type}
-- Amount: ₦{number_format($transaction->amount, 2)}
+- Amount: ₦{$amount}
 - Description: {$transaction->description}
 - Counterparty: {$transaction->counterparty}
-- Date: {$transaction->transaction_date->format('Y-m-d')}
+- Date: {$date}
 
 Categories available:
 REVENUE:

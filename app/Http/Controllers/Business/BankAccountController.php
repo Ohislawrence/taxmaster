@@ -33,9 +33,22 @@ class BankAccountController extends Controller
 
         // Check subscription feature
         if (!$this->subscriptionService->canPerformAction($business, 'link_bank_account')) {
-            return redirect()->route('business.dashboard')
-                ->with('error', 'Your current plan does not include bank account linking. Please upgrade to Basic or higher.');
+            // Differentiate: plan doesn't support it at all vs. at limit
+            $usageStats = $this->subscriptionService->getUsageStats($business);
+            $limit = $usageStats['bank_accounts_limit'] ?? 0;
+
+            if ($limit === 0) {
+                return redirect()->route('business.dashboard')
+                    ->with('error', 'Your current plan does not include bank account linking. Please upgrade to Basic or higher.');
+            }
+
+            // At limit — still show the page but frontend will disable the connect button
         }
+
+        $usageStats = $this->subscriptionService->getUsageStats($business);
+        $bankAccountsCount = $usageStats['bank_accounts_count'] ?? 0;
+        $bankAccountsLimit = $usageStats['bank_accounts_limit'] ?? 0;
+        $canLinkMore = $bankAccountsCount < $bankAccountsLimit;
 
         $accounts = BankAccount::where('business_id', $business->id)
             ->with('transactions')
@@ -62,6 +75,12 @@ class BankAccountController extends Controller
         return Inertia::render('Business/BankAccounts/Index', [
             'accounts' => $accounts,
             'monoPublicKey' => config('services.mono.public_key'),
+            'customerName' => $business->name ?? $user->name,
+            'customerEmail' => $business->email ?? $user->email,
+            'monoCustomerId' => $business->mono_customer_id,
+            'bankAccountsCount' => $bankAccountsCount,
+            'bankAccountsLimit' => $bankAccountsLimit,
+            'canLinkMore' => $canLinkMore,
         ]);
     }
 
@@ -72,6 +91,7 @@ class BankAccountController extends Controller
     {
         $request->validate([
             'code' => 'required|string',
+            'mono_customer_id' => 'nullable|string',
         ]);
 
         $user = $request->user();
@@ -86,29 +106,60 @@ class BankAccountController extends Controller
 
         // Check subscription feature
         if (!$this->subscriptionService->canPerformAction($business, 'link_bank_account')) {
+            $usageStats = $this->subscriptionService->getUsageStats($business);
+            $limit = $usageStats['bank_accounts_limit'] ?? 0;
+
+            if ($limit === 0) {
+                return response()->json([
+                    'error' => 'Your current plan does not include bank account linking. Please upgrade to Basic or higher.',
+                ], 403);
+            }
+
             return response()->json([
-                'error' => 'Your current plan does not include bank account linking. Please upgrade to Basic or higher.',
+                'error' => "You've reached your plan's limit of {$limit} bank account(s). Please upgrade to connect more.",
             ], 403);
         }
 
         try {
             // Exchange code for account ID
             $authData = $this->monoService->exchangeToken($request->code);
-            $accountId = $authData['id'];
+
+            \Log::info('Mono exchangeToken response', ['authData' => $authData]);
+
+            // Mono v2 may return { "id": "..." } or { "data": { "id": "..." } }
+            $accountId = $authData['id']
+                ?? $authData['data']['id']
+                ?? $authData['data']['account_id']
+                ?? $authData['account_id']
+                ?? null;
+
+            if (!$accountId) {
+                \Log::error('Mono auth response missing account ID', ['authData' => $authData]);
+                throw new \Exception('No account ID returned from Mono. Response: ' . json_encode($authData));
+            }
 
             // Get account details
             $details = $this->monoService->getAccountDetails($accountId);
-            $accountData = $details['account'];
+
+            \Log::info('Mono account details response', ['details' => $details]);
+
+            // Mono v2 nests as: { data: { account: { ... }, customer: { ... }, meta: { ... } } }
+            $accountData = $details['data']['account']
+                ?? $details['account']
+                ?? $details['data']
+                ?? $details;
+
+            \Log::info('Parsed account data', ['accountData' => $accountData]);
 
             // Create bank account record
             $bankAccount = BankAccount::create([
                 'business_id' => $business->id,
-                'bank_name' => $accountData['institution']['name'] ?? 'Unknown Bank',
-                'account_name' => $accountData['name'] ?? $accountData['accountName'] ?? 'N/A',
-                'account_number' => $accountData['accountNumber'] ?? $accountData['number'] ?? 'N/A',
+                'bank_name' => $accountData['institution']['name'] ?? $accountData['bankName'] ?? $accountData['bank_name'] ?? 'Unknown Bank',
+                'account_name' => $accountData['name'] ?? $accountData['accountName'] ?? $accountData['account_name'] ?? 'N/A',
+                'account_number' => $accountData['accountNumber'] ?? $accountData['account_number'] ?? $accountData['number'] ?? 'N/A',
                 'currency' => $accountData['currency'] ?? 'NGN',
                 'mono_account_id' => $accountId,
-                'balance' => $accountData['balance'] ?? 0,
+                'balance' => ($accountData['balance'] ?? 0) / 100, // Mono returns balance in kobo
                 'is_active' => true,
                 'auto_sync' => true,
                 'meta' => $accountData,
@@ -117,16 +168,25 @@ class BankAccountController extends Controller
             // Queue initial sync
             SyncBankAccount::dispatch($bankAccount);
 
-            return redirect()->route('business.banks.index')
-                ->with('success', 'Bank account connected successfully! Transactions are being synced.');
+            // Save Mono customer ID if returned
+            if (!empty($request->input('mono_customer_id'))) {
+                $business->update(['mono_customer_id' => $request->input('mono_customer_id')]);
+            }
+
+            return response()->json([
+                'message' => 'Bank account connected successfully! Transactions are being synced.',
+                'account' => $bankAccount,
+            ]);
         } catch (\Exception $e) {
             \Log::error('Bank connection failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'business_id' => $business->id,
             ]);
 
-            return redirect()->route('business.banks.index')
-                ->with('error', 'Failed to connect bank account. Please try again.');
+            return response()->json([
+                'error' => 'Failed to connect bank account: ' . $e->getMessage(),
+            ], 500);
         }
     }
 

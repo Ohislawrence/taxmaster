@@ -12,7 +12,15 @@ class PayeReturnPolicy
      */
     public function view(User $user, PayeReturn $payeReturn): bool
     {
-        return $user->business_id === $payeReturn->business_id;
+        return $user->ownedBusiness?->id === $payeReturn->business_id;
+    }
+
+    /**
+     * Determine if the user can create a PAYE return
+     */
+    public function create(User $user): bool
+    {
+        return $user->ownedBusiness !== null;
     }
 
     /**
@@ -20,7 +28,7 @@ class PayeReturnPolicy
      */
     public function update(User $user, PayeReturn $payeReturn): bool
     {
-        return $user->business_id === $payeReturn->business_id;
+        return $user->ownedBusiness?->id === $payeReturn->business_id;
     }
 
     /**
@@ -28,7 +36,7 @@ class PayeReturnPolicy
      */
     public function delete(User $user, PayeReturn $payeReturn): bool
     {
-        return $user->business_id === $payeReturn->business_id
+        return $user->ownedBusiness?->id === $payeReturn->business_id
             && $payeReturn->status === 'draft';
     }
 }

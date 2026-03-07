@@ -18,6 +18,7 @@ class SubscriptionPlan extends Model
         'annual_price',
         'max_staff_members',
         'max_returns_per_year',
+        'max_bank_accounts',
         'storage_gb',
         'ai_analysis_included',
         'payment_automation',

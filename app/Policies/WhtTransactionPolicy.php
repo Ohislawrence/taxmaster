@@ -12,7 +12,15 @@ class WhtTransactionPolicy
      */
     public function view(User $user, WhtTransaction $whtTransaction): bool
     {
-        return $user->business_id === $whtTransaction->business_id;
+        return $user->ownedBusiness?->id === $whtTransaction->business_id;
+    }
+
+    /**
+     * Determine if the user can create a WHT transaction
+     */
+    public function create(User $user): bool
+    {
+        return $user->ownedBusiness !== null;
     }
 
     /**
@@ -20,7 +28,7 @@ class WhtTransactionPolicy
      */
     public function update(User $user, WhtTransaction $whtTransaction): bool
     {
-        return $user->business_id === $whtTransaction->business_id;
+        return $user->ownedBusiness?->id === $whtTransaction->business_id;
     }
 
     /**
@@ -28,6 +36,6 @@ class WhtTransactionPolicy
      */
     public function delete(User $user, WhtTransaction $whtTransaction): bool
     {
-        return $user->business_id === $whtTransaction->business_id;
+        return $user->ownedBusiness?->id === $whtTransaction->business_id;
     }
 }
