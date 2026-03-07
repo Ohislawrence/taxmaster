@@ -119,16 +119,25 @@
 
                 <!-- Pagination -->
                 <div v-if="invoices.links" class="flex justify-center gap-2 mt-6">
-                    <Link
-                        v-for="link in invoices.links"
-                        :key="link.label"
-                        :href="link.url"
-                        :class="[
-                            'px-4 py-2 rounded border',
-                            link.active ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 hover:bg-gray-50'
-                        ]"
-                        v-html="link.label"
-                    />
+                    <template v-for="link in invoices.links" :key="link.label">
+                        <Link
+                            v-if="link.url"
+                            :href="link.url"
+                            :class="[
+                                'px-4 py-2 rounded border',
+                                link.active ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 hover:bg-gray-50'
+                            ]"
+                            v-html="link.label"
+                        />
+                        <span
+                            v-else
+                            :class="[
+                                'px-4 py-2 rounded border cursor-not-allowed',
+                                link.active ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-400'
+                            ]"
+                            v-html="link.label"
+                        />
+                    </template>
                 </div>
             </div>
         </div>

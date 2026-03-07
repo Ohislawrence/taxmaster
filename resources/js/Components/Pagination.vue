@@ -1,25 +1,40 @@
 <template>
   <nav class="flex items-center gap-1">
     <template v-for="link in links" :key="`${link.label}-${link.url}`">
+
       <!-- Previous Button -->
-      <Link
-        v-if="link.label === '&laquo; Previous'"
-        :href="link.url"
-        :disabled="!link.url"
-        class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-      >
-        <i class="fas fa-chevron-left"></i>
-      </Link>
+      <template v-if="link.label === '&laquo; Previous'">
+        <Link
+          v-if="link.url"
+          :href="link.url"
+          class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+        >
+          <i class="fas fa-chevron-left"></i>
+        </Link>
+        <span
+          v-else
+          class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-400 cursor-not-allowed"
+        >
+          <i class="fas fa-chevron-left"></i>
+        </span>
+      </template>
 
       <!-- Next Button -->
-      <Link
-        v-else-if="link.label === 'Next &raquo;'"
-        :href="link.url"
-        :disabled="!link.url"
-        class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-      >
-        <i class="fas fa-chevron-right"></i>
-      </Link>
+      <template v-else-if="link.label === 'Next &raquo;'">
+        <Link
+          v-if="link.url"
+          :href="link.url"
+          class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+        >
+          <i class="fas fa-chevron-right"></i>
+        </Link>
+        <span
+          v-else
+          class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-400 cursor-not-allowed"
+        >
+          <i class="fas fa-chevron-right"></i>
+        </span>
+      </template>
 
       <!-- Page Numbers -->
       <template v-else>

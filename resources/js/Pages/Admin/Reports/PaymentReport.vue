@@ -103,9 +103,14 @@
 
                 <!-- Pagination -->
                 <div v-if="payments.links.length > 3" class="bg-white px-6 py-4 border-t border-gray-200 flex justify-center space-x-2">
-                    <Link v-for="link in payments.links" :key="link.url || link.label" :href="link.url || '#'" :class="link.active ? 'bg-blue-600 text-white' : 'text-gray-600'" class="px-3 py-1 rounded text-sm">
-                        {{ link.label }}
-                    </Link>
+                    <template v-for="link in payments.links" :key="link.url || link.label">
+                        <Link v-if="link.url" :href="link.url" :class="link.active ? 'bg-blue-600 text-white' : 'text-gray-600'" class="px-3 py-1 rounded text-sm">
+                            {{ link.label }}
+                        </Link>
+                        <span v-else :class="link.active ? 'bg-blue-600 text-white' : 'text-gray-400'" class="px-3 py-1 rounded text-sm cursor-not-allowed">
+                            {{ link.label }}
+                        </span>
+                    </template>
                 </div>
             </div>
         </div>

@@ -51,6 +51,7 @@
                 </div>
             </div>
 
+            </div>
             <!-- Line Items -->
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="border-b border-gray-200 p-6">
@@ -141,11 +142,7 @@
                                     </div>
                                 </div>
                             </div>
-                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 inline-block"
-                        target="_blank"
-                    >
-                        Download Signed E-Invoice (JAdES JSON)
-                    </a>
+</div>
                 </div>
             </div>
 
