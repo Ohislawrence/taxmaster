@@ -13,13 +13,19 @@ use App\Http\Controllers\PublicApi\PublicAiController;
 use App\Http\Controllers\PublicApi\VisitorChatController;
 
 // Blog public routes
-Route::get('/blog', fn () => Inertia::render('Blog/Index'))->name('blog.index');
-Route::get('/blog/{slug}', fn ($slug) => Inertia::render('Blog/Show', ['slug' => $slug]))->name('blog.show');
+Route::get('/blog', fn () => Inertia::render('Blog/Index', [
+    'title' => 'Blog',
+]))->name('blog.index');
+Route::get('/blog/{slug}', fn ($slug) => Inertia::render('Blog/Show', [
+    'slug' => $slug,
+    'title' => $slug,
+]))->name('blog.show');
 
 Route::get('/', function () {
     return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
+        'title' => 'Simplifying tax compliance for Nigerian businesses',
     ]);
 })->name('home');
 
@@ -28,22 +34,24 @@ Route::get('/pricing', function () {
     $plans = SubscriptionPlan::active()->get();
     return Inertia::render('Public/Pricing', [
         'plans' => $plans,
+        'title' => 'Pricing',
     ]);
 })->name('pricing');
-Route::get('/about', fn () => Inertia::render('Public/About'))->name('about');
-Route::get('/contact', fn () => Inertia::render('Public/Contact'))->name('contact');
+Route::get('/about', fn () => Inertia::render('Public/About', ['title' => 'About']))->name('about');
+Route::get('/contact', fn () => Inertia::render('Public/Contact', ['title' => 'Contact']))->name('contact');
 
 // Legal & compliance pages
-Route::get('/privacy', fn () => Inertia::render('Public/Privacy'))->name('privacy');
-Route::get('/terms', fn () => Inertia::render('Public/Terms'))->name('terms');
-Route::get('/data-protection', fn () => Inertia::render('Public/DataProtection'))->name('data-protection');
+Route::get('/privacy', fn () => Inertia::render('Public/Privacy', ['title' => 'Privacy']))->name('privacy');
+Route::get('/terms', fn () => Inertia::render('Public/Terms', ['title' => 'Terms']))->name('terms');
+Route::get('/data-protection', fn () => Inertia::render('Public/DataProtection', ['title' => 'Data Protection']))->name('data-protection');
 Route::get('/cookie-policy', function () {
     // If the CookiePolicy.vue page exists, render it; otherwise, show a placeholder
     if (file_exists(resource_path('js/Pages/Public/CookiePolicy.vue'))) {
-        return Inertia::render('Public/CookiePolicy');
+        return Inertia::render('Public/CookiePolicy', ['title' => 'Cookie Policy']);
     } else {
         return Inertia::render('Public/Privacy', [
-            'notice' => 'Cookie Policy coming soon.'
+            'notice' => 'Cookie Policy coming soon.',
+            'title' => 'Cookie Policy (Coming Soon)'
         ]);
     }
 })->name('cookie-policy');
