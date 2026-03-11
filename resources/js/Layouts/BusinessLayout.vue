@@ -64,7 +64,9 @@
 
                     <!-- Logo/Title -->
                     <div class="flex items-center space-x-2 md:space-x-4">
-                        <Link href="/business/dashboard" class="text-xl md:text-2xl font-bold text-blue-600">TaxMaster</Link>
+                        <Link href="/business/dashboard" class="flex items-center">
+                            <img src="/taxmaster-one.png" alt="TaxMaster" class="h-8 w-auto" />
+                        </Link>
                         <span class="hidden sm:inline text-gray-400">|</span>
                         <span class="hidden sm:inline text-gray-600 font-medium">Business Portal</span>
                     </div>

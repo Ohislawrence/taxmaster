@@ -109,23 +109,7 @@ const footerColumns = [
                     <div class="flex items-center">
                         <Link href="/" class="flex items-center gap-2.5 group">
                             <!-- Mono-style geometric mark -->
-                            <div
-                                class="relative flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300"
-                                :class="scrolled ? 'bg-slate-900' : 'bg-slate-900'"
-                            >
-                                <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                    <path d="M9 7v10"/>
-                                    <path d="M15 7v10"/>
-                                    <path d="M7 12h10"/>
-                                </svg>
-                            </div>
-                            <span
-                                class="text-lg font-semibold tracking-tight transition-colors"
-                                :class="scrolled ? 'text-slate-900' : 'text-slate-900'"
-                            >
-                                TaxMaster
-                            </span>
+                            <img src="/taxmaster-one.png" alt="TaxMaster" class="h-8 w-auto" />
                         </Link>
                     </div>
 
@@ -235,17 +219,7 @@ const footerColumns = [
                     <!-- Brand column - Wider -->
                     <div class="lg:col-span-2">
                         <Link href="/" class="inline-flex items-center gap-2.5">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900">
-                                <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                    <path d="M9 7v10"/>
-                                    <path d="M15 7v10"/>
-                                    <path d="M7 12h10"/>
-                                </svg>
-                            </div>
-                            <span class="text-lg font-semibold text-slate-900">
-                                TaxMaster
-                            </span>
+                            <img src="/taxmaster-one.png" alt="TaxMaster" class="h-8 w-auto" />
                         </Link>
                         <p class="mt-4 max-w-sm text-sm leading-relaxed text-slate-600">
                             Modern tax infrastructure for Nigerian businesses. Automate compliance, eliminate penalties, and focus on growth.
