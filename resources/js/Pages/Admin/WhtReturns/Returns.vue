@@ -139,17 +139,25 @@
                 <!-- Pagination -->
                 <div class="mt-6 flex justify-center">
                     <nav v-if="returns.links" class="flex gap-2">
-                        <Link
-                            v-for="link in returns.links"
-                            :key="link.label"
-                            :href="link.url"
-                            v-html="link.label"
-                            :class="{
-                                'bg-blue-600 text-white': link.active,
-                                'bg-white text-gray-700 border': !link.active,
-                            }"
-                            class="px-3 py-2 rounded-lg text-sm font-medium"
-                        />
+                        <template v-for="link in returns.links">
+                            <Link
+                                v-if="link.url"
+                                :key="link.url"
+                                :href="link.url"
+                                v-html="link.label"
+                                :class="{
+                                    'bg-blue-600 text-white': link.active,
+                                    'bg-white text-gray-700 border': !link.active,
+                                }"
+                                class="px-3 py-2 rounded-lg text-sm font-medium"
+                            />
+                            <span
+                                v-else
+                                :key="link.label"
+                                class="px-3 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-400 cursor-not-allowed"
+                                v-html="link.label"
+                            />
+                        </template>
                     </nav>
                 </div>
             </div>

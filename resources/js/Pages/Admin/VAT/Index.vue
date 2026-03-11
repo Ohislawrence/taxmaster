@@ -169,14 +169,22 @@
 
             <!-- Pagination -->
             <div v-if="returns.links && returns.links.length > 3" class="flex justify-center space-x-2">
-                <Link
-                    v-for="link in returns.links"
-                    :key="link.url"
-                    :href="link.url"
-                    :class="link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-900 border border-gray-300 hover:bg-gray-50'"
-                    class="px-4 py-2 rounded-lg transition"
-                    v-html="link.label"
-                />
+                <template v-for="link in returns.links">
+                    <Link
+                        v-if="link.url"
+                        :key="link.url"
+                        :href="link.url"
+                        :class="link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-900 border border-gray-300 hover:bg-gray-50'"
+                        class="px-4 py-2 rounded-lg transition"
+                        v-html="link.label"
+                    />
+                    <span
+                        v-else
+                        :key="link.label"
+                        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-400 cursor-not-allowed"
+                        v-html="link.label"
+                    />
+                </template>
             </div>
         </div>
     </AdminLayout>

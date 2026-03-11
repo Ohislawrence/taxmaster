@@ -99,12 +99,18 @@ Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name(
     // VAT Returns (across all businesses)
     Route::get('vat-returns', [VatController::class, 'index'])->name('vat-returns.index');
     Route::get('vat-returns/export', [VatController::class, 'export'])->name('vat-returns.export');
+    // VAT Form 002 export (CSV or XML)
+    Route::get('vat-returns/export/form002', [VatController::class, 'exportForm002'])->name('vat-returns.export.form002');
+    Route::get('vat-returns/{return}/export/form002', [VatController::class, 'exportForm002ForReturn'])->name('vat-returns.export.form002.single');
     Route::get('vat-returns/reports/revenue', [VatController::class, 'revenueReport'])->name('vat-returns.revenue-report');
     Route::get('vat-returns/{return}', [VatController::class, 'show'])->name('vat-returns.show');
 
     // PAYE Returns (across all businesses)
     Route::get('paye-returns', [PayeReturnController::class, 'index'])->name('paye-returns.index');
     Route::get('paye-returns/export', [PayeReturnController::class, 'export'])->name('paye-returns.export');
+    // PAYE schedules export (per return)
+    Route::get('paye-returns/{payeReturn}/export-schedules', [PayeReturnController::class, 'exportSchedules'])->name('paye-returns.export.schedules');
+    Route::get('paye-returns/export/schedules', [PayeReturnController::class, 'exportSchedulesBulk'])->name('paye-returns.export.schedules.bulk');
     Route::get('paye-returns/reports/revenue', [PayeReturnController::class, 'revenueReport'])->name('paye-returns.revenue-report');
     Route::get('paye-returns/{payeReturn}', [PayeReturnController::class, 'show'])->name('paye-returns.show');
 

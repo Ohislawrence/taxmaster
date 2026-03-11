@@ -8,6 +8,8 @@ use App\Models\TaxReturn;
 use App\Services\AiAgentService;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class AiController extends Controller
@@ -85,7 +87,7 @@ class AiController extends Controller
      */
     public function insights()
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = Auth::user()->ownedBusiness;
 
         // Check subscription feature
         if (!$this->subscriptionService->canPerformAction($business, 'use_ai_analysis')) {
@@ -107,13 +109,9 @@ class AiController extends Controller
      */
     public function chat()
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = Auth::user()->ownedBusiness ?? null;
 
-        // Check subscription feature
-        if (!$this->subscriptionService->canPerformAction($business, 'use_ai_chat')) {
-            return redirect()->route('business.dashboard')
-                ->with('error', 'Your current plan does not include AI chat. Please upgrade to Professional or higher.');
-        }
+        // AI chat is now open to all users and does not require a business
 
         $aiStatus = $this->checkAiConfiguration();
 
@@ -130,14 +128,9 @@ class AiController extends Controller
      */
     public function sendMessage(Request $request)
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = Auth::user()->ownedBusiness;
 
-        // Check subscription feature
-        if (!$this->subscriptionService->canPerformAction($business, 'use_ai_chat')) {
-            return response()->json([
-                'error' => 'Your current plan does not include AI chat. Please upgrade to Professional or higher.',
-            ], 403);
-        }
+        // AI chat is now open to all users; no subscription check
 
         try {
             $validated = $request->validate([
@@ -175,15 +168,17 @@ class AiController extends Controller
                 ], 400);
             }
 
-            // Log interaction
-            AiAgentLog::create([
-                'business_id' => $business->id,
-                'action_type' => 'chat',
-                'ai_provider' => $aiConfig['provider'],
-                'prompt' => $validated['message'],
-                'response' => $response['message'],
-                'status' => 'completed',
-            ]);
+            // Log interaction only if business exists
+            if ($business) {
+                AiAgentLog::create([
+                    'business_id' => $business->id,
+                    'action_type' => 'chat',
+                    'ai_provider' => $aiConfig['provider'],
+                    'prompt' => $validated['message'],
+                    'response' => $response['message'],
+                    'status' => 'completed',
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
@@ -191,7 +186,7 @@ class AiController extends Controller
                 'context' => $validated['context'] ?? 'general',
             ]);
         } catch (\Exception $e) {
-            \Log::error('AI chat error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::error('AI chat error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
             return response()->json([
                 'error' => 'Failed to process your question: ' . $e->getMessage(),
@@ -204,7 +199,7 @@ class AiController extends Controller
      */
     public function analyzeTaxReturn(TaxReturn $taxReturn)
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = Auth::user()->ownedBusiness;
 
         // Verify ownership
         if ($taxReturn->business_id !== $business->id) {
@@ -226,7 +221,7 @@ class AiController extends Controller
 
             return response()->json($result);
         } catch (\Exception $e) {
-            \Log::error('Tax analysis error', ['error' => $e->getMessage()]);
+            Log::error('Tax analysis error', ['error' => $e->getMessage()]);
 
             return response()->json([
                 'error' => 'Failed to analyze tax return',
@@ -239,7 +234,7 @@ class AiController extends Controller
      */
     public function getTaxOptimizationRecommendations(TaxReturn $taxReturn)
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = Auth::user()->ownedBusiness;
 
         // Check subscription feature
         if (!$this->subscriptionService->canPerformAction($business, 'use_ai_optimization')) {
@@ -268,7 +263,7 @@ class AiController extends Controller
 
             return response()->json($result);
         } catch (\Exception $e) {
-            \Log::error('Optimization error', ['error' => $e->getMessage()]);
+            Log::error('Optimization error', ['error' => $e->getMessage()]);
 
             return response()->json([
                 'error' => 'Failed to get recommendations',
@@ -281,7 +276,7 @@ class AiController extends Controller
      */
     public function getHistory(Request $request)
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = Auth::user()->ownedBusiness;
 
         $logs = AiAgentLog::where('business_id', $business->id)
             ->when($request->action_type, function ($query) use ($request) {
@@ -425,7 +420,7 @@ PROMPT;
                 'error' => 'Invalid response from Deepseek',
             ];
         } catch (\Exception $e) {
-            \Log::error('Deepseek error', ['error' => $e->getMessage()]);
+            Log::error('Deepseek error', ['error' => $e->getMessage()]);
             return [
                 'success' => false,
                 'error' => 'Deepseek API error: ' . $e->getMessage(),
@@ -488,7 +483,7 @@ PROMPT;
                 'error' => 'Invalid response from Gemini',
             ];
         } catch (\Exception $e) {
-            \Log::error('Gemini error', ['error' => $e->getMessage()]);
+            Log::error('Gemini error', ['error' => $e->getMessage()]);
             return [
                 'success' => false,
                 'error' => 'Gemini API error: ' . $e->getMessage(),

@@ -171,10 +171,6 @@ onMounted(() => {
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
             <div class="mx-auto max-w-3xl text-center">
-                <div class="reveal reveal-up mb-5 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 text-sm font-medium text-gray-600">
-                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                    Transparent pricing
-                </div>
                 <h1 class="reveal reveal-up text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-[3.5rem] lg:leading-[1.1]">
                     Simple pricing,<br class="hidden sm:inline" /> powerful features
                 </h1>

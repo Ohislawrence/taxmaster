@@ -111,24 +111,18 @@ class GovernmentPaymentService
      */
     public function generateRRR(string $taxType, $return, Business $business): array
     {
-        // Prepare payment details based on tax type
-        $paymentDetails = $this->preparePaymentDetails($taxType, $return, $business);
+        // RRR generation is disabled for now. Return a clear failure so callers
+        // do not attempt to use Remita until credentials / integration are re-enabled.
+        Log::warning('RRR generation disabled: generateRRR called', [
+            'tax_type' => $taxType,
+            'return_id' => $return->id ?? null,
+            'business_id' => $business->id ?? null,
+        ]);
 
-        // Resolve state-aware service type ID
-        $stateCode = $return->tax_state ?? $business->state ?? null;
-        $beneficiaryType = $return->beneficiary_type ?? null;
-        $resolvedServiceTypeId = $this->resolveServiceTypeId($taxType, $stateCode, $beneficiaryType);
-
-        // For now, generate a mock RRR until Remita integration is fully set up
-        if (!$this->isConfigured()) {
-            Log::info('Remita not configured - generating mock RRR', [
-                'environment' => $this->environment,
-                'tax_type' => $taxType,
-                'state_code' => $stateCode,
-                'resolved_service_type_id' => $resolvedServiceTypeId,
-            ]);
-            return $this->generateMockRRR($paymentDetails);
-        }
+        return [
+            'success' => false,
+            'message' => 'RRR generation is currently disabled. Enable Remita integration to generate RRRs.',
+        ];
 
         try {
             $response = Http::withHeaders([

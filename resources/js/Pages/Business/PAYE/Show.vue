@@ -172,6 +172,18 @@
                     >
                         {{ generatingRRR ? 'Generating...' : 'Generate Payment RRR' }}
                     </button>
+                    <Link
+                        :href="route('business.paye.export.schedules', payeReturn.id) + '?format=csv'"
+                        class="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm"
+                    >
+                        Export CSV
+                    </Link>
+                    <Link
+                        :href="route('business.paye.export.schedules', payeReturn.id) + '?format=xml'"
+                        class="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm"
+                    >
+                        Export XML
+                    </Link>
                 </div>
             </div>
         </div>

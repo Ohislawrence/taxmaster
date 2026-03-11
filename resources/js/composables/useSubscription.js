@@ -55,7 +55,7 @@ export function useSubscription() {
 
         // AI features
         useAiAnalysis: computed(() => hasPlan('professional') && canUseFeature('use_ai_analysis')),
-        useAiChat: computed(() => hasPlan('professional') && canUseFeature('use_ai_chat')),
+        useAiChat: computed(() => true), // AI chat is now open to all users
         useAiOptimization: computed(() => hasPlan('professional') && canUseFeature('use_ai_optimization')),
 
         // Banking

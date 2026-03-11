@@ -345,6 +345,123 @@ class PayeController extends Controller
     }
 
     /**
+     * Export PAYE schedules for a single PAYE return (CSV or XML)
+     */
+    public function exportSchedules(Request $request, PayeReturn $payeReturn)
+    {
+        $this->authorize('view', $payeReturn);
+
+        $business = $this->resolveBusiness($request);
+
+        if ($payeReturn->business_id !== $business->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $payeReturn->load('schedules.staff');
+
+        $format = strtolower($request->get('format', 'csv'));
+
+        if ($format === 'csv') {
+            $csv = "Staff ID,Staff Name,TIN,Gross Pay,Allowances,Reliefs,Taxable Income,PAYE Due,Cumulative Gross,Cumulative Tax\n";
+
+            foreach ($payeReturn->schedules as $s) {
+                $staff = $s->staff;
+                $csv .= sprintf(
+                    '"%s","%s","%s",%s,%s,%s,%s,%s,%s,%s\n',
+                    $staff->id ?? 'N/A',
+                    ($staff->full_name ?? 'N/A'),
+                    ($staff->tax_identification_number ?? 'N/A'),
+                    $s->gross_pay,
+                    number_format($s->getTotalAllowancesAttribute() ?? 0, 2, '.', ''),
+                    number_format($s->getTotalReliefsAttribute() ?? 0, 2, '.', ''),
+                    $s->taxable_income,
+                    $s->paye_due,
+                    $s->cumulative_gross,
+                    $s->cumulative_tax
+                );
+            }
+
+            $filename = 'paye-schedules-' . $payeReturn->period . '-' . $business->id . '.csv';
+
+            return response($csv, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+        }
+
+        $xml = new \SimpleXMLElement('<PayeSchedules/>');
+        $xml->addChild('Period', $payeReturn->period);
+        $xml->addChild('Business', $business->name ?? '');
+        $schedulesNode = $xml->addChild('Schedules');
+
+        foreach ($payeReturn->schedules as $s) {
+            $item = $schedulesNode->addChild('Schedule');
+            $staff = $s->staff;
+            $item->addChild('StaffId', $staff->id ?? '');
+            $item->addChild('FullName', $staff->full_name ?? '');
+            $item->addChild('TIN', $staff->tax_identification_number ?? '');
+            $item->addChild('GrossPay', (string)$s->gross_pay);
+            $item->addChild('Allowances', (string)($s->getTotalAllowancesAttribute() ?? 0));
+            $item->addChild('Reliefs', (string)($s->getTotalReliefsAttribute() ?? 0));
+            $item->addChild('TaxableIncome', (string)$s->taxable_income);
+            $item->addChild('PayeDue', (string)$s->paye_due);
+            $item->addChild('CumulativeGross', (string)$s->cumulative_gross);
+            $item->addChild('CumulativeTax', (string)$s->cumulative_tax);
+        }
+
+        return response($xml->asXML(), 200, [
+            'Content-Type' => 'application/xml',
+            'Content-Disposition' => 'attachment; filename="paye-schedules-' . $payeReturn->period . '.xml"',
+        ]);
+    }
+
+    /**
+     * Export PAYE schedules across multiple returns for this business (bulk)
+     */
+    public function exportSchedulesBulk(Request $request)
+    {
+        $business = $this->resolveBusiness($request);
+
+        $query = PayeReturn::with(['schedules.staff'])
+            ->where('business_id', $business->id);
+
+        if ($request->filled('period')) {
+            $query->where('period', $request->period);
+        }
+
+        $returns = $query->get();
+
+        $format = strtolower($request->get('format', 'csv'));
+
+        if ($format === 'csv') {
+            $csv = "ReturnPeriod,Business,Staff ID,Staff Name,TIN,Gross Pay,PAYE Due\n";
+
+            foreach ($returns as $r) {
+                foreach ($r->schedules as $s) {
+                    $staff = $s->staff;
+                    $csv .= sprintf(
+                        '"%s","%s","%s","%s","%s",%s,%s\n',
+                        $r->period,
+                        $business->name ?? 'N/A',
+                        $staff->id ?? '',
+                        $staff->full_name ?? '',
+                        $staff->tax_identification_number ?? '',
+                        $s->gross_pay,
+                        $s->paye_due
+                    );
+                }
+            }
+
+            return response($csv, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="paye-schedules-bulk-' . date('Y-m-d') . '.csv"',
+            ]);
+        }
+
+        return response('Only CSV supported for bulk export at this time', 400);
+    }
+
+    /**
      * Generate annual PAYE return (Form H1)
      * Aggregates all monthly returns for a given tax year.
      */

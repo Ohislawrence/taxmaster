@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import SeoMeta from '@/Components/SeoMeta.vue';
-import TaxMasterChat from '@/Components/TaxMasterChat.vue';
+import VisitorChat from '@/Components/VisitorChat.vue';
 
 defineProps({
     title: { type: String, default: '' },
@@ -305,8 +305,9 @@ const footerColumns = [
         </footer>
     </div>
 
-    <!-- Floating AI Chat Widget (public) -->
-    <TaxMasterChat />
+
+    <!-- Floating Visitor AI Chat Widget (public/guest) -->
+    <VisitorChat />
 
     <!-- Cookie Consent Banner -->
     <CookieConsent />

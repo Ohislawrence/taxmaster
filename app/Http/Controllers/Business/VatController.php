@@ -398,6 +398,113 @@ class VatController extends Controller
     }
 
     /**
+     * Export VAT Form 002 (bulk) for this business in CSV or XML.
+     */
+    public function exportForm002(Request $request)
+    {
+        $business = $this->resolveBusiness($request);
+
+        $returns = VatReturn::where('business_id', $business->id)
+            ->when($request->period, fn($q, $p) => $q->where('period', $p))
+            ->when($request->year, fn($q, $y) => $q->whereRaw('YEAR(STR_TO_DATE(period, "%Y-%m")) = ?', [$y]))
+            ->orderBy('period', 'desc')
+            ->get();
+
+        $format = strtolower($request->get('format', 'csv'));
+
+        if ($format === 'csv') {
+            $csv = "Business Name,TIN,Period,Total Sales,Output VAT,Input VAT,Net VAT,Form002Ref\n";
+
+            foreach ($returns as $r) {
+                $csv .= sprintf(
+                    '"%s","%s","%s",%s,%s,%s,%s,"%s"\n',
+                    $business->name ?? 'N/A',
+                    $business->tax_identification_number ?? 'N/A',
+                    $r->period_label,
+                    $r->vat_sales ?? 0,
+                    $r->vat_on_sales ?? 0,
+                    $r->input_vat ?? 0,
+                    $r->vat_due ?? 0,
+                    $r->form_002_reference ?? ''
+                );
+            }
+
+            return response($csv, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="vat-form002-' . date('Y-m-d') . '.csv"',
+            ]);
+        }
+
+        $xml = new \SimpleXMLElement('<Form002s/>');
+
+        foreach ($returns as $r) {
+            $node = $xml->addChild('Form002');
+            $node->addChild('BusinessName', $business->name ?? '');
+            $node->addChild('TIN', $business->tax_identification_number ?? '');
+            $node->addChild('Period', $r->period);
+            $node->addChild('TotalSales', (string)($r->vat_sales ?? 0));
+            $node->addChild('OutputVAT', (string)($r->vat_on_sales ?? 0));
+            $node->addChild('InputVAT', (string)($r->input_vat ?? 0));
+            $node->addChild('NetVAT', (string)($r->vat_due ?? 0));
+            $node->addChild('Form002Reference', $r->form_002_reference ?? '');
+        }
+
+        return response($xml->asXML(), 200, [
+            'Content-Type' => 'application/xml',
+            'Content-Disposition' => 'attachment; filename="vat-form002-' . date('Y-m-d') . '.xml"',
+        ]);
+    }
+
+    /**
+     * Export VAT Form 002 for a single return (business)
+     */
+    public function exportForm002ForReturn(Request $request, VatReturn $vatReturn)
+    {
+        $business = $this->resolveBusiness($request);
+
+        if ($vatReturn->business_id !== $business->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $format = strtolower($request->get('format', 'csv'));
+
+        if ($format === 'csv') {
+            $csv = "Business Name,TIN,Period,Total Sales,Output VAT,Input VAT,Net VAT,Form002Ref\n";
+            $csv .= sprintf(
+                '"%s","%s","%s",%s,%s,%s,%s,"%s"\n',
+                $business->name ?? 'N/A',
+                $business->tax_identification_number ?? 'N/A',
+                $vatReturn->period_label,
+                $vatReturn->vat_sales ?? 0,
+                $vatReturn->vat_on_sales ?? 0,
+                $vatReturn->input_vat ?? 0,
+                $vatReturn->vat_due ?? 0,
+                $vatReturn->form_002_reference ?? ''
+            );
+
+            return response($csv, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="vat-form002-' . $vatReturn->period . '.csv"',
+            ]);
+        }
+
+        $xml = new \SimpleXMLElement('<Form002/>');
+        $xml->addChild('BusinessName', $business->name ?? '');
+        $xml->addChild('TIN', $business->tax_identification_number ?? '');
+        $xml->addChild('Period', $vatReturn->period);
+        $xml->addChild('TotalSales', (string)($vatReturn->vat_sales ?? 0));
+        $xml->addChild('OutputVAT', (string)($vatReturn->vat_on_sales ?? 0));
+        $xml->addChild('InputVAT', (string)($vatReturn->input_vat ?? 0));
+        $xml->addChild('NetVAT', (string)($vatReturn->vat_due ?? 0));
+        $xml->addChild('Form002Reference', $vatReturn->form_002_reference ?? '');
+
+        return response($xml->asXML(), 200, [
+            'Content-Type' => 'application/xml',
+            'Content-Disposition' => 'attachment; filename="vat-form002-' . $vatReturn->period . '.xml"',
+        ]);
+    }
+
+    /**
      * Resolve business from request
      */
     private function resolveBusiness(Request $request): Business

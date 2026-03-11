@@ -141,17 +141,25 @@
                 <!-- Pagination -->
                 <div class="mt-6 flex justify-center">
                     <nav v-if="transactions.links" class="flex gap-2">
-                        <Link
-                            v-for="link in transactions.links"
-                            :key="link.label"
-                            :href="link.url"
-                            v-html="link.label"
-                            :class="{
-                                'bg-blue-600 text-white': link.active,
-                                'bg-white text-gray-700 border': !link.active,
-                            }"
-                            class="px-3 py-2 rounded-lg text-sm font-medium"
-                        />
+                        <template v-for="(link, index) in transactions.links" :key="index">
+                            <div
+                                v-if="link.url === null"
+                                v-html="link.label"
+                                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-400 border border-gray-200 cursor-not-allowed"
+                            />
+
+                            <Link
+                                v-else
+                                :href="link.url"
+                                v-html="link.label"
+                                :class="{
+                                    'bg-blue-600 text-white': link.active,
+                                    'bg-white text-gray-700 border hover:bg-gray-50': !link.active,
+                                }"
+                                class="px-3 py-2 rounded-lg text-sm font-medium"
+                                preserve-scroll
+                            />
+                        </template>
                     </nav>
                 </div>
             </div>
@@ -160,8 +168,8 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
-import { reactive } from 'vue';
+import { Link, router, Head } from '@inertiajs/vue3'; // Added router and Head
+import { reactive, watch } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
 defineProps({

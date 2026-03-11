@@ -226,28 +226,7 @@
                             </svg>
                             <span>PAYE Dashboard</span>
                         </Link>
-                        <Link
-                            href="/admin/paye-statistics"
-                            :class="isActive('/admin/paye-statistics') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : 'text-gray-700 hover:bg-gray-50'"
-                            class="flex items-center space-x-3 px-4 py-3 rounded transition"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h4v4" />
-                            </svg>
-                            <span>PAYE Statistics</span>
-                        </Link>
-                        <Link
-                            href="/admin/paye-overdue"
-                            :class="isActive('/admin/paye-overdue') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : 'text-gray-700 hover:bg-gray-50'"
-                            class="flex items-center space-x-3 px-4 py-3 rounded transition"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3" />
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
-                            </svg>
-                            <span>PAYE Overdue</span>
-                        </Link>
+
                         <Link
                             href="/admin/wht-returns"
                             :class="isActive('/admin/wht-returns') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : 'text-gray-700 hover:bg-gray-50'"
@@ -382,6 +361,9 @@ const auth = computed(() => page.props.auth);
 const showUserMenu = ref(false);
 const flashMessage = ref(null);
 let flashTimeout = null;
+
+
+
 
 // Watch for flash data changes
 watchEffect(() => {

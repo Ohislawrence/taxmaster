@@ -33,6 +33,18 @@
             <i class="fas fa-arrow-left mr-2"></i>
             Back
           </Link>
+          <Link
+            :href="route('business.vat.export.form002') + '?format=csv'"
+            class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm"
+          >
+            Export Form 002 (CSV)
+          </Link>
+          <Link
+            :href="route('business.vat.export.form002') + '?format=xml'"
+            class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm"
+          >
+            Export Form 002 (XML)
+          </Link>
         </div>
       </div>
 

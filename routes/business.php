@@ -144,6 +144,9 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
             Route::put('/{vatReturn}/status', [VatController::class, 'updateStatus'])->name('update-status');
             Route::post('/{vatReturn}/generate-rrr', [VatController::class, 'generatePaymentRRR'])->name('generate-rrr');
             Route::get('/{vatReturn}/export-pdf', [VatController::class, 'exportPdf'])->name('export-pdf');
+            // VAT Form 002 exports (business)
+            Route::get('/export/form002', [VatController::class, 'exportForm002'])->name('export.form002');
+            Route::get('/{vatReturn}/export/form002', [VatController::class, 'exportForm002ForReturn'])->name('export.form002.single');
             Route::post('/calculate-preview', [VatController::class, 'calculatePreview'])->name('calculate-preview');
         });
 
@@ -171,6 +174,9 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
             Route::put('/{payeReturn}/status', [PayeController::class, 'updateStatus'])->name('update-status');
             Route::post('/{payeReturn}/generate-rrr', [PayeController::class, 'generatePaymentRRR'])->name('generate-rrr');
             Route::get('/{payeReturn}/export-pdf', [PayeController::class, 'exportPdf'])->name('export-pdf');
+            // PAYE schedules export (business)
+            Route::get('/{payeReturn}/export-schedules', [PayeController::class, 'exportSchedules'])->name('export.schedules');
+            Route::get('/export/schedules', [PayeController::class, 'exportSchedulesBulk'])->name('export.schedules.bulk');
             Route::post('/calculate-preview', [PayeController::class, 'calculatePreview'])->name('calculate-preview');
         });
 

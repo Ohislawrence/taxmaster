@@ -96,6 +96,10 @@ class WhtReturnController extends Controller
         }
 
         $returns = $query->paginate(15);
+        // Ensure 'links' and 'data' are always present for Vue pagination
+        if ($returns->isEmpty()) {
+            $returns->setCollection(collect([]));
+        }
 
         // Get stats
         $totalReturns = WhtReturn::count();
@@ -103,7 +107,7 @@ class WhtReturnController extends Controller
         $pendingReturns = WhtReturn::where('status', 'pending')->count();
 
         // Calculate total WHT from all businesses
-        $totalWhtAmount = WhtReturn::sum('total_wht_amount');
+        $totalWhtAmount = WhtReturn::sum('total_wht_deducted');
 
         // Get list of businesses for filter
         $businesses = Business::orderBy('name')->get(['id', 'name']);
@@ -143,7 +147,7 @@ class WhtReturnController extends Controller
         $stats = [
             'totalTransactions' => $whtReturn->schedules->sum('transaction_count'),
             'totalGrossAmount' => $whtReturn->schedules->sum('gross_amount'),
-            'totalWht' => $whtReturn->total_wht_amount,
+            'totalWht' => $whtReturn->total_wht_deducted,
         ];
 
         return Inertia::render('Admin/WhtReturns/ShowReturn', [
@@ -206,7 +210,7 @@ class WhtReturnController extends Controller
                 $return->status,
                 $return->schedules->count(),
                 $return->schedules->sum('gross_amount'),
-                $return->total_wht_amount,
+                $return->total_wht_deducted,
                 $return->filed_date ?? 'N/A',
             ]) . "\n";
         }
@@ -222,7 +226,7 @@ class WhtReturnController extends Controller
     public function revenueReport()
     {
         // Revenue by month
-        $monthlyRevenue = WhtReturn::selectRaw('YEAR(period) as year, MONTH(period) as month, SUM(total_wht_amount) as revenue')
+        $monthlyRevenue = WhtReturn::selectRaw('YEAR(period) as year, MONTH(period) as month, SUM(total_wht_deducted) as revenue')
             ->groupByRaw('YEAR(period), MONTH(period)')
             ->orderByRaw('YEAR(period) DESC, MONTH(period) DESC')
             ->limit(12)
@@ -230,7 +234,7 @@ class WhtReturnController extends Controller
 
         // Top businesses by WHT collection
         $topBusinesses = WhtReturn::with('business')
-            ->selectRaw('business_id, SUM(total_wht_amount) as total_wht')
+            ->selectRaw('business_id, SUM(total_wht_deducted) as total_wht')
             ->groupBy('business_id')
             ->orderByRaw('total_wht DESC')
             ->limit(10)
@@ -242,7 +246,7 @@ class WhtReturnController extends Controller
             ->orderByRaw('total_wht DESC')
             ->get();
 
-        $totalRevenue = WhtReturn::sum('total_wht_amount');
+        $totalRevenue = WhtReturn::sum('total_wht_deducted');
 
         return Inertia::render('Admin/Reports/WhtRevenue', [
             'monthlyRevenue' => $monthlyRevenue,

@@ -8,6 +8,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Http\Controllers\PublicApi\PublicAiController;
+
+use App\Http\Controllers\PublicApi\VisitorChatController;
+
 // Blog public routes
 Route::get('/blog', fn () => Inertia::render('Blog/Index'))->name('blog.index');
 Route::get('/blog/{slug}', fn ($slug) => Inertia::render('Blog/Show', ['slug' => $slug]))->name('blog.show');
@@ -44,8 +48,12 @@ Route::get('/cookie-policy', function () {
     }
 })->name('cookie-policy');
 
+// Public AI Visitor Chat endpoint
+Route::post('/visitor/ai/chat/send', [VisitorChatController::class, 'sendVisitorMessage']);
+
 // Mono webhook (no auth)
 Route::post('/webhooks/mono', [MonoWebhookController::class, 'handle'])->name('webhooks.mono');
+
 
 // Business Setup Routes (after email verification)
 Route::middleware([
