@@ -53,7 +53,9 @@
                 <div class="flex justify-between items-center h-16">
                     <!-- Logo/Title -->
                     <div class="flex items-center space-x-4">
-                        <Link href="/admin/dashboard" class="text-2xl font-bold text-blue-600">TaxMaster</Link>
+                        <Link href="/admin/dashboard" class="flex items-center">
+                            <img src="/taxmaster-one.png" alt="TaxMaster" class="h-8 w-auto" />
+                        </Link>
                         <span class="text-gray-400">|</span>
                         <span class="text-gray-600 font-medium">Admin Dashboard</span>
                     </div>
