@@ -95,11 +95,10 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
     Route::middleware('subscription.features:use_ai_analysis')->group(function () {
         Route::get('ai/insights', [AiController::class, 'insights'])->name('ai.insights');
     });
-    Route::middleware('subscription.features:use_ai_chat')->group(function () {
-        Route::get('ai/chat', [AiController::class, 'chat'])->name('ai.chat');
-        Route::post('ai/chat/send', [AiController::class, 'sendMessage'])->name('ai.chat.send');
-        Route::get('ai/history', [AiController::class, 'getHistory'])->name('ai.history');
-    });
+    // AI chat - open to all business users (no subscription restriction)
+    Route::get('ai/chat', [AiController::class, 'chat'])->name('ai.chat');
+    Route::post('ai/chat/send', [AiController::class, 'sendMessage'])->name('ai.chat.send');
+    Route::get('ai/history', [AiController::class, 'getHistory'])->name('ai.history');
     Route::middleware('subscription.features:use_ai_optimization')->group(function () {
         Route::post('ai/tax-returns/{taxReturn}/analyze', [AiController::class, 'analyzeTaxReturn'])->name('ai.tax-analyze');
         Route::post('ai/tax-returns/{taxReturn}/optimize', [AiController::class, 'getTaxOptimizationRecommendations'])->name('ai.tax-optimize');

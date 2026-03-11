@@ -40,9 +40,26 @@ Route::get('/pricing', function () {
 Route::get('/about', fn () => Inertia::render('Public/About', ['title' => 'About']))->name('about');
 Route::get('/contact', fn () => Inertia::render('Public/Contact', ['title' => 'Contact']))->name('contact');
 
-// Legal & compliance pages
-Route::get('/privacy', fn () => Inertia::render('Public/Privacy', ['title' => 'Privacy']))->name('privacy');
-Route::get('/terms', fn () => Inertia::render('Public/Terms', ['title' => 'Terms']))->name('terms');
+// Legal & compliance pages (serve markdown from resources/markdown)
+use Illuminate\Support\Facades\File as FileFacade;
+
+Route::get('/privacy', function () {
+    $path = resource_path('markdown/policy.md');
+    $content = FileFacade::exists($path) ? FileFacade::get($path) : null;
+    return Inertia::render('Public/MarkdownPage', [
+        'title' => 'Privacy Policy',
+        'markdown' => $content,
+    ]);
+})->name('privacy');
+
+Route::get('/terms', function () {
+    $path = resource_path('markdown/terms.md');
+    $content = FileFacade::exists($path) ? FileFacade::get($path) : null;
+    return Inertia::render('Public/MarkdownPage', [
+        'title' => 'Terms of Service',
+        'markdown' => $content,
+    ]);
+})->name('terms');
 Route::get('/data-protection', fn () => Inertia::render('Public/DataProtection', ['title' => 'Data Protection']))->name('data-protection');
 Route::get('/cookie-policy', function () {
     // If the CookiePolicy.vue page exists, render it; otherwise, show a placeholder

@@ -216,12 +216,14 @@ const sendMessage = async () => {
         else if (currentPath.includes('/cit') || currentPath.includes('/tax-returns')) context = 'tax_planning';
         else if (currentPath.includes('/wht') || currentPath.includes('/vat')) context = 'deductions';
 
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
         const response = await fetch('/visitor/ai/chat/send', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
+                ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {}),
             },
             body: JSON.stringify({
                 message: text,
