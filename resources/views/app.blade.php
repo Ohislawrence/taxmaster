@@ -25,7 +25,7 @@
         @endphp
 
         <meta name="description" content="{{ $seoDescription }}">
-        <meta property="og:site_name" content="{{ config('app.name', 'TaxMaster') }}">
+        <meta property="og:site_name" content="{{ config('app.name', 'TaxMaster NG') }}">
         <meta property="og:locale" content="en_NG">
         <meta property="og:title" content="{{ $seoTitle }}">
         <meta property="og:description" content="{{ $seoDescription }}">
