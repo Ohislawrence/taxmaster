@@ -19,8 +19,8 @@
         <!-- Default SEO (overridden by Inertia Head / per-page props) -->
         @php
             $seoTitle = ($page['props']['title'] ?? null) ? ($page['props']['title'] . ' - ' . config('app.name')) : ('Simplifying tax compliance for Nigerian businesses - ' . config('app.name'));
-            $seoDescription = $page['props']['description'] ?? 'Simplifying tax compliance for Nigerian businesses. Automate PAYE, VAT, WHT & CIT filings.';
-            $seoImage = isset($page['props']['ogImage']) ? url($page['props']['ogImage']) : url('/taxmaster-one.png');
+            $seoDescription = $page['props']['description'] ?? 'Automates tax computations and prepares ready-to-file returns for Nigerian businesses --from PAYE, VAT, WHT & CIT filings. Connect your bank, import staff data, and generate exportable filing and payment instructions so teams can file and reconcile faster.';
+            $seoImage = isset($page['props']['ogImage']) ? url($page['props']['ogImage']) : url('/company-Income-Tax.jpg');
             $seoUrl = url()->current();
         @endphp
 

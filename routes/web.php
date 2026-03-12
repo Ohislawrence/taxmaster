@@ -37,6 +37,12 @@ Route::get('/pricing', function () {
         'title' => 'Pricing',
     ]);
 })->name('pricing');
+// Features page
+Route::get('/features', function () {
+    return Inertia::render('Public/Features', [
+        'title' => 'Features',
+    ]);
+})->name('features');
 Route::get('/about', fn () => Inertia::render('Public/About', ['title' => 'About']))->name('about');
 Route::get('/contact', fn () => Inertia::render('Public/Contact', ['title' => 'Contact']))->name('contact');
 

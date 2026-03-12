@@ -31,7 +31,7 @@ onUnmounted(() => {
 
 const navLinks = [
     { label: 'Product', href: '/#product' },
-    { label: 'Features', href: '/#features' },
+    { label: 'Features', href: '/features' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'About', href: '/about' },
 ];
@@ -40,10 +40,10 @@ const footerColumns = [
     {
         title: 'Product',
         links: [
-            { label: 'PAYE Filing', href: '/#features' },
-            { label: 'VAT Returns', href: '/#features' },
-            { label: 'WHT Remittance', href: '/#features' },
-            { label: 'CIT Filing', href: '/#features' },
+            { label: 'PAYE Filing', href: '/features' },
+            { label: 'VAT Returns', href: '/features' },
+            { label: 'WHT Remittance', href: '/features' },
+            { label: 'CIT Filing', href: '/features' },
             { label: 'Pricing', href: '/pricing' },
         ],
     },

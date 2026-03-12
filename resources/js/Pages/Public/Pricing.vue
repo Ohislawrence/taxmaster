@@ -91,8 +91,8 @@ const comparisonFeatures = [
     ]},
     { category: 'Automation & AI', features: [
         { name: 'AI Tax Analysis', free: false, basic: true, professional: true, enterprise: true },
-        { name: 'Payment Automation', free: false, basic: false, professional: true, enterprise: true },
-        { name: 'Remita Integration', free: false, basic: false, professional: true, enterprise: true },
+        { name: 'Payment Automation (planned)', free: false, basic: false, professional: false, enterprise: false },
+        { name: 'Programmatic payment (RRR generation) — planned', free: false, basic: false, professional: false, enterprise: false },
         { name: 'Auto-categorisation', free: false, basic: true, professional: true, enterprise: true },
     ]},
     { category: 'Reporting', features: [
@@ -125,7 +125,11 @@ const faqs = [
     },
     {
         q: 'What payment methods do you accept?',
-        a: 'We accept payments via Paystack — including debit/credit cards (Visa, Mastercard, Verve) and bank transfers. All transactions are processed securely.',
+        a: 'We accept payments via Paystack — including debit/credit cards (Visa, Mastercard, Verve) and bank transfers for subscription billing. For government remittances, TaxMaster currently provides exportable payment instructions; programmatic remittance is planned and will be rolled out when available.',
+    },
+    {
+        q: 'Can TaxMaster submit government payments on our behalf?',
+        a: 'Not yet. Today we generate payment instructions and references you can use to complete remittance. Programmatic submission (RRR generation and automated payment) is on our roadmap and will be communicated when available.',
     },
     {
         q: 'Do you offer annual billing?',
