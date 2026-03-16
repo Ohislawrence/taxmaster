@@ -39,6 +39,11 @@ class SubscriptionService
         ?string $paymentMethod = null,
         ?string $transactionRef = null
     ): BusinessSubscription {
+        // Prevent creating subscriptions for businesses whose billing is managed externally
+        if (isset($business->billing_managed_by_platform) && $business->billing_managed_by_platform === false) {
+            throw new \RuntimeException('Billing for this business is managed externally and cannot be created on-platform.');
+        }
+
         // Cancel any existing subscriptions (active, pending_payment, and pending)
         $business->subscriptions()
             ->whereIn('status', ['active', 'pending_payment', 'pending'])
@@ -100,6 +105,55 @@ class SubscriptionService
             'payment_status' => 'completed',
             'started_at' => now(),
         ]);
+
+        // Create affiliate payout if there's an active referral for this business
+        try {
+            $referral = \App\Models\AffiliateReferral::where('business_id', $subscription->business_id)
+                ->where(function ($q) {
+                    $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+                })
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>=', now());
+                })
+                ->first();
+
+            if ($referral) {
+                $amount = $subscription->billing_cycle === 'annual' ? $subscription->annual_price : $subscription->monthly_price;
+
+                // Determine commission: prefer referral-specific percent, otherwise consult global rule
+                $commission = 0;
+
+                if ($referral->commission_percent) {
+                    $commission = round($amount * (floatval($referral->commission_percent) / 100), 2);
+                } else {
+                    $rule = \App\Models\AffiliateRule::where('key', 'global')->where('active', true)->first();
+                    if ($rule) {
+                        if ($rule->type === 'percentage') {
+                            $commission = round($amount * (floatval($rule->value) / 100), 2);
+                        } else {
+                            // fixed amount
+                            $commission = round(floatval($rule->value), 2);
+                        }
+                    }
+                }
+
+                // Only create a payout for this subscription if one doesn't already exist
+                $exists = \App\Models\AffiliatePayout::where('referral_id', $referral->id)
+                    ->where('business_subscription_id', $subscription->id)
+                    ->exists();
+
+                if (! $exists && $commission > 0) {
+                    \App\Models\AffiliatePayout::create([
+                        'referral_id' => $referral->id,
+                        'business_subscription_id' => $subscription->id,
+                        'amount' => $commission,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Keep subscription activation resilient; log error for later inspection
+            \Illuminate\Support\Facades\Log::error('Affiliate payout creation failed: ' . $e->getMessage());
+        }
 
         return $subscription;
     }

@@ -54,14 +54,60 @@
                     <!-- Owner Information -->
                     <div class="bg-white rounded-lg shadow p-6">
                         <h2 class="text-lg font-semibold text-gray-900 mb-4">Owner Information</h2>
-                        <div class="flex items-center space-x-4">
+                        <div v-if="!editingOwner" class="flex items-center space-x-4">
                             <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                                {{ business.owner.name.charAt(0).toUpperCase() }}
+                                {{ business.owner?.name ? business.owner.name.charAt(0).toUpperCase() : (business.createdByAccountant?.name ? business.createdByAccountant.name.charAt(0).toUpperCase() : '?') }}
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900">{{ business.owner.name }}</p>
-                                <p class="text-sm text-gray-600">{{ business.owner.email }}</p>
+                                <template v-if="business.owner && business.owner.name">
+                                    <p class="font-medium text-gray-900">{{ business.owner.name }}</p>
+                                    <p class="text-sm text-gray-600">{{ business.owner.email || '-' }}</p>
+                                </template>
+
+                                <template v-else-if="(business.createdByAccountant && business.createdByAccountant.name) || business.created_by_accountant?.name">
+                                    <p class="font-medium text-gray-900">{{ business.createdByAccountant?.name || business.created_by_accountant?.name }}</p>
+                                    <p class="text-sm text-gray-600">Created by accountant</p>
+                                </template>
+
+                                <template v-else>
+                                    <p class="font-medium text-gray-900">Unassigned</p>
+                                    <p class="text-sm text-gray-600">No owner assigned</p>
+                                </template>
                             </div>
+                            <div class="ml-auto">
+                                <button @click="editingOwner = true" class="text-sm text-blue-600">Edit Owner</button>
+                            </div>
+                        </div>
+
+                        <div v-else>
+                            <form :action="`/admin/businesses/${business.id}/assign-owner`" method="post" class="space-y-3">
+                                <input type="hidden" name="_token" :value="$page.props.csrf_token" />
+                                <div>
+                                    <label class="block text-sm font-medium">Role to assign</label>
+                                    <select name="assigned_role" v-model="assignedRole" class="w-full border rounded px-3 py-2">
+                                        <option value="business">Business (owner)</option>
+                                        <option value="accountant">Accountant (manager)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium">User</label>
+                                    <select name="assigned_user_id" class="w-full border rounded px-3 py-2">
+                                        <option value="">Select user</option>
+                                        <optgroup label="Business users">
+                                            <option v-for="u in owners" :key="'o-'+u.id" v-if="assignedRole === 'business'" :value="u.id">{{ u.name }}</option>
+                                        </optgroup>
+                                        <optgroup label="Accountants">
+                                            <option v-for="u in accountants" :key="'a-'+u.id" v-if="assignedRole === 'accountant'" :value="u.id">{{ u.name }}</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+                                    <button type="button" @click="cancelEdit" class="bg-gray-200 px-4 py-2 rounded">Cancel</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
 
@@ -165,6 +211,8 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 const props = defineProps({
     business: Object,
     recentActivity: Array,
+    owners: Array,
+    accountants: Array,
 });
 
 const memberDays = computed(() => {
@@ -206,5 +254,16 @@ const formatCurrency = (amount) => {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(amount);
+};
+
+import { ref } from 'vue';
+
+const editingOwner = ref(false);
+const assignedRole = ref('business');
+const owners = props.owners || [];
+const accountants = props.accountants || [];
+
+const cancelEdit = () => {
+    editingOwner.value = false;
 };
 </script>

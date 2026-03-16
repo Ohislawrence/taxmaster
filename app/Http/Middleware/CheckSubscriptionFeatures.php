@@ -24,7 +24,8 @@ class CheckSubscriptionFeatures
      */
     public function handle(Request $request, Closure $next, string $feature = ''): Response
     {
-        $business = auth()->user()?->ownedBusiness;
+        // Use the user's default business context (covers owners and accountants)
+        $business = auth()->user()?->defaultBusiness();
 
         if (!$business) {
             return response()->json(['error' => 'No business selected'], 403);

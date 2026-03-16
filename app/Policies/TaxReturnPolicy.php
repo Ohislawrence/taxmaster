@@ -13,7 +13,7 @@ class TaxReturnPolicy
     public function view(User $user, TaxReturn $taxReturn): bool
     {
         // User must own the business that this tax return belongs to
-        return $user->ownedBusiness?->id === $taxReturn->business_id;
+        return $user->managesBusiness($taxReturn->business_id);
     }
 
     /**
@@ -22,7 +22,7 @@ class TaxReturnPolicy
     public function create(User $user): bool
     {
         // Any authenticated user with a business can create
-        return $user->ownedBusiness !== null;
+        return $user->ownedBusiness !== null || $user->businesses()->exists();
     }
 
     /**
@@ -35,7 +35,7 @@ class TaxReturnPolicy
             return false;
         }
 
-        return $user->ownedBusiness?->id === $taxReturn->business_id;
+        return $user->managesBusiness($taxReturn->business_id);
     }
 
     /**
@@ -48,6 +48,6 @@ class TaxReturnPolicy
             return false;
         }
 
-        return $user->ownedBusiness?->id === $taxReturn->business_id;
+        return $user->managesBusiness($taxReturn->business_id);
     }
 }

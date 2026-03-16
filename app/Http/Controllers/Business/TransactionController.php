@@ -27,7 +27,7 @@ class TransactionController extends Controller
                 ->with('error', 'Please complete your business setup first.');
         }
 
-        $business = $user->ownedBusiness;
+        $business = $user->defaultBusiness();
 
         $query = Transaction::where('business_id', $business->id)
             ->with('bankAccount');
@@ -180,7 +180,7 @@ class TransactionController extends Controller
             'transaction_ids.*' => 'exists:transactions,id',
         ]);
 
-        $business = $request->user()->ownedBusiness;
+        $business = $request->user()->defaultBusiness();
 
         // Verify all transactions belong to business
         $transactions = Transaction::whereIn('id', $request->transaction_ids)
@@ -201,7 +201,7 @@ class TransactionController extends Controller
      */
     public function export(Request $request)
     {
-        $business = $request->user()->ownedBusiness;
+        $business = $request->user()->defaultBusiness();
 
         $transactions = Transaction::where('business_id', $business->id)
             ->with('bankAccount')

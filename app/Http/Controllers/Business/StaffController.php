@@ -44,7 +44,7 @@ class StaffController extends Controller
      */
     public function index()
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
 
         $staff = $business->staff()
             ->orderBy('first_name')
@@ -70,7 +70,7 @@ class StaffController extends Controller
      */
     public function create()
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
 
         return Inertia::render('Business/Staff/Create', [
             'business' => $business,
@@ -266,7 +266,7 @@ class StaffController extends Controller
     protected function tryAiColumnMapping(array $headers, array $sampleRows, array $targetFields): ?array
     {
         try {
-            $business = auth()->user()->ownedBusiness;
+            $business = auth()->user()->defaultBusiness();
             if (!$business) return null;
 
             $aiService = new AiAgentService($business);
@@ -384,7 +384,7 @@ PROMPT;
             'staff_data.*.date_employed' => 'required|date',
         ]);
 
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
         $staffData = $request->input('staff_data');
         $results = ['success' => 0, 'failed' => 0, 'errors' => []];
 

@@ -38,10 +38,14 @@ class TaxReturn extends Model
         'deduction_breakdown',
         'reliefs_claimed',
         'calculation_details',
+        'date_filed',
+        'date_paid',
     ];
 
     protected $casts = [
         'submission_date' => 'date',
+        'date_filed' => 'date',
+        'date_paid' => 'date',
         'due_date' => 'date',
         'gross_income' => 'decimal:2',
         'deductions' => 'decimal:2',

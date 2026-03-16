@@ -12,7 +12,7 @@ class WhtTransactionPolicy
      */
     public function view(User $user, WhtTransaction $whtTransaction): bool
     {
-        return $user->ownedBusiness?->id === $whtTransaction->business_id;
+        return $user->managesBusiness($whtTransaction->business_id);
     }
 
     /**
@@ -20,7 +20,7 @@ class WhtTransactionPolicy
      */
     public function create(User $user): bool
     {
-        return $user->ownedBusiness !== null;
+        return $user->ownedBusiness !== null || $user->businesses()->exists();
     }
 
     /**
@@ -28,7 +28,7 @@ class WhtTransactionPolicy
      */
     public function update(User $user, WhtTransaction $whtTransaction): bool
     {
-        return $user->ownedBusiness?->id === $whtTransaction->business_id;
+        return $user->managesBusiness($whtTransaction->business_id);
     }
 
     /**
@@ -36,6 +36,6 @@ class WhtTransactionPolicy
      */
     public function delete(User $user, WhtTransaction $whtTransaction): bool
     {
-        return $user->ownedBusiness?->id === $whtTransaction->business_id;
+        return $user->managesBusiness($whtTransaction->business_id);
     }
 }

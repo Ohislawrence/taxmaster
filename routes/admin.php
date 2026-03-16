@@ -27,6 +27,8 @@ Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name(
     Route::resource('businesses', BusinessController::class);
     Route::get('businesses/{business}/activity', [BusinessController::class, 'activity'])->name('businesses.activity');
     Route::put('businesses/{business}/status', [BusinessController::class, 'updateStatus'])->name('businesses.status');
+    Route::post('businesses/{business}/assign-accountant', [BusinessController::class, 'assignAccountant'])->name('businesses.assign-accountant');
+    Route::post('businesses/{business}/assign-owner', [BusinessController::class, 'assignOwner'])->name('businesses.assign-owner');
 
     // Users Management
     Route::resource('users', UserController::class);
@@ -34,6 +36,14 @@ Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name(
     Route::put('users/{user}/role', [UserController::class, 'changeRole'])->name('users.change-role');
     Route::post('users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('users/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
+
+    // Accountants management
+    Route::get('accountants', [\App\Http\Controllers\Admin\AccountantController::class, 'index'])->name('accountants.index');
+    Route::get('accountants/{user}', [\App\Http\Controllers\Admin\AccountantController::class, 'show'])->name('accountants.show');
+    Route::post('accountants/{user}/detach/{business}', [\App\Http\Controllers\Admin\AccountantController::class, 'detachBusiness'])->name('accountants.detach');
+    Route::post('accountants/{user}/assign', [\App\Http\Controllers\Admin\AccountantController::class, 'assignBusiness'])->name('accountants.assign');
+    Route::post('accountants/{user}/transfer/{business}', [\App\Http\Controllers\Admin\AccountantController::class, 'transferOwnership'])->name('accountants.transfer');
+    Route::post('accountants/{user}/enable-billing/{business}', [\App\Http\Controllers\Admin\AccountantController::class, 'enableBilling'])->name('accountants.enable-billing');
 
     // Subscriptions & Plans
     Route::resource('plans', PlanController::class);
@@ -72,6 +82,20 @@ Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name(
     Route::get('ai-settings', [AiSettingsController::class, 'index'])->name('ai-settings.index');
     Route::put('ai-settings', [AiSettingsController::class, 'update'])->name('ai-settings.update');
     Route::post('ai-settings/test', [AiSettingsController::class, 'testConnection'])->name('ai-settings.test');
+
+    // Accountant role settings
+    Route::get('accountant-settings', [\App\Http\Controllers\Admin\AccountantSettingsController::class, 'index'])->name('accountant-settings.index');
+    Route::put('accountant-settings', [\App\Http\Controllers\Admin\AccountantSettingsController::class, 'update'])->name('accountant-settings.update');
+
+    // Affiliate payouts management
+    Route::get('affiliate/payouts', [\App\Http\Controllers\Admin\AffiliatePayoutController::class, 'index'])->name('affiliate.payouts.index');
+    Route::post('affiliate/payouts/{payout}/approve', [\App\Http\Controllers\Admin\AffiliatePayoutController::class, 'approve'])->name('affiliate.payouts.approve');
+    Route::post('affiliate/payouts/{payout}/mark-paid', [\App\Http\Controllers\Admin\AffiliatePayoutController::class, 'markPaid'])->name('affiliate.payouts.mark-paid');
+    Route::post('affiliate/payouts/bulk-approve', [\App\Http\Controllers\Admin\AffiliatePayoutController::class, 'bulkApprove'])->name('affiliate.payouts.bulk-approve');
+
+    // Affiliate settings (commission rules)
+    Route::get('affiliate/settings', [\App\Http\Controllers\Admin\AffiliateSettingsController::class, 'index'])->name('affiliate.settings.index');
+    Route::put('affiliate/settings', [\App\Http\Controllers\Admin\AffiliateSettingsController::class, 'update'])->name('affiliate.settings.update');
 
     // Reports
     Route::get('reports/tax', [DashboardController::class, 'taxReport'])->name('reports.tax');

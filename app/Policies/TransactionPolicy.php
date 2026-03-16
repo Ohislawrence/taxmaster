@@ -12,7 +12,7 @@ class TransactionPolicy
      */
     public function view(User $user, Transaction $transaction): bool
     {
-        return $user->ownedBusiness?->id === $transaction->business_id;
+        return $user->managesBusiness($transaction->business_id);
     }
 
     /**
@@ -20,7 +20,7 @@ class TransactionPolicy
      */
     public function update(User $user, Transaction $transaction): bool
     {
-        return $user->ownedBusiness?->id === $transaction->business_id;
+        return $user->managesBusiness($transaction->business_id);
     }
 
     /**
@@ -28,6 +28,6 @@ class TransactionPolicy
      */
     public function delete(User $user, Transaction $transaction): bool
     {
-        return $user->ownedBusiness?->id === $transaction->business_id;
+        return $user->managesBusiness($transaction->business_id);
     }
 }

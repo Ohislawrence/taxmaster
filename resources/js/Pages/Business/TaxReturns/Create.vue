@@ -28,18 +28,18 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Tax Period (Start)</label>
-                        <input 
-                            v-model="form.tax_period_start" 
-                            type="date" 
+                        <input
+                            v-model="form.tax_period_start"
+                            type="date"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <p v-if="errors.tax_period_start" class="text-red-600 text-sm mt-1">{{ errors.tax_period_start[0] }}</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Tax Period (End)</label>
-                        <input 
-                            v-model="form.tax_period_end" 
-                            type="date" 
+                        <input
+                            v-model="form.tax_period_end"
+                            type="date"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <p v-if="errors.tax_period_end" class="text-red-600 text-sm mt-1">{{ errors.tax_period_end[0] }}</p>
@@ -49,12 +49,34 @@
                 <!-- Due Date -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
-                    <input 
-                        v-model="form.due_date" 
-                        type="date" 
+                    <input
+                        v-model="form.due_date"
+                        type="date"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <p v-if="errors.due_date" class="text-red-600 text-sm mt-1">{{ errors.due_date[0] }}</p>
+                </div>
+
+                <!-- Date Filed -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date Filed (optional)</label>
+                    <input
+                        v-model="form.date_filed"
+                        type="date"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p v-if="errors.date_filed" class="text-red-600 text-sm mt-1">{{ errors.date_filed[0] }}</p>
+                </div>
+
+                <!-- Date Paid -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date Paid (optional)</label>
+                    <input
+                        v-model="form.date_paid"
+                        type="date"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p v-if="errors.date_paid" class="text-red-600 text-sm mt-1">{{ errors.date_paid[0] }}</p>
                 </div>
 
                 <!-- Staff Selection -->
@@ -65,8 +87,8 @@
                             No staff members available. <Link href="/business/staff/create" class="text-blue-600 hover:underline">Add staff first</Link>
                         </div>
                         <label v-for="staffMember in staff" :key="staffMember.id" class="flex items-center">
-                            <input 
-                                type="checkbox" 
+                            <input
+                                type="checkbox"
                                 :value="staffMember.id"
                                 v-model="form.staff_ids"
                                 class="rounded border-gray-300 text-blue-600"
@@ -82,8 +104,8 @@
                 <!-- Description -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
-                    <textarea 
-                        v-model="form.description" 
+                    <textarea
+                        v-model="form.description"
                         rows="4"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Add any notes or references..."
@@ -92,7 +114,7 @@
 
                 <!-- Actions -->
                 <div class="flex gap-4">
-                    <button 
+                    <button
                         type="submit"
                         :disabled="processing"
                         class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium transition"
@@ -132,6 +154,8 @@ const form = ref({
     tax_period_start: '',
     tax_period_end: '',
     due_date: '',
+    date_filed: '',
+    date_paid: '',
     staff_ids: [],
     description: '',
 });

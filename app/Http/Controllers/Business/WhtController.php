@@ -398,7 +398,7 @@ class WhtController extends Controller
 
     private function resolveBusiness(Request $request)
     {
-        $business = $request->user()?->ownedBusiness;
+        $business = $request->user()?->defaultBusiness();
 
         if (!$business) {
             throw new HttpResponseException(

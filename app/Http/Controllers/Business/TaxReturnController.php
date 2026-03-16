@@ -38,7 +38,7 @@ class TaxReturnController extends Controller
      */
     public function index()
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
 
         $taxReturns = $business->taxReturns()
             ->with('taxType')
@@ -58,7 +58,7 @@ class TaxReturnController extends Controller
      */
     public function create()
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
         $taxTypes = TaxType::active()->get();
 
         return Inertia::render('Business/TaxReturns/Create', [
@@ -73,13 +73,15 @@ class TaxReturnController extends Controller
      */
     public function store(Request $request)
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
 
         $validated = $request->validate([
             'tax_type_id' => 'required|exists:tax_types,id',
             'tax_period' => 'required',
             'return_type' => 'required|in:monthly,quarterly,annual',
             'due_date' => 'required|date',
+            'date_filed' => 'nullable|date|before_or_equal:today',
+            'date_paid' => 'nullable|date|after_or_equal:date_filed',
             'state_code' => 'nullable|string|max:2',
             'filing_status' => 'nullable|string',
             'gross_income' => 'required|numeric|min:0',
@@ -109,6 +111,8 @@ class TaxReturnController extends Controller
             'return_type' => $validated['return_type'],
             'tax_period' => $validated['tax_period'],
             'due_date' => $validated['due_date'],
+            'date_filed' => $validated['date_filed'] ?? null,
+            'date_paid' => $validated['date_paid'] ?? null,
             'state_code' => $validated['state_code'] ?? $business->state,
             'filing_status' => $validated['filing_status'],
             'gross_income' => $validated['gross_income'],
@@ -162,6 +166,8 @@ class TaxReturnController extends Controller
         $validated = $request->validate([
             'gross_income' => 'required|numeric|min:0',
             'deductions' => 'nullable|numeric|min:0',
+            'date_filed' => 'nullable|date|before_or_equal:today',
+            'date_paid' => 'nullable|date|after_or_equal:date_filed',
             'additional_data' => 'nullable|array',
         ]);
 
@@ -188,6 +194,8 @@ class TaxReturnController extends Controller
             'total_amount_due' => $taxResult['total_due'] ?? $taxResult['tax_due'],
             'reliefs_claimed' => $taxResult['reliefs'] ?? [],
             'calculation_details' => $taxResult,
+            'date_filed' => $validated['date_filed'] ?? $taxReturn->date_filed,
+            'date_paid' => $validated['date_paid'] ?? $taxReturn->date_paid,
         ]);
 
         return redirect()->route('business.tax-returns.show', $taxReturn)

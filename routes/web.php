@@ -43,6 +43,18 @@ Route::get('/features', function () {
         'title' => 'Features',
     ]);
 })->name('features');
+// Tax calculator landing page (marketing + estimator for Nigerian businesses)
+Route::get('/tax-calculator', function () {
+    return Inertia::render('Public/TaxCalculator', [
+        'title' => 'Tax Calculator - Estimate your Nigerian business taxes',
+    ]);
+})->name('tax-calculator');
+// Accountant features landing page
+Route::get('/for-accountants', function () {
+    return Inertia::render('Public/AccountantFeatures', [
+        'title' => 'TaxMaster for Accountants',
+    ]);
+})->name('accountant.features');
 Route::get('/about', fn () => Inertia::render('Public/About', ['title' => 'About']))->name('about');
 Route::get('/contact', fn () => Inertia::render('Public/Contact', ['title' => 'Contact']))->name('contact');
 
@@ -85,6 +97,12 @@ Route::post('/visitor/ai/chat/send', [VisitorChatController::class, 'sendVisitor
 // Mono webhook (no auth)
 Route::post('/webhooks/mono', [MonoWebhookController::class, 'handle'])->name('webhooks.mono');
 
+// Affiliate link handler - sets affiliate code in session then redirects to pricing
+Route::get('/affiliate/{code}', function ($code) {
+    session(['affiliate_code' => $code]);
+    return redirect()->route('pricing');
+})->name('affiliate.link');
+
 
 // Business Setup Routes (after email verification)
 Route::middleware([
@@ -111,6 +129,8 @@ Route::middleware([
             return redirect()->route('admin.dashboard');
         } elseif ($user->hasRole('business')) {
             return redirect()->route('business.dashboard');
+        } elseif ($user->hasRole('accountant')) {
+            return redirect()->route('accountant.dashboard');
         }
 
         // Fallback to default dashboard
@@ -119,6 +139,10 @@ Route::middleware([
 
     // Test Mono Integration (localhost/test-mono)
     Route::get('/test-mono', [TestMonoController::class, 'testMono'])->name('test.mono');
+
+    // Business switch (available to authenticated users who can manage businesses)
+    Route::post('/business/switch', [App\Http\Controllers\Business\SwitchController::class, 'switch'])->name('business.switch');
+    Route::post('/business/leave', [App\Http\Controllers\Business\SwitchController::class, 'leave'])->name('business.leave');
 });
 
 // Include admin routes
@@ -126,3 +150,5 @@ require __DIR__ . '/admin.php';
 
 // Include business routes
 require __DIR__ . '/business.php';
+// Include accountant routes
+require __DIR__ . '/accountant.php';

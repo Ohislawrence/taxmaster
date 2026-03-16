@@ -29,7 +29,7 @@ class BankAccountController extends Controller
                 ->with('error', 'Please complete your business setup first.');
         }
 
-        $business = $user->ownedBusiness;
+        $business = $user->defaultBusiness();
 
         // Check subscription feature
         if (!$this->subscriptionService->canPerformAction($business, 'link_bank_account')) {
@@ -102,7 +102,7 @@ class BankAccountController extends Controller
             ], 422);
         }
 
-        $business = $user->ownedBusiness;
+        $business = $user->defaultBusiness();
 
         // Check subscription feature
         if (!$this->subscriptionService->canPerformAction($business, 'link_bank_account')) {

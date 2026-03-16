@@ -22,6 +22,7 @@
         "vue": "^3.3.13"
     },
     "dependencies": {
+        "@inertiajs/inertia": "^0.11.1",
         "@mono.co/connect.js": "^2.1.0",
         "@tinymce/tinymce-vue": "^6.3.0",
         "@vueup/vue-quill": "^1.2.0",

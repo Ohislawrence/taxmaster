@@ -7,6 +7,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import BusinessSwitcher from '@/Components/BusinessSwitcher.vue';
 
 defineProps({
     title: String,
@@ -55,6 +56,9 @@ const logout = () => {
                         </div>
 
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
+                            <div class="me-4">
+                                <BusinessSwitcher :businesses="$page.props.businesses" :currentBusiness="$page.props.current_business" />
+                            </div>
                             <div class="ms-3 relative">
                                 <!-- Teams Dropdown -->
                                 <Dropdown v-if="$page.props.jetstream.hasTeamFeatures" align="right" width="60">
@@ -78,7 +82,7 @@ const logout = () => {
                                             </div>
 
                                             <!-- Team Settings -->
-                                            <DropdownLink :href="route('teams.show', $page.props.auth.user.current_team)">
+                                            <DropdownLink :href="$page.props.auth.user.current_team ? route('teams.show', $page.props.auth.user.current_team) : '#'">
                                                 Team Settings
                                             </DropdownLink>
 
@@ -238,7 +242,7 @@ const logout = () => {
                                 </div>
 
                                 <!-- Team Settings -->
-                                <ResponsiveNavLink :href="route('teams.show', $page.props.auth.user.current_team)" :active="route().current('teams.show')">
+                                <ResponsiveNavLink :href="$page.props.auth.user.current_team ? route('teams.show', $page.props.auth.user.current_team) : '#'" :active="route().current('teams.show')">
                                     Team Settings
                                 </ResponsiveNavLink>
 

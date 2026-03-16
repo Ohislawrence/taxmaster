@@ -12,7 +12,7 @@ class PayeReturnPolicy
      */
     public function view(User $user, PayeReturn $payeReturn): bool
     {
-        return $user->ownedBusiness?->id === $payeReturn->business_id;
+        return $user->managesBusiness($payeReturn->business_id);
     }
 
     /**
@@ -20,7 +20,7 @@ class PayeReturnPolicy
      */
     public function create(User $user): bool
     {
-        return $user->ownedBusiness !== null;
+        return $user->ownedBusiness !== null || $user->businesses()->exists();
     }
 
     /**
@@ -28,7 +28,7 @@ class PayeReturnPolicy
      */
     public function update(User $user, PayeReturn $payeReturn): bool
     {
-        return $user->ownedBusiness?->id === $payeReturn->business_id;
+        return $user->managesBusiness($payeReturn->business_id);
     }
 
     /**
@@ -36,7 +36,7 @@ class PayeReturnPolicy
      */
     public function delete(User $user, PayeReturn $payeReturn): bool
     {
-        return $user->ownedBusiness?->id === $payeReturn->business_id
+        return $user->managesBusiness($payeReturn->business_id);
             && $payeReturn->status === 'draft';
     }
 }

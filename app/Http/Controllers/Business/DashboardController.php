@@ -25,7 +25,7 @@ class DashboardController
     public function index()
     {
         $user = auth()->user();
-        $business = $user->ownedBusiness;
+        $business = $user->defaultBusiness();
 
         if (!$business) {
             return Inertia::render('Business/NoBusiness');

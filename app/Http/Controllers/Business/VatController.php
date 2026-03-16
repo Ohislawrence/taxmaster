@@ -380,7 +380,7 @@ class VatController extends Controller
      */
     public function exportPdf(VatReturn $vatReturn)
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
 
         if ($vatReturn->business_id !== $business->id) {
             abort(403, 'Unauthorized');
@@ -509,7 +509,7 @@ class VatController extends Controller
      */
     private function resolveBusiness(Request $request): Business
     {
-        $business = $request->user()->ownedBusiness;
+        $business = $request->user()->defaultBusiness();
 
         if (!$business) {
             abort(403, 'No active business selected');

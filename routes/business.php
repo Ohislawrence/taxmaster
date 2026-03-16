@@ -21,7 +21,9 @@ use App\Http\Controllers\BusinessSetupController;
 use App\Http\Controllers\Business\GetStartedController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setup', 'ensure.subscription'])->prefix('business')->name('business.')->group(function () {
+use App\Http\Middleware\EnsureBusinessOrManager;
+
+Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, 'ensure.business.setup', 'ensure.subscription'])->prefix('business')->name('business.')->group(function () {
     // ERP Connectors (Phase 3)
     Route::post('erp/sync/quickbooks', [App\Http\Controllers\Business\ERPController::class, 'syncQuickBooks']);
     Route::post('erp/sync/xero', [App\Http\Controllers\Business\ERPController::class, 'syncXero']);
@@ -99,6 +101,7 @@ Route::middleware(['auth:sanctum', 'verified', 'business', 'ensure.business.setu
     Route::get('ai/chat', [AiController::class, 'chat'])->name('ai.chat');
     Route::post('ai/chat/send', [AiController::class, 'sendMessage'])->name('ai.chat.send');
     Route::get('ai/history', [AiController::class, 'getHistory'])->name('ai.history');
+    Route::post('ai/history/clear', [AiController::class, 'clearHistory'])->name('ai.history.clear');
     Route::middleware('subscription.features:use_ai_optimization')->group(function () {
         Route::post('ai/tax-returns/{taxReturn}/analyze', [AiController::class, 'analyzeTaxReturn'])->name('ai.tax-analyze');
         Route::post('ai/tax-returns/{taxReturn}/optimize', [AiController::class, 'getTaxOptimizationRecommendations'])->name('ai.tax-optimize');

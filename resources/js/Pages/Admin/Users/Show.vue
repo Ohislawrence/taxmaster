@@ -93,6 +93,57 @@
                     </div>
                 </div>
 
+                <!-- Associated Businesses -->
+                <div v-if="associatedBusinesses && associatedBusinesses.length" class="bg-white rounded-lg shadow p-6 mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Associated Businesses</h2>
+                    <div class="space-y-2">
+                        <div v-for="b in associatedBusinesses" :key="b.id" class="flex items-center justify-between border rounded p-3">
+                            <div>
+                                <p class="font-medium text-gray-900">{{ b.name }}</p>
+                                <p class="text-xs text-gray-500">{{ b.email || '' }} • {{ b.status }}</p>
+                            </div>
+                            <div>
+                                <Link :href="`/admin/businesses/${b.id}`" class="text-blue-600 hover:underline text-sm">View</Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Affiliate Summary (for accountants) -->
+                <div v-if="affiliateSummary" class="bg-white rounded-lg shadow p-6 mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Affiliate Earnings</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-green-50 p-4 rounded">
+                            <p class="text-sm text-gray-600">Total Paid</p>
+                            <p class="text-2xl font-bold text-green-700">₦{{ affiliateSummary.total_paid.toFixed(2) }}</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <p class="text-sm text-gray-600">Approved (Not Paid)</p>
+                            <p class="text-2xl font-bold text-yellow-700">₦{{ affiliateSummary.total_approved_not_paid.toFixed(2) }}</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded">
+                            <p class="text-sm text-gray-600">Pending Approval</p>
+                            <p class="text-2xl font-bold text-gray-700">₦{{ affiliateSummary.total_pending.toFixed(2) }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Recent Payouts</h3>
+                        <div v-if="recentPayouts && recentPayouts.length" class="space-y-2">
+                            <div v-for="p in recentPayouts" :key="p.id" class="flex items-center justify-between border rounded p-3">
+                                <div>
+                                    <p class="font-medium text-gray-900">{{ p.referral?.business?.name || '—' }}</p>
+                                    <p class="text-xs text-gray-500">Amount: ₦{{ Number(p.amount).toFixed(2) }} • {{ p.approved ? (p.paid ? 'Paid' : 'Approved') : 'Pending' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-gray-600">{{ new Date(p.created_at).toLocaleDateString() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="text-sm text-gray-500">No payouts yet.</div>
+                    </div>
+                </div>
+
                 <!-- Actions -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
@@ -132,6 +183,9 @@ const props = defineProps({
     user: Object,
     userRole: String,
     businessInfo: Object,
+    associatedBusinesses: Array,
+    affiliateSummary: Object,
+    recentPayouts: Array,
 });
 
 function formatDate(date) {

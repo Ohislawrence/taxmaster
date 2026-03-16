@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Business;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -40,7 +41,14 @@ class HandleInertiaRequests extends Middleware
         $usageStats = null;
 
         if (auth()->check()) {
-            $business = auth()->user()->ownedBusiness;
+            // Default business context: prefer single ownedBusiness, otherwise first managed business
+            $default = auth()->user()->ownedBusiness ?? auth()->user()->businesses()->first();
+
+            // Allow explicit session override for the currently selected business
+            $currentBusiness = session('business_id') ? Business::find(session('business_id')) : $default;
+
+            $business = $currentBusiness;
+
             if ($business) {
                 $subscriptionService = app(\App\Services\SubscriptionService::class);
                 $subscription = $subscriptionService->getActiveSubscription($business);
@@ -71,6 +79,13 @@ class HandleInertiaRequests extends Middleware
                 'active' => $subscription,
                 'stats' => $usageStats,
             ],
+            // Business context for the UI
+            'businesses' => fn () => auth()->check() ? auth()->user()->businesses()->get()->merge(auth()->user()->managedBusinesses()->get())->unique('id')->values() : null,
+            'current_business' => fn () => $business ? [
+                'id' => $business->id,
+                'name' => $business->name,
+                'slug' => $business->slug,
+            ] : null,
         ];
     }
 }

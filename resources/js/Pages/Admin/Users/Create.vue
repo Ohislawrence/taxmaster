@@ -48,8 +48,9 @@
                             class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">Select Role</option>
-                            <option value="admin">Admin - Full system access</option>
-                            <option value="business">Business - Manage own business</option>
+                            <option v-for="role in roles" :key="role" :value="role">
+                                {{ roleLabels[role] ?? (role.charAt(0).toUpperCase() + role.slice(1)) }}
+                            </option>
                         </select>
                         <span v-if="errors.role" class="text-red-600 text-sm mt-1">{{ errors.role[0] }}</span>
                     </div>
@@ -110,6 +111,12 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 defineProps({
     roles: Array,
 });
+
+const roleLabels = {
+    admin: 'Admin - Full system access',
+    business: 'Business - Manage own business',
+    accountant: 'Accountant - Manage client businesses',
+};
 
 const form = useForm({
     name: '',

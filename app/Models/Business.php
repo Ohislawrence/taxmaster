@@ -16,6 +16,7 @@ class Business extends Model
         'owner_id',
         'name',
         'slug',
+        'created_by_accountant_id',
         'registration_number',
         'description',
         'business_type',
@@ -32,16 +33,19 @@ class Business extends Model
         'status',
         'email_verified',
         'email_verified_at',
+        'registration_number_hash',
+        'tax_identification_number_hash',
         'settings',
         'accounting_year_end',
         'incorporation_date',
         'has_staff',
         'staff_count',
         'mono_customer_id',
+        'billing_managed_by_platform',
     ];
 
     protected $casts = [
-        'email_verified' => 'boolean',
+        'created_by_accountant_id' => 'integer',
         'email_verified_at' => 'datetime',
         'settings' => 'array',
         'accounting_year_end' => 'date',
@@ -50,7 +54,16 @@ class Business extends Model
         // NDPA 2023 — encrypt PII at rest
         'tax_identification_number' => 'encrypted',
         'registration_number' => 'encrypted',
+        'billing_managed_by_platform' => 'boolean',
     ];
+
+    /**
+     * Who (accountant) created this business, if any
+     */
+    public function createdByAccountant()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'created_by_accountant_id');
+    }
 
     /**
      * Get the owner of the business
@@ -126,6 +139,15 @@ class Business extends Model
     public function aiConfig(): HasMany
     {
         return $this->hasMany(AiConfiguration::class);
+    }
+
+    /**
+     * Accountants assigned to this business
+     */
+    public function accountants()
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'accountant_business', 'business_id', 'user_id')
+            ->withTimestamps();
     }
 
     /**

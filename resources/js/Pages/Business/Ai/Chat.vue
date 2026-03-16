@@ -3,6 +3,22 @@
         <Head title="AI Tax Assistant" />
 
         <div class="py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+            <!-- Local Toast -->
+            <transition name="fade">
+                <div v-if="toast.message" :class="[
+                    'fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 px-4 py-3 rounded-lg shadow-2xl',
+                    toast.type === 'success' ? 'bg-green-50 text-green-900 border-2 border-green-300' : '',
+                    toast.type === 'error' ? 'bg-red-50 text-red-900 border-2 border-red-300' : '',
+                    toast.type === 'info' ? 'bg-blue-50 text-blue-900 border-2 border-blue-300' : ''
+                ]">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-2 flex-1">
+                            <p class="text-sm font-medium">{{ toast.message }}</p>
+                        </div>
+                        <button @click="dismissToast" class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors">×</button>
+                    </div>
+                </div>
+            </transition>
             <!-- Header -->
             <div class="mb-8">
                 <div class="flex items-center gap-3 mb-2">
@@ -35,6 +51,22 @@
                     <div class="bg-white rounded-lg shadow-lg p-6 h-screen max-h-[600px] flex flex-col">
                         <!-- Messages -->
                         <div class="flex-1 overflow-y-auto mb-6 space-y-4" ref="messagesContainer">
+                            <div class="flex items-center justify-center">
+                                <div class="w-full text-center">
+                                    <button
+                                        v-if="historyState.current > 0 && historyState.current < historyState.last"
+                                        @click="loadMore"
+                                        :disabled="loadingHistory"
+                                        class="mb-4 px-3 py-2 bg-gray-100 rounded text-sm disabled:opacity-50"
+                                    >
+                                        Load more
+                                    </button>
+
+                                    <div v-else-if="historyState.current > 0 && historyState.current >= historyState.last" class="mb-4 text-xs text-gray-500">
+                                        Start of history — no older messages
+                                    </div>
+                                </div>
+                            </div>
                             <div v-if="messages.length === 0" class="flex items-center justify-center h-full">
                                 <div class="text-center">
                                     <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,14 +136,14 @@
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Question Category (Optional)</label>
                                 <div class="flex flex-wrap gap-2">
-                                    <button 
+                                    <button
                                         v-for="ctx in contexts"
                                         :key="ctx.value"
                                         @click="selectedContext = ctx.value"
                                         :class="[
                                             'px-3 py-1 rounded-full text-sm font-medium transition',
-                                            selectedContext === ctx.value 
-                                                ? 'bg-blue-600 text-white' 
+                                            selectedContext === ctx.value
+                                                ? 'bg-blue-600 text-white'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         ]"
                                     >
@@ -122,14 +154,14 @@
 
                             <!-- Input Field -->
                             <form @submit.prevent="sendMessage" class="flex gap-3">
-                                <input 
+                                <input
                                     v-model="userMessage"
                                     type="text"
                                     placeholder="Ask me anything about your taxes..."
                                     :disabled="loading || !aiConfigured"
                                     class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 disabled:bg-gray-100"
                                 />
-                                <button 
+                                <button
                                     type="submit"
                                     :disabled="loading || !userMessage.trim() || !aiConfigured"
                                     class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium transition"
@@ -153,7 +185,7 @@
                     <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
                         <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
                         <div class="space-y-2">
-                            <Link 
+                            <Link
                                 href="/business/ai/chat"
                                 class="flex items-center gap-3 p-4 rounded-lg hover:bg-blue-50 transition border border-transparent hover:border-blue-200 text-gray-700"
                             >
@@ -162,7 +194,7 @@
                                 </svg>
                                 <span>Tax Planning</span>
                             </Link>
-                            <Link 
+                            <Link
                                 href="/business/ai/insights"
                                 class="flex items-center gap-3 p-4 rounded-lg hover:bg-blue-50 transition border border-transparent hover:border-blue-200 text-gray-700"
                             >
@@ -171,7 +203,7 @@
                                 </svg>
                                 <span>Tax Insights</span>
                             </Link>
-                            <button 
+                            <button
                                 @click="clearChat"
                                 class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-red-50 transition border border-transparent hover:border-red-200 text-gray-700"
                             >
@@ -201,7 +233,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, watch, computed } from 'vue'
+import { ref, nextTick, watch, computed, onMounted } from 'vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
 import BusinessLayout from '@/Layouts/BusinessLayout.vue'
 import { useSubscription } from '@/composables/useSubscription'
@@ -232,18 +264,21 @@ const contexts = [
     { value: 'compliance', label: 'Compliance' },
 ];
 
-// Auto-scroll to latest message
+// Auto-scroll to latest message (skip when prepending older messages)
+const isPrepending = ref(false);
 watch(() => messages.value.length, () => {
     nextTick(() => {
         if (messagesContainer.value) {
-            messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+            if (!isPrepending.value) {
+                messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+            }
         }
     });
 });
 
 const sendMessage = async () => {
     if (!userMessage.value.trim() || loading.value) return;
-    
+
     // Check subscription first
     if (!isFeatureAvailable.value) {
         messages.value.push({
@@ -318,10 +353,117 @@ const sendMessage = async () => {
     }
 };
 
-const clearChat = () => {
-    if (confirm('Are you sure you want to clear the chat?')) {
-        messages.value = [];
+// Load history page; page=1 is newest page. We reverse each page's results so UI shows oldest->newest.
+const historyState = ref({ current: 0, last: 0 });
+const loadingHistory = ref(false);
+
+const loadHistory = async (page = 1, prepend = false) => {
+    try {
+        loadingHistory.value = true;
+        const url = `/business/ai/history?page=${page}`;
+        const res = await fetch(url, {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const logs = (data.data || []).slice().reverse();
+
+        // convert logs to message pairs
+        const newMessages = [];
+        logs.forEach((log) => {
+            if (log.prompt) newMessages.push({ role: 'user', content: log.prompt });
+            if (log.response) newMessages.push({ role: 'assistant', content: log.response });
+        });
+
+        if (prepend) {
+            // preserve scroll position
+            const container = messagesContainer.value;
+            const prevScrollHeight = container ? container.scrollHeight : 0;
+            const prevScrollTop = container ? container.scrollTop : 0;
+            isPrepending.value = true;
+
+            messages.value = newMessages.concat(messages.value);
+
+            await nextTick();
+            if (container) {
+                const newScrollHeight = container.scrollHeight;
+                container.scrollTop = newScrollHeight - prevScrollHeight + prevScrollTop;
+            }
+            isPrepending.value = false;
+        } else {
+            messages.value = newMessages;
+            // scroll handled by watcher
+        }
+
+        historyState.value.current = data.current_page || page;
+        historyState.value.last = data.last_page || 1;
+    } catch (e) {
+        console.error('Failed to load AI history', e);
+    } finally {
+        loadingHistory.value = false;
     }
+};
+
+const loadMore = async () => {
+    if (historyState.value.current >= historyState.value.last) return;
+    const nextPage = historyState.value.current + 1 || 2;
+    await loadHistory(nextPage, true);
+};
+
+const clearChat = async () => {
+    if (!confirm('Are you sure you want to clear the chat?')) return;
+
+    // Call server to delete persisted chat logs, then clear UI
+    try {
+        const csrfToken = page.props.csrf_token || document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const res = await fetch('/business/ai/history/clear', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({}),
+        });
+
+        if (res.ok) {
+            messages.value = [];
+            showToast('success', 'Chat history cleared');
+        } else {
+            const err = await res.json().catch(() => ({}));
+            console.error('Failed to clear chat', err);
+            showToast('error', err.error || 'Failed to clear chat');
+        }
+    } catch (e) {
+        console.error('Clear chat error', e);
+        alert('Failed to clear chat');
+    }
+};
+
+onMounted(() => {
+    // Load persisted history when the component mounts
+    loadHistory();
+});
+
+// Toast state & helpers
+const toast = ref({ message: null, type: 'info' });
+let toastTimeout = null;
+const showToast = (type, message, ms = 4000) => {
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toast.value = { type, message };
+    toastTimeout = setTimeout(() => {
+        toast.value = { message: null, type: 'info' };
+        toastTimeout = null;
+    }, ms);
+};
+const dismissToast = () => {
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toast.value = { message: null, type: 'info' };
+    toastTimeout = null;
 };
 </script>
 

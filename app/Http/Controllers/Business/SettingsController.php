@@ -26,7 +26,7 @@ class SettingsController
      */
     public function index()
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
 
         $subscription = $business->subscription()
             ->where('status', 'active')
@@ -51,7 +51,7 @@ class SettingsController
      */
     public function update(Request $request)
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',

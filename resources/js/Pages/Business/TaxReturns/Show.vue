@@ -137,6 +137,14 @@
                                 <p class="font-medium text-gray-900">{{ formatDate(taxReturn.due_date) }}</p>
                             </div>
                             <div>
+                                <p class="text-gray-600 text-sm">Date Filed</p>
+                                <p class="font-medium text-gray-900">{{ formatDate(taxReturn.date_filed) }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 text-sm">Date Paid</p>
+                                <p class="font-medium text-gray-900">{{ formatDate(taxReturn.date_paid) }}</p>
+                            </div>
+                            <div>
                                 <p class="text-gray-600 text-sm">Status</p>
                                 <p class="font-medium text-gray-900 capitalize">{{ taxReturn.status }}</p>
                             </div>

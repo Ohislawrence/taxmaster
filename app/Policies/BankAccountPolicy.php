@@ -12,7 +12,7 @@ class BankAccountPolicy
      */
     public function view(User $user, BankAccount $bankAccount): bool
     {
-        return $user->ownedBusiness?->id === $bankAccount->business_id;
+        return $user->managesBusiness($bankAccount->business_id);
     }
 
     /**
@@ -20,7 +20,7 @@ class BankAccountPolicy
      */
     public function update(User $user, BankAccount $bankAccount): bool
     {
-        return $user->ownedBusiness?->id === $bankAccount->business_id;
+        return $user->managesBusiness($bankAccount->business_id);
     }
 
     /**
@@ -28,6 +28,6 @@ class BankAccountPolicy
      */
     public function delete(User $user, BankAccount $bankAccount): bool
     {
-        return $user->ownedBusiness?->id === $bankAccount->business_id;
+        return $user->managesBusiness($bankAccount->business_id);
     }
 }

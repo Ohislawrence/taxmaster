@@ -415,7 +415,7 @@ class CitController extends Controller
      */
     public function exportPdf(CitReturn $citReturn)
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
 
         if ($citReturn->business_id !== $business->id) {
             abort(403, 'Unauthorized');
@@ -437,7 +437,7 @@ class CitController extends Controller
      */
     private function resolveBusiness(Request $request): Business
     {
-        $business = $request->user()->ownedBusiness;
+        $business = $request->user()->defaultBusiness();
 
         if (!$business) {
             abort(403, 'No active business selected');

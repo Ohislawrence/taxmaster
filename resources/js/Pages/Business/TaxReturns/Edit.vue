@@ -33,25 +33,47 @@
                 <!-- Editable Fields -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Due Date *</label>
-                    <input 
-                        v-model="form.due_date" 
+                    <input
+                        v-model="form.due_date"
                         type="date"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <p v-if="errors.due_date" class="text-red-600 text-sm mt-1">{{ errors.due_date[0] }}</p>
                 </div>
 
+                <!-- Date Filed -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date Filed (optional)</label>
+                    <input
+                        v-model="form.date_filed"
+                        type="date"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p v-if="errors.date_filed" class="text-red-600 text-sm mt-1">{{ errors.date_filed[0] }}</p>
+                </div>
+
+                <!-- Date Paid -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date Paid (optional)</label>
+                    <input
+                        v-model="form.date_paid"
+                        type="date"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p v-if="errors.date_paid" class="text-red-600 text-sm mt-1">{{ errors.date_paid[0] }}</p>
+                </div>
+
                 <!-- Income Section -->
                 <div class="mb-6 p-4 border border-gray-200 rounded-lg">
                     <h3 class="font-semibold text-gray-900 mb-4">Income Information</h3>
-                    
+
                     <div class="grid grid-cols-2 gap-6 mb-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Gross Income *</label>
                             <div class="relative">
                                 <span class="absolute left-4 top-2 text-gray-700">₦</span>
-                                <input 
-                                    v-model="form.gross_income" 
+                                <input
+                                    v-model="form.gross_income"
                                     type="number"
                                     step="0.01"
                                     min="0"
@@ -66,8 +88,8 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Deductions</label>
                             <div class="relative">
                                 <span class="absolute left-4 top-2 text-gray-700">₦</span>
-                                <input 
-                                    v-model="form.deductions" 
+                                <input
+                                    v-model="form.deductions"
                                     type="number"
                                     step="0.01"
                                     min="0"
@@ -100,8 +122,8 @@
                 <!-- Description/Notes -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
-                    <textarea 
-                        v-model="form.description" 
+                    <textarea
+                        v-model="form.description"
                         rows="4"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Add any notes about changes made..."
@@ -122,7 +144,7 @@
 
                 <!-- Actions -->
                 <div class="flex gap-4">
-                    <button 
+                    <button
                         type="submit"
                         :disabled="processing"
                         class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium transition"
@@ -158,6 +180,8 @@ const form = ref({
     due_date: props.taxReturn?.due_date || '',
     gross_income: props.taxReturn?.gross_income || '',
     deductions: props.taxReturn?.deductions || 0,
+    date_filed: props.taxReturn?.date_filed || '',
+    date_paid: props.taxReturn?.date_paid || '',
     description: '',
 });
 

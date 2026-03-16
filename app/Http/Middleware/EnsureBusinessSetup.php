@@ -17,9 +17,12 @@ class EnsureBusinessSetup
     {
         // If user is authenticated and verified but has not owned a business, redirect to setup
         if (
-            auth()->check() && 
-            auth()->user()->hasVerifiedEmail() && 
-            !auth()->user()->ownedBusiness()->exists()
+            auth()->check() &&
+            auth()->user()->hasVerifiedEmail() &&
+            !(
+                auth()->user()->ownedBusiness()->exists() ||
+                auth()->user()->businesses()->exists()
+            )
         ) {
             return redirect()->route('business.setup.create');
         }

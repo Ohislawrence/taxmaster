@@ -12,7 +12,7 @@ class WhtReturnPolicy
      */
     public function view(User $user, WhtReturn $whtReturn): bool
     {
-        return $user->ownedBusiness?->id === $whtReturn->business_id;
+        return $user->managesBusiness($whtReturn->business_id);
     }
 
     /**
@@ -20,7 +20,7 @@ class WhtReturnPolicy
      */
     public function create(User $user): bool
     {
-        return $user->ownedBusiness !== null;
+        return $user->ownedBusiness !== null || $user->businesses()->exists();
     }
 
     /**
@@ -28,7 +28,7 @@ class WhtReturnPolicy
      */
     public function update(User $user, WhtReturn $whtReturn): bool
     {
-        return $user->ownedBusiness?->id === $whtReturn->business_id;
+        return $user->managesBusiness($whtReturn->business_id);
     }
 
     /**
@@ -36,7 +36,7 @@ class WhtReturnPolicy
      */
     public function delete(User $user, WhtReturn $whtReturn): bool
     {
-        return $user->ownedBusiness?->id === $whtReturn->business_id
+        return $user->managesBusiness($whtReturn->business_id)
             && $whtReturn->status === 'draft';
     }
 }

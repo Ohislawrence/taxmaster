@@ -21,7 +21,7 @@ class GetStartedController extends Controller
      */
     public function index(Request $request)
     {
-        $business = $request->user()->ownedBusiness;
+        $business = $request->user()->defaultBusiness();
 
         if (!$business) {
             return redirect()->route('business.setup');
@@ -57,7 +57,7 @@ class GetStartedController extends Controller
      */
     public function completeStep(Request $request)
     {
-        $business = $request->user()->ownedBusiness;
+        $business = $request->user()->defaultBusiness();
         $progress = $business->getStartedProgress ?? GetStartedProgress::create([
             'business_id' => $business->id,
         ]);
@@ -77,7 +77,7 @@ class GetStartedController extends Controller
      */
     public function incompleteStep(Request $request)
     {
-        $business = $request->user()->ownedBusiness;
+        $business = $request->user()->defaultBusiness();
         $progress = $business->getStartedProgress;
 
         if (!$progress) {
@@ -98,7 +98,7 @@ class GetStartedController extends Controller
      */
     public function dismiss(Request $request)
     {
-        $business = $request->user()->ownedBusiness;
+        $business = $request->user()->defaultBusiness();
         $progress = $business->getStartedProgress ?? GetStartedProgress::create([
             'business_id' => $business->id,
         ]);

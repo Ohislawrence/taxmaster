@@ -87,10 +87,15 @@ class AiController extends Controller
      */
     public function insights()
     {
-        $business = Auth::user()->ownedBusiness;
+        $business = Auth::user()->defaultBusiness();
+
+        if (! $business) {
+            return redirect()->route('business.dashboard')
+                ->with('error', 'No business selected. Please select a business to view AI insights.');
+        }
 
         // Check subscription feature
-        if (!$this->subscriptionService->canPerformAction($business, 'use_ai_analysis')) {
+        if (! $this->subscriptionService->canPerformAction($business, 'use_ai_analysis')) {
             return redirect()->route('business.dashboard')
                 ->with('error', 'Your current plan does not include AI insights. Please upgrade to Professional or higher.');
         }
@@ -109,7 +114,7 @@ class AiController extends Controller
      */
     public function chat()
     {
-        $business = Auth::user()->ownedBusiness ?? null;
+        $business = Auth::user()->defaultBusiness() ?? null;
 
         // AI chat is now open to all users and does not require a business
 
@@ -128,7 +133,7 @@ class AiController extends Controller
      */
     public function sendMessage(Request $request)
     {
-        $business = Auth::user()->ownedBusiness;
+        $business = Auth::user()->defaultBusiness();
 
         // AI chat is now open to all users; no subscription check
 
@@ -155,7 +160,7 @@ class AiController extends Controller
             $aiConfig = $this->getAiConfig();
             $aiService = new AiAgentService($business, $aiConfig['provider']);
 
-            // Build context-aware prompt
+            // Build context-aware prompt (handle missing business inside builder)
             $systemPrompt = $this->buildSystemPrompt($business, $validated['context'] ?? 'general');
             $fullPrompt = "{$systemPrompt}\n\nUser Question: {$validated['message']}";
 
@@ -199,7 +204,12 @@ class AiController extends Controller
      */
     public function analyzeTaxReturn(TaxReturn $taxReturn)
     {
-        $business = Auth::user()->ownedBusiness;
+        $business = Auth::user()->defaultBusiness();
+
+        // Require a business context
+        if (! $business) {
+            return response()->json(['error' => 'No business selected'], 403);
+        }
 
         // Verify ownership
         if ($taxReturn->business_id !== $business->id) {
@@ -234,10 +244,14 @@ class AiController extends Controller
      */
     public function getTaxOptimizationRecommendations(TaxReturn $taxReturn)
     {
-        $business = Auth::user()->ownedBusiness;
+        $business = Auth::user()->defaultBusiness();
+
+        if (! $business) {
+            return response()->json(['error' => 'No business selected'], 403);
+        }
 
         // Check subscription feature
-        if (!$this->subscriptionService->canPerformAction($business, 'use_ai_optimization')) {
+        if (! $this->subscriptionService->canPerformAction($business, 'use_ai_optimization')) {
             return response()->json([
                 'error' => 'Your current plan does not include AI optimization. Please upgrade to Professional or higher.',
             ], 403);
@@ -276,7 +290,12 @@ class AiController extends Controller
      */
     public function getHistory(Request $request)
     {
-        $business = Auth::user()->ownedBusiness;
+        // Use default business so accountants/managers are supported
+        $business = Auth::user()->defaultBusiness();
+
+        if (! $business) {
+            return response()->json(['error' => 'No business selected'], 403);
+        }
 
         $logs = AiAgentLog::where('business_id', $business->id)
             ->when($request->action_type, function ($query) use ($request) {
@@ -289,12 +308,40 @@ class AiController extends Controller
     }
 
     /**
+     * Clear persisted AI chat history for the current business (chat logs only)
+     */
+    public function clearHistory(Request $request)
+    {
+        $business = Auth::user()->defaultBusiness();
+
+        if (! $business) {
+            return response()->json(['error' => 'No business selected'], 403);
+        }
+
+        try {
+            AiAgentLog::where('business_id', $business->id)
+                ->where('action_type', 'chat')
+                ->delete();
+
+            return response()->json(['success' => true]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to clear AI history', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Failed to clear history'], 500);
+        }
+    }
+
+    /**
      * Build context-aware system prompt
      */
     protected function buildSystemPrompt($business, $context): string
     {
+        // Allow $business to be null (chat may be used without a selected business)
+        $bizName = $business?->name ?? 'your business';
+        $bizType = $business?->business_type ?? 'business';
+        $bizIndustry = $business?->industry ?? 'your industry';
+
         $basePrompt = <<<PROMPT
-You are TaxMaster — an expert Nigerian tax accountant, tax lawyer, and digital assistant for {$business->name}, a {$business->business_type} business in the {$business->industry} industry.
+    You are TaxMaster — an expert Nigerian tax accountant, tax lawyer, and digital assistant for {$bizName}, a {$bizType} business in the {$bizIndustry} industry.
 
 PERSONALITY & STYLE:
 - Be concise and direct; prefer short, actionable answers (2–4 sentences when possible)
@@ -327,6 +374,11 @@ APP FEATURES (TaxMaster Platform):
 - Staff Management: Add/manage employees for PAYE computation
 - Bank Accounts: Link bank accounts to auto-import transactions
 - AI Insights: Get AI-powered tax optimization suggestions and compliance analysis
+- Accountant Features: Provide tools for accountants managing client businesses:
+    - Accountant Dashboard: view and manage all client/managed businesses, quick-switch context, and see aggregated compliance status.
+    - Multi-business Management: create businesses on behalf of clients, invite clients, assign/manage access, and export managed companies as CSV.
+    - Affiliate & Payouts: generate affiliate links, view referrals, request payouts, and capture bank details for payouts (admin approves/marks paid).
+    - Client Onboarding: auto-enroll clients into starter plans, record referral sources, and maintain audit logs for business switching and actions.
 - Subscription Plans: Free, Starter, Professional, and Enterprise tiers unlock different features
 
 PAYMENT PROCESS (HOW TO GENERATE RRR):

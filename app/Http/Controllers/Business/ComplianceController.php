@@ -27,7 +27,7 @@ class ComplianceController extends Controller
                 ->with('error', 'Please complete your business setup first.');
         }
 
-        $business = $user->ownedBusiness;
+        $business = $user->defaultBusiness();
         $allDeadlines = ComplianceDeadline::where('business_id', $business->id)
             ->orderBy('due_date', 'asc')
             ->get()
@@ -117,7 +117,7 @@ class ComplianceController extends Controller
      */
     public function regenerate(Request $request)
     {
-        $business = $request->user()->ownedBusiness;
+        $business = $request->user()->defaultBusiness();
 
         GenerateComplianceDeadlines::dispatch($business);
 

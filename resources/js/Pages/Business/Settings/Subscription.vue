@@ -1,6 +1,7 @@
 <template>
     <BusinessLayout title="Subscription Management">
         <div class="space-y-6">
+            <BillingGuardNotice />
             <!-- Header -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h1 class="text-3xl font-bold text-gray-900">Subscription & Billing</h1>
@@ -269,10 +270,11 @@
 
 <script>
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
+import BillingGuardNotice from '@/Components/BillingGuardNotice.vue';
 import { router, usePage } from '@inertiajs/vue3';
 
 export default {
-    components: { BusinessLayout },
+    components: { BusinessLayout, BillingGuardNotice },
     props: {
         currentSubscription: Object,
         availablePlans: Object,

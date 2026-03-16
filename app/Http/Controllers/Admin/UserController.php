@@ -38,7 +38,7 @@ class UserController
     public function create()
     {
         return Inertia::render('Admin/Users/Create', [
-            'roles' => ['admin', 'business'],
+            'roles' => ['admin', 'business', 'accountant'],
         ]);
     }
 
@@ -51,7 +51,7 @@ class UserController
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => ['required', 'confirmed', Password::defaults()],
-            'role' => 'required|in:admin,business',
+            'role' => 'required|in:admin,business,accountant',
         ]);
 
         $user = User::create([
@@ -73,19 +73,63 @@ class UserController
      */
     public function show(User $user)
     {
-        $user->load(['roles', 'ownedBusiness']);
+        $user->load(['roles', 'ownedBusiness', 'businesses', 'managedBusinesses']);
 
         $userRole = $user->roles->first()?->name;
-        $businessInfo = null;
 
+        // Associated businesses: owned + managed
+        $owned = $user->ownedBusiness ? collect([$user->ownedBusiness]) : collect();
+        $ownedList = $user->businesses ?? collect();
+        $managed = $user->managedBusinesses ?? collect();
+
+        $associatedBusinesses = $owned->merge($ownedList)->merge($managed)->unique('id')->values();
+
+        $businessInfo = null;
         if ($userRole === 'business' && $user->ownedBusiness) {
             $businessInfo = $user->ownedBusiness->load(['staff', 'taxReturns']);
+        }
+
+        // Affiliate earnings (for accountants)
+        $affiliateSummary = null;
+        $recentPayouts = collect();
+
+        if ($user->hasRole('accountant') || $user->affiliate_code) {
+            $totalPaid = \App\Models\AffiliatePayout::whereHas('referral', function ($q) use ($user) {
+                $q->where('accountant_id', $user->id);
+            })->where('paid', true)->sum('amount');
+
+            $totalApprovedNotPaid = \App\Models\AffiliatePayout::whereHas('referral', function ($q) use ($user) {
+                $q->where('accountant_id', $user->id);
+            })->where('approved', true)->where('paid', false)->sum('amount');
+
+            $totalPending = \App\Models\AffiliatePayout::whereHas('referral', function ($q) use ($user) {
+                $q->where('accountant_id', $user->id);
+            })->where('approved', false)->sum('amount');
+
+            $countPayouts = \App\Models\AffiliatePayout::whereHas('referral', function ($q) use ($user) {
+                $q->where('accountant_id', $user->id);
+            })->count();
+
+            $recentPayouts = \App\Models\AffiliatePayout::with(['referral.business'])
+                ->whereHas('referral', function ($q) use ($user) {
+                    $q->where('accountant_id', $user->id);
+                })->latest()->take(10)->get();
+
+            $affiliateSummary = [
+                'total_paid' => round(floatval($totalPaid), 2),
+                'total_approved_not_paid' => round(floatval($totalApprovedNotPaid), 2),
+                'total_pending' => round(floatval($totalPending), 2),
+                'payout_count' => $countPayouts,
+            ];
         }
 
         return Inertia::render('Admin/Users/Show', [
             'user' => $user,
             'userRole' => $userRole,
             'businessInfo' => $businessInfo,
+            'associatedBusinesses' => $associatedBusinesses,
+            'affiliateSummary' => $affiliateSummary,
+            'recentPayouts' => $recentPayouts,
         ]);
     }
 
@@ -98,7 +142,7 @@ class UserController
 
         return Inertia::render('Admin/Users/Edit', [
             'user' => $user,
-            'roles' => ['admin', 'business'],
+            'roles' => ['admin', 'business', 'accountant'],
             'currentRole' => $user->roles->first()?->name,
         ]);
     }
@@ -111,7 +155,7 @@ class UserController
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|in:admin,business',
+            'role' => 'required|in:admin,business,accountant',
         ]);
 
         $user->update([
@@ -151,7 +195,7 @@ class UserController
     public function changeRole(User $user, Request $request)
     {
         $validated = $request->validate([
-            'role' => 'required|in:admin,business',
+            'role' => 'required|in:admin,business,accountant',
         ]);
 
         // Sync role (removes old roles and assigns new)

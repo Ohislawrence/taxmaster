@@ -20,7 +20,7 @@ class FinancialStatementController extends Controller
      */
     public function index(Request $request)
     {
-        $business = $request->user()?->ownedBusiness;
+        $business = $request->user()?->defaultBusiness();
         if (!$business) {
             return redirect()->route('business.setup')
                 ->with('error', 'Please complete your business setup first.');
@@ -49,7 +49,7 @@ class FinancialStatementController extends Controller
      */
     public function downloadPdf(Request $request)
     {
-        $business = $request->user()?->ownedBusiness;
+        $business = $request->user()?->defaultBusiness();
         if (!$business) {
             return redirect()->route('business.setup')
                 ->with('error', 'Please complete your business setup first.');

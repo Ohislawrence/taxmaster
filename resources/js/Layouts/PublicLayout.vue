@@ -32,6 +32,7 @@ onUnmounted(() => {
 const navLinks = [
     { label: 'Product', href: '/#product' },
     { label: 'Features', href: '/features' },
+    { label: 'Tax Calculator', href: '/tax-calculator' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'About', href: '/about' },
 ];
@@ -43,7 +44,8 @@ const footerColumns = [
             { label: 'PAYE Filing', href: '/features' },
             { label: 'VAT Returns', href: '/features' },
             { label: 'WHT Remittance', href: '/features' },
-            { label: 'CIT Filing', href: '/features' },
+                { label: 'CIT Filing', href: '/features' },
+                { label: 'Tax Calculator', href: '/tax-calculator' },
             { label: 'Pricing', href: '/pricing' },
         ],
     },
@@ -51,6 +53,7 @@ const footerColumns = [
         title: 'Company',
         links: [
             { label: 'About Us', href: '/about' },
+            { label: 'For Accountants', href: '/for-accountants' },
             { label: 'Contact', href: '/contact' },
             { label: 'Blog', href: '/blog' },
             { label: 'Careers', href: '/careers' },

@@ -9,6 +9,9 @@
                     <h1 class="text-3xl font-bold text-gray-900">Businesses</h1>
                     <p class="text-gray-600 mt-1">Manage all active businesses on the platform</p>
                 </div>
+                <div>
+                    <Link href="/admin/businesses/create" class="bg-blue-600 text-white px-4 py-2 rounded">Create Business</Link>
+                </div>
             </div>
 
             <!-- Filters and Search -->
@@ -72,7 +75,24 @@
                                     {{ business.name }}
                                 </td>
                                 <td class="py-4 px-6 text-gray-600">
-                                    {{ business.owner.name }}
+                                    <div class="flex items-center gap-2">
+                                        <div>
+                                            <template v-if="business.owner && business.owner.name">
+                                                <span class="font-medium">{{ business.owner.name }}</span>
+                                                <div class="text-xs text-gray-500">Owner</div>
+                                            </template>
+
+                                            <template v-else-if="business.created_by_accountant_id && (business.createdByAccountant?.name || business.created_by_accountant?.name)">
+                                                <span class="font-medium">{{ business.createdByAccountant?.name || business.created_by_accountant?.name }}</span>
+                                                <div class="text-xs text-gray-500">Created by accountant</div>
+                                            </template>
+
+                                            <template v-else>
+                                                <span class="text-sm text-gray-700">No owner</span>
+                                                <div class="text-xs text-gray-500">Unassigned</div>
+                                            </template>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="py-4 px-6 text-gray-600">
                                     {{ business.email }}

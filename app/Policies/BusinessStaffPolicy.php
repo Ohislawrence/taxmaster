@@ -12,7 +12,7 @@ class BusinessStaffPolicy
      */
     public function view(User $user, BusinessStaff $staff): bool
     {
-        return $user->ownedBusiness?->id === $staff->business_id;
+        return $user->managesBusiness($staff->business_id);
     }
 
     /**
@@ -20,7 +20,7 @@ class BusinessStaffPolicy
      */
     public function create(User $user): bool
     {
-        return $user->ownedBusiness !== null;
+        return $user->ownedBusiness !== null || $user->businesses()->exists();
     }
 
     /**
@@ -28,7 +28,7 @@ class BusinessStaffPolicy
      */
     public function update(User $user, BusinessStaff $staff): bool
     {
-        return $user->ownedBusiness?->id === $staff->business_id;
+        return $user->managesBusiness($staff->business_id);
     }
 
     /**
@@ -36,6 +36,6 @@ class BusinessStaffPolicy
      */
     public function delete(User $user, BusinessStaff $staff): bool
     {
-        return $user->ownedBusiness?->id === $staff->business_id;
+        return $user->managesBusiness($staff->business_id);
     }
 }

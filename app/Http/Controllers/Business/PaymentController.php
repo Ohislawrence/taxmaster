@@ -24,7 +24,7 @@ class PaymentController
      */
     public function index()
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
 
         $payments = $business->taxPayments()
             ->with('taxReturn')
@@ -53,7 +53,7 @@ class PaymentController
      */
     public function create(Request $request)
     {
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
 
         $taxReturn = null;
         if ($request->tax_return_id) {
@@ -83,7 +83,7 @@ class PaymentController
             'amount' => 'required|numeric|min:1',
         ]);
 
-        $business = auth()->user()->ownedBusiness;
+        $business = auth()->user()->defaultBusiness();
         $taxReturn = TaxReturn::findOrFail($validated['tax_return_id']);
 
         if ($taxReturn->business_id !== $business->id) {
