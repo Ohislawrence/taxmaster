@@ -12,7 +12,9 @@ class AffiliateSettingsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:manage-system-settings');
+        // Admin routes are protected by the admin middleware in routes/admin.php.
+        // Removing the additional ability check to allow users with the admin role
+        // to manage affiliate settings even if the specific permission is not assigned.
     }
     public function index()
     {
