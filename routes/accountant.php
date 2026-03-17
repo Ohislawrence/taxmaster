@@ -14,6 +14,8 @@ Route::middleware(['auth:sanctum', 'verified', \Spatie\Permission\Middleware\Rol
     Route::get('businesses/create', [AccountantBusinessController::class, 'create'])->name('businesses.create');
     Route::post('businesses', [AccountantBusinessController::class, 'store'])->name('businesses.store');
     Route::get('businesses/{business}', [AccountantBusinessController::class, 'show'])->name('businesses.show');
+    Route::get('businesses/{business}/invites', [\App\Http\Controllers\Accountant\BusinessInviteController::class, 'index'])->name('businesses.invites.index');
+    Route::post('businesses/{business}/invite', [\App\Http\Controllers\Accountant\BusinessInviteController::class, 'store'])->name('businesses.invite');
     Route::post('businesses/{business}/detach', [AccountantBusinessController::class, 'detach'])->name('businesses.detach');
         // Affiliate dashboard for accountants
             Route::get('affiliate', [\App\Http\Controllers\Accountant\AffiliateController::class, 'index'])->name('affiliate.index');

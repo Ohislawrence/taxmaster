@@ -150,6 +150,7 @@ const clearPhotoFileInput = () => {
                     v-model="form.email"
                     type="email"
                     class="mt-1 block w-full"
+                    readonly
                     required
                     autocomplete="username"
                 />

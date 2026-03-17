@@ -14,7 +14,7 @@ const features = ref([
     },
     {
         title: 'Automated Filing & Schedules',
-        description: 'Generate PAYE, VAT, WHT and CIT returns with prefilled schedules and downloadable reports.',
+        description: 'Generate PAYE, VAT, WHT and CIT returns with prefilled schedules and downloadable reports all Ai assisted.',
         icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
     }
 ]);
@@ -41,19 +41,19 @@ onMounted(() => {
         <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <!-- Hero Section -->
             <div class="text-center max-w-4xl mx-auto mb-12 sm:mb-16 lg:mb-20 reveal">
-                
+
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight mb-4">
                     TaxMaster for Accountants
                 </h1>
-                
+
                 <p class="text-base sm:text-lg lg:text-xl text-slate-500 leading-relaxed max-w-3xl mx-auto">
                     Manage multiple clients, automate filings, get paid, and grow your practice with TaxMaster's accountant tools — built for Nigerian tax workflows.
                 </p>
 
                 <!-- CTA Buttons -->
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
-                    <Link 
-                        :href="route('contact')" 
+                    <Link
+                        :href="route('contact')"
                         class="group inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 sm:px-8 py-3 sm:py-4 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-slate-900/20 active:scale-95"
                     >
                         Contact us to request an accountant account
@@ -61,8 +61,8 @@ onMounted(() => {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </Link>
-                    
-                    <Link 
+
+                    <Link
                         href="#features"
                         class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 sm:px-8 py-3 sm:py-4 text-sm font-medium text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
                     >
@@ -70,13 +70,13 @@ onMounted(() => {
                     </Link>
                 </div>
 
-                <p class="text-xs text-slate-500 mt-4">Accountant roles are issued by our admin team — please contact us to request an accountant account.</p>
+                <p class="text-xs text-slate-500 mt-4">Please contact us to request an accountant account.</p>
             </div>
 
             <!-- Quick summary cards - Enhanced -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-12 sm:mb-16">
-                <div 
-                    v-for="(feature, index) in features" 
+                <div
+                    v-for="(feature, index) in features"
                     :key="index"
                     class="group bg-white rounded-2xl sm:rounded-3xl border border-slate-100 p-6 sm:p-8 transition-all duration-300 hover:border-slate-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] reveal"
                     :style="{ transitionDelay: `${index * 100}ms` }"
@@ -198,7 +198,7 @@ onMounted(() => {
                             </div>
                             <h3 class="text-xl sm:text-2xl font-bold text-slate-900">Affiliate & Referral Features</h3>
                         </div>
-                        
+
                         <p class="text-sm text-slate-500 mb-6">Grow revenue by referring clients to TaxMaster. Our affiliate system is built for accountants who introduce businesses to the platform.</p>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -230,7 +230,7 @@ onMounted(() => {
                     <!-- Benefits Card -->
                     <div class="bg-slate-50 rounded-2xl sm:rounded-3xl border border-slate-200 p-6 sm:p-8 reveal">
                         <h4 class="text-lg font-semibold text-slate-900 mb-4">Benefits for your practice</h4>
-                        
+
                         <ul class="space-y-3">
                             <li class="flex items-center gap-3 text-sm text-slate-600">
                                 <svg class="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -265,8 +265,8 @@ onMounted(() => {
                         </ul>
 
                         <div class="mt-6">
-                            <Link 
-                                :href="route('contact')" 
+                            <Link
+                                :href="route('contact')"
                                 class="group w-full inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-slate-900/20 active:scale-95"
                             >
                                 Contact us to request an accountant account
@@ -341,7 +341,7 @@ onMounted(() => {
                         </div>
                     </div>
                     <p class="text-sm text-slate-600 italic">"TaxMaster reduced our month-end filing time from 3 days to 3 hours. The multi-client dashboard is a game-changer for our practice."</p>
-                    
+
                     <!-- Rating -->
                     <div class="flex items-center gap-1 mt-4">
                         <svg v-for="n in 5" :key="n" class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -362,7 +362,7 @@ onMounted(() => {
                         </div>
                     </div>
                     <p class="text-sm text-slate-600 italic">"The affiliate program alone has created a new revenue stream for us. We're now recommending TaxMaster to all our clients."</p>
-                    
+
                     <!-- Rating -->
                     <div class="flex items-center gap-1 mt-4">
                         <svg v-for="n in 5" :key="n" class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -380,10 +380,10 @@ onMounted(() => {
                 <p class="text-base sm:text-lg text-slate-500 mb-8 max-w-2xl mx-auto">
                     Join hundreds of accounting firms already saving time and growing revenue with TaxMaster.
                 </p>
-                
+
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <Link 
-                        :href="route('contact')" 
+                    <Link
+                        :href="route('contact')"
                         class="group inline-flex items-center gap-2 rounded-full bg-slate-900 px-8 py-4 text-base font-semibold text-white transition-all hover:shadow-lg hover:shadow-slate-900/20 active:scale-95"
                     >
                         Contact us to request an accountant account
@@ -391,8 +391,8 @@ onMounted(() => {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </Link>
-                    
-                    <Link 
+
+                    <Link
                         href="/contact"
                         class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-8 py-4 text-base font-medium text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
                     >

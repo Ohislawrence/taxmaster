@@ -18,6 +18,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+            \App\Listeners\AssignBusinessOwnerFromInvitation::class,
         ],
         TransactionCreated::class => [
             CategorizeTransactionWithAi::class,

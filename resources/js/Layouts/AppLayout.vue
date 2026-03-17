@@ -91,7 +91,7 @@ const logout = () => {
                                             </DropdownLink>
 
                                             <!-- Team Switcher -->
-                                            <template v-if="$page.props.auth.user.all_teams.length > 1">
+                                            <template v-if="$page.props.auth.user.all_teams && $page.props.auth.user.all_teams.length > 1">
                                                 <div class="border-t border-gray-200" />
 
                                                 <div class="block px-4 py-2 text-xs text-gray-400">
@@ -250,8 +250,8 @@ const logout = () => {
                                     Create New Team
                                 </ResponsiveNavLink>
 
-                                <!-- Team Switcher -->
-                                <template v-if="$page.props.auth.user.all_teams.length > 1">
+                                                <!-- Team Switcher -->
+                                                <template v-if="$page.props.auth.user.all_teams && $page.props.auth.user.all_teams.length > 1">
                                     <div class="border-t border-gray-200" />
 
                                     <div class="block px-4 py-2 text-xs text-gray-400">

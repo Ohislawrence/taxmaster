@@ -25,6 +25,7 @@ Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name(
 
     // Businesses Management
     Route::resource('businesses', BusinessController::class);
+    Route::get('businesses/{business}/invites', [\App\Http\Controllers\Accountant\BusinessInviteController::class, 'index'])->name('businesses.invites');
     Route::get('businesses/{business}/activity', [BusinessController::class, 'activity'])->name('businesses.activity');
     Route::put('businesses/{business}/status', [BusinessController::class, 'updateStatus'])->name('businesses.status');
     Route::post('businesses/{business}/assign-accountant', [BusinessController::class, 'assignAccountant'])->name('businesses.assign-accountant');

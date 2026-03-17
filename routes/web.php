@@ -57,6 +57,7 @@ Route::get('/for-accountants', function () {
 })->name('accountant.features');
 Route::get('/about', fn () => Inertia::render('Public/About', ['title' => 'About']))->name('about');
 Route::get('/contact', fn () => Inertia::render('Public/Contact', ['title' => 'Contact']))->name('contact');
+Route::post('/contact', [App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send');
 
 // Legal & compliance pages (serve markdown from resources/markdown)
 use Illuminate\Support\Facades\File as FileFacade;
@@ -121,6 +122,22 @@ Route::middleware([
     'verified',
     'ensure.business.setup',
 ])->group(function () {
+    // Profile route: render role-appropriate profile page
+    Route::get('/profile', function () {
+        $user = auth()->user();
+        if ($user && method_exists($user, 'hasRole')) {
+            if ($user->hasRole('admin')) {
+                return Inertia::render('Admin/Profile', ['user' => $user]);
+            }
+            if ($user->hasRole('accountant')) {
+                return Inertia::render('Accountant/Profile', ['user' => $user]);
+            }
+            if ($user->hasRole('business')) {
+                return Inertia::render('Business/Profile', ['user' => $user]);
+            }
+        }
+        return Inertia::render('Profile/Show', ['user' => $user]);
+    })->name('profile.show');
     Route::get('/dashboard', function () {
         $user = auth()->user();
 

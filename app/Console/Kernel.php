@@ -48,6 +48,12 @@ class Kernel extends ConsoleKernel
 
         // Report invoices to NRS every hour
         $schedule->command('invoices:report-nrs')->hourly()->runInBackground();
+
+        // Process queued jobs once per minute (suitable for shared hosts/cPanel)
+        $schedule->command('queue:work --once --tries=3')
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->onOneServer();
     }
 
     /**

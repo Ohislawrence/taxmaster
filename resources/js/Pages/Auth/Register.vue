@@ -8,12 +8,22 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 
+import { usePage } from '@inertiajs/vue3'
+
+const page = usePage()
+
+// Prefill invite token/email when present in URL query (e.g., /register?invite=...&email=...)
+const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+const prefillEmail = urlParams.get('email') || ''
+const prefillInvite = urlParams.get('invite') || ''
+
 const form = useForm({
     name: '',
-    email: '',
+    email: prefillEmail,
     password: '',
     password_confirmation: '',
     terms: false,
+    invite: prefillInvite,
 });
 
 const submit = () => {

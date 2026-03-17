@@ -15,16 +15,12 @@ class EnsureBusinessSetup
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // If user is authenticated and verified but has not owned a business, redirect to setup
-        if (
-            auth()->check() &&
-            auth()->user()->hasVerifiedEmail() &&
-            !(
-                auth()->user()->ownedBusiness()->exists() ||
-                auth()->user()->businesses()->exists()
-            )
-        ) {
-            return redirect()->route('business.setup.create');
+        // Only enforce business setup for users with the 'business' role.
+        // Accountants, admins and other roles should not be forced to complete business setup.
+        if (auth()->check() && auth()->user()->hasVerifiedEmail() && method_exists(auth()->user(), 'isBusiness') && auth()->user()->isBusiness()) {
+            if (!(auth()->user()->ownedBusiness()->exists() || auth()->user()->businesses()->exists())) {
+                return redirect()->route('business.setup.create');
+            }
         }
 
         return $next($request);

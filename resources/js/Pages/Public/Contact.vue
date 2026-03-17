@@ -2,6 +2,7 @@
 import { useForm } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
 import { ref, onMounted, nextTick } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 
 defineOptions({ layout: PublicLayout });
@@ -14,6 +15,8 @@ const form = useForm({
     message: '',
 });
 
+const page = usePage();
+
 const submit = () => {
     form.post('/contact', {
         preserveScroll: true,
@@ -25,14 +28,14 @@ const contactInfo = [
     {
         icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
         label: 'Email',
-        value: 'hello@taxmaster.ng',
-        href: 'mailto:hello@taxmaster.ng',
+        value: 'support@taxmaster.ng',
+        href: 'mailto:support@taxmaster.ng',
     },
     {
         icon: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z',
         label: 'Phone',
-        value: '+234 (0) 812 345 6789',
-        href: 'tel:+2348123456789',
+        value: '+234 (0) 811 729 7730',
+        href: 'tel:+2348117297730',
     },
     {
         icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z',
@@ -49,7 +52,7 @@ const faqs = [
     },
     {
         q: "Do you offer on-site demos in Lagos?",
-        a: "Yes, for teams of 10+ users, we offer on-site demos across Lagos, Abuja, and Port Harcourt."
+        a: "Yes, for teams of 10+ users, we offer on-site demos in Lagos, virtual available also."
     },
     {
         q: "Can I speak with a tax expert directly?",
@@ -115,6 +118,22 @@ onMounted(() => {
             </div>
         </div>
     </section>
+
+    <!-- Success flash -->
+    <div v-if="page.props.flash && page.props.flash.success" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
+        <div class="rounded-md bg-green-50 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800">{{ page.props.flash.success }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Contact Grid -->
     <section class="py-16 sm:py-20 lg:py-28 bg-gray-50/50 relative overflow-hidden">

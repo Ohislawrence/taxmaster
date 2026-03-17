@@ -18,7 +18,7 @@
           <div class="bg-white rounded-2xl border border-gray-200/50 shadow-sm overflow-hidden mb-6">
             <div class="p-6 lg:p-8">
               <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-                <!-- Business Info -->
+                <!-- Business Info Section -->
                 <div class="flex-1">
                   <div class="flex items-start gap-4">
                     <!-- Business Avatar -->
@@ -129,6 +129,31 @@
             </div>
           </div>
 
+          <!-- Quick Actions -->
+          <div class="flex items-center justify-end gap-3 text-sm mb-6">
+            <button @click.prevent="openInvite" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Invite Owner</span>
+            </button>
+            <Link :href="`/accountant/businesses/${business.id}/invites`" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7h18M3 12h18M3 17h18" />
+              </svg>
+              <span>View Invites</span>
+            </Link>
+            <Link 
+              href="/accountant/businesses" 
+              class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Back to List</span>
+            </Link>
+          </div>
+
           <!-- Description Card -->
           <div class="bg-white rounded-2xl border border-gray-200/50 shadow-sm overflow-hidden mb-6">
             <div class="p-6">
@@ -175,18 +200,30 @@
             </div>
           </div>
 
-          <!-- Quick Actions -->
-          <div class="mt-6 flex items-center justify-end gap-3 text-sm">
-            
-            <Link 
-              href="/accountant/businesses" 
-              class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span>Back to List</span>
-            </Link>
+          <!-- Invite Modal -->
+          <div v-if="inviteModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" @click.self="inviteModal = false">
+            <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Invite a business owner</h3>
+                <button @click="inviteModal = false" class="text-gray-400 hover:text-gray-600">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <p class="text-sm text-gray-600 mb-4">Enter the email address of the person who should own this business. They will receive a link to register and claim ownership.</p>
+              <div>
+                <label class="text-sm font-medium text-gray-700">Email</label>
+                <input v-model="inviteEmail" type="email" class="block w-full mt-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                <p v-if="inviteErrors.email" class="text-xs text-red-500 mt-1">{{ inviteErrors.email }}</p>
+              </div>
+              <div class="mt-6 flex justify-end gap-3">
+                <button @click="inviteModal = false" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+                <button @click="sendInvite" :disabled="inviteProcessing" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  {{ inviteProcessing ? 'Sending...' : 'Send Invite' }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -205,6 +242,14 @@ export default {
     business: Object,
     openView: { type: String, default: null },
   },
+  data() {
+    return {
+      inviteModal: false,
+      inviteEmail: '',
+      inviteProcessing: false,
+      inviteErrors: {},
+    }
+  },
   mounted() {
     // If openView is provided (e.g., ?view=vat), auto-submit the switch form to set business context and redirect
     if (this.openView) {
@@ -222,6 +267,27 @@ export default {
       if (confirm('Are you sure you want to remove your access to this business? This action cannot be undone.')) {
         event.target.submit();
       }
+    },
+    openInvite() {
+      this.inviteModal = true;
+      this.inviteEmail = this.business.email || '';
+      this.inviteErrors = {};
+    },
+    sendInvite() {
+      this.inviteErrors = {};
+      if (!this.inviteEmail || !/.+@.+\..+/.test(this.inviteEmail)) {
+        this.inviteErrors.email = 'Please enter a valid email address.';
+        return;
+      }
+      this.inviteProcessing = true;
+      router.post(`/accountant/businesses/${this.business.id}/invite`, { email: this.inviteEmail }, {
+        onSuccess: () => {
+          this.inviteModal = false;
+        },
+        onFinish: () => { 
+          this.inviteProcessing = false;
+        }
+      });
     }
   }
 };
