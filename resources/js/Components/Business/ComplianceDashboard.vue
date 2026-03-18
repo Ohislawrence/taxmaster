@@ -11,6 +11,18 @@
                     <div>
                         <h3 class="text-lg font-medium opacity-90">Overall Compliance Rate</h3>
                         <p class="text-4xl font-bold mt-2">{{ complianceStatus?.compliance_rate || 0 }}%</p>
+                        <div v-if="complianceStatus?.risk" class="mt-3 flex items-center space-x-3">
+                            <span class="text-2xl">{{ complianceStatus.risk.emoji }}</span>
+                            <div>
+                                <div class="text-sm font-semibold">{{ formatRiskLabel(complianceStatus.risk.level) }}</div>
+                                <div class="text-xs text-gray-500">Score: {{ complianceStatus.risk.score }}</div>
+                                <div v-if="complianceStatus.risk.reasons && complianceStatus.risk.reasons.length" class="text-xs text-gray-600 mt-1">
+                                    <ul class="list-disc pl-4">
+                                        <li v-for="(r, i) in complianceStatus.risk.reasons" :key="i">{{ r }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="text-6xl opacity-20">
                         ✓
@@ -64,14 +76,14 @@
             <!-- Upcoming Deadlines -->
             <div class="mt-8">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Upcoming Deadlines (Next 30 Days)</h3>
-                
+
                 <div v-if="!upcomingDeadlines || upcomingDeadlines.length === 0" class="text-gray-500 text-center py-8">
                     <p>No upcoming deadlines</p>
                 </div>
 
                 <div v-else class="space-y-3">
-                    <div 
-                        v-for="deadline in upcomingDeadlines" 
+                    <div
+                        v-for="deadline in upcomingDeadlines"
                         :key="deadline.id"
                         class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
                         :class="{
@@ -90,19 +102,19 @@
                             </p>
                         </div>
                         <div>
-                            <span 
+                            <span
                                 v-if="deadline.days_until < 7"
                                 class="px-3 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full"
                             >
                                 Urgent
                             </span>
-                            <span 
+                            <span
                                 v-else-if="deadline.days_until < 14"
                                 class="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full"
                             >
                                 Soon
                             </span>
-                            <span 
+                            <span
                                 v-else
                                 class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full"
                             >
@@ -117,8 +129,8 @@
             <div v-if="reminders && reminders.length > 0" class="mt-8">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Active Reminders</h3>
                 <div class="space-y-2">
-                    <div 
-                        v-for="reminder in reminders" 
+                    <div
+                        v-for="reminder in reminders"
                         :key="reminder.id"
                         class="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded"
                     >
@@ -129,7 +141,7 @@
                                 <p class="text-xs text-gray-600">Reminder on: {{ formatDate(reminder.reminder_date) }}</p>
                             </div>
                         </div>
-                        <button 
+                        <button
                             @click="dismissReminder(reminder.id)"
                             class="text-sm text-gray-500 hover:text-gray-700"
                         >
@@ -164,15 +176,23 @@ defineProps({
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-NG', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+    return date.toLocaleDateString('en-NG', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
     });
 };
 
 const dismissReminder = (reminderId) => {
     // Implement dismiss functionality
     console.log('Dismiss reminder:', reminderId);
+};
+
+const formatRiskLabel = (level) => {
+    if (!level) return '';
+    if (level === 'compliant') return 'Compliant';
+    if (level === 'at_risk') return 'At Risk';
+    if (level === 'high_risk') return 'High Risk';
+    return level;
 };
 </script>

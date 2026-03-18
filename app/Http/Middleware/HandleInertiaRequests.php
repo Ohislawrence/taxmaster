@@ -53,6 +53,14 @@ class HandleInertiaRequests extends Middleware
                 $subscriptionService = app(\App\Services\SubscriptionService::class);
                 $subscription = $subscriptionService->getActiveSubscription($business);
                 $usageStats = $subscriptionService->getUsageStats($business);
+
+                // Attach cached compliance status (including risk) for the current business
+                try {
+                    $complianceService = app(\App\Services\ComplianceService::class);
+                    $complianceStatus = $complianceService->getComplianceStatusCached($business);
+                } catch (\Throwable $e) {
+                    $complianceStatus = null;
+                }
             }
         }
 
@@ -86,6 +94,7 @@ class HandleInertiaRequests extends Middleware
                 'id' => $business->id,
                 'name' => $business->name,
                 'slug' => $business->slug,
+                'compliance_status' => $complianceStatus ?? null,
             ] : null,
         ];
     }

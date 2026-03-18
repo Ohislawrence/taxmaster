@@ -10,7 +10,7 @@ class BusinessInvitation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'business_id', 'inviter_id', 'email', 'token', 'expires_at', 'used_at', 'accepted_by',
+        'business_id', 'inviter_id', 'email', 'token', 'expires_at', 'used_at', 'accepted_by', 'role',
     ];
 
     protected $casts = [

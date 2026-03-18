@@ -49,11 +49,19 @@ class Kernel extends ConsoleKernel
         // Report invoices to NRS every hour
         $schedule->command('invoices:report-nrs')->hourly()->runInBackground();
 
-        // Process queued jobs once per minute (suitable for shared hosts/cPanel)
-        $schedule->command('queue:work --once --tries=3')
+        // Process queued jobs via a wrapper command once per minute (suitable for shared hosts/cPanel)
+        $schedule->command('app:process-queue')
             ->everyMinute()
             ->withoutOverlapping()
-            ->onOneServer();
+            ->onOneServer()
+            ->appendOutputTo(storage_path('logs/scheduled_queue.log'));
+
+        // Auto-reconcile invoices and transactions periodically
+        $schedule->job(new \App\Jobs\AutoReconcileInvoices())
+            ->everyFifteenMinutes()
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->appendOutputTo(storage_path('logs/reconciliation.log'));
     }
 
     /**

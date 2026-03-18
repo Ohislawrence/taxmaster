@@ -55,6 +55,13 @@ Route::get('/for-accountants', function () {
         'title' => 'TaxMaster for Accountants',
     ]);
 })->name('accountant.features');
+
+// Businesses features landing page
+Route::get('/for-businesses', function () {
+    return Inertia::render('Public/BusinessFeatures', [
+        'title' => 'TaxMaster for Businesses',
+    ]);
+})->name('business.features');
 Route::get('/about', fn () => Inertia::render('Public/About', ['title' => 'About']))->name('about');
 Route::get('/contact', fn () => Inertia::render('Public/Contact', ['title' => 'Contact']))->name('contact');
 Route::post('/contact', [App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send');
@@ -103,6 +110,9 @@ Route::get('/affiliate/{code}', function ($code) {
     session(['affiliate_code' => $code]);
     return redirect()->route('pricing');
 })->name('affiliate.link');
+
+// Signed file serve route (used as fallback when storage driver doesn't support temporary URLs)
+Route::get('/files/serve/{encodedPath}', [App\Http\Controllers\Business\FileController::class, 'serve'])->name('files.serve');
 
 
 // Business Setup Routes (after email verification)

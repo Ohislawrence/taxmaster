@@ -20,6 +20,8 @@ use App\Http\Controllers\Business\CacFormController;
 use App\Http\Controllers\BusinessSetupController;
 use App\Http\Controllers\Business\GetStartedController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Controllers\Business\TaxInsightsController;
 
 use App\Http\Middleware\EnsureBusinessOrManager;
 
@@ -107,6 +109,21 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
         Route::post('ai/tax-returns/{taxReturn}/optimize', [AiController::class, 'getTaxOptimizationRecommendations'])->name('ai.tax-optimize');
     });
 
+    // Tax Insights (simple trends view + data endpoint)
+    Route::get('insights', function () {
+        return Inertia::render('Business/Insights/TaxTrends');
+    })->name('insights.index');
+
+    // Business invites: allow business owners to invite accountants
+    Route::post('invite/accountant', [App\Http\Controllers\Business\AccountantInviteController::class, 'store'])->name('invite.accountant');
+    Route::get('invites', [App\Http\Controllers\Business\AccountantInviteController::class, 'index'])->name('invites.index');
+    Route::delete('invites/{invite}', [App\Http\Controllers\Business\AccountantInviteController::class, 'destroy'])->name('invites.revoke');
+    Route::post('accountant/detach', [App\Http\Controllers\Business\AccountantInviteController::class, 'detachAccountant'])->name('accountant.detach');
+
+    Route::get('insights/tax-trends', [TaxInsightsController::class, 'taxTrends'])->name('insights.tax-trends');
+    Route::get('insights/summary', [TaxInsightsController::class, 'summary'])->name('insights.summary');
+    Route::get('insights/anomalies', [TaxInsightsController::class, 'anomalies'])->name('insights.anomalies');
+
         // Bank Accounts & Transactions (Phase 1)
         Route::prefix('banks')->name('banks.')->middleware('subscription.features:link_bank_account')->group(function () {
             Route::get('/', [BankAccountController::class, 'index'])->name('index');
@@ -122,6 +139,13 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
             Route::get('/{transaction}/categorize', [TransactionController::class, 'categorize'])->name('categorize');
             Route::put('/{transaction}/category', [TransactionController::class, 'updateCategory'])->name('update-category');
             Route::post('/batch-categorize', [TransactionController::class, 'batchCategorize'])->name('batch-categorize');
+            // Reconciliations review
+            Route::get('/reconciliations', [App\Http\Controllers\Business\ReconciliationController::class, 'index'])->name('reconciliations.index');
+            Route::post('/reconciliations/{reconciliation}/confirm', [App\Http\Controllers\Business\ReconciliationController::class, 'confirm'])->name('reconciliations.confirm');
+            Route::post('/reconciliations/{reconciliation}/reject', [App\Http\Controllers\Business\ReconciliationController::class, 'reject'])->name('reconciliations.reject');
+                // Signed URLs for attachments and PDFs
+                Route::get('/reconciliations/{reconciliation}/attachment/{index}/signed', [App\Http\Controllers\Business\FileController::class, 'reconciliationAttachment'])->name('reconciliations.attachment.signed');
+                Route::get('/invoices/{invoice}/pdf/signed', [App\Http\Controllers\Business\FileController::class, 'invoicePdfSigned'])->name('invoices.pdf.signed');
             Route::middleware('subscription.features:export_pdf')->get('/export', [TransactionController::class, 'export'])->name('export');
         });
 

@@ -93,11 +93,11 @@ onMounted(() => {
             <div class="mx-auto max-w-3xl text-center">
 
                 <h1 class="reveal reveal-up text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl lg:leading-[1.15]">
-                    Making tax compliance simple for <span class="text-blue-600">every Nigerian business</span>
+                    Make compliance simple, reliable, and fast for <span class="text-blue-600">Nigerian businesses</span>
                 </h1>
 
                 <p class="reveal reveal-up mt-6 text-base leading-relaxed text-gray-600 sm:text-lg max-w-2xl mx-auto">
-                    TaxMaster was born from the frustration of dealing with Nigeria's complex, multi-layered tax system. We believe no business should face penalties because compliance is too hard.
+                    Built by Nigerian tax practitioners and engineers, TaxMaster turns complex rules into automated workflows so you file on time, avoid penalties, and free your team to focus on growth.
                 </p>
 
                 <div class="reveal reveal-up mt-8 flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500">
@@ -128,10 +128,10 @@ onMounted(() => {
             <div class="reveal reveal-up max-w-3xl">
                 <p class="text-sm font-semibold uppercase tracking-wider text-blue-400 mb-4">Our Mission</p>
                 <h2 class="text-2xl font-bold text-white sm:text-3xl lg:text-4xl leading-tight">
-                    Automate the calculation. Simplify the filing. Eliminate the penalties.
+                    Automate calculations. Deliver filing-ready outputs. Avoid penalties.
                 </h2>
                 <p class="mt-6 text-gray-400 text-lg leading-relaxed">
-                    Nigerian businesses spend 40+ hours monthly on tax compliance. We reduce that to under 2 hours by automating calculations, generating filing-ready schedules, and tracking deadlines — so you never miss a payment.
+                    Nigerian businesses spend 40+ hours monthly on tax compliance. TaxMaster reduces that to under 2 hours with accurate computations, validated exports for FIRS and state portals, and automated deadline tracking.
                 </p>
                 <div class="mt-8 flex items-center gap-6">
                     <div class="flex -space-x-3">

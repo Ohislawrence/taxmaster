@@ -28,6 +28,11 @@ class BusinessInviteController extends Controller
             'email' => ['required','email','max:255'],
         ]);
 
+        // Ensure business does not already have an owner
+        if ($business->owner_id) {
+            return back()->with('error', 'This business already has an owner assigned.');
+        }
+
         $token = Str::random(48);
 
         $invite = BusinessInvitation::create([
@@ -35,6 +40,7 @@ class BusinessInviteController extends Controller
             'inviter_id' => $user->id,
             'email' => strtolower(trim($data['email'])),
             'token' => hash('sha256', $token),
+            'role' => 'owner',
             'expires_at' => now()->addDays(14),
         ]);
 

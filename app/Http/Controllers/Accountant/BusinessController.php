@@ -24,9 +24,23 @@ class BusinessController extends Controller
         $owned = $user->businesses()->get();
         $managed = $user->managedBusinesses()->get();
 
+        $complianceService = app(\App\Services\ComplianceService::class);
+
+        $ownedTransformed = $owned->map(function ($b) use ($complianceService) {
+            return array_merge($b->toArray(), [
+                'compliance_status' => $complianceService->getComplianceStatusCached($b),
+            ]);
+        });
+
+        $managedTransformed = $managed->map(function ($b) use ($complianceService) {
+            return array_merge($b->toArray(), [
+                'compliance_status' => $complianceService->getComplianceStatusCached($b),
+            ]);
+        });
+
         return Inertia::render('Accountant/Businesses/Index', [
-            'businesses' => $owned,
-            'managedBusinesses' => $managed,
+            'businesses' => $ownedTransformed,
+            'managedBusinesses' => $managedTransformed,
         ]);
     }
 

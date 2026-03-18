@@ -26,9 +26,11 @@
         "@mono.co/connect.js": "^2.1.0",
         "@tinymce/tinymce-vue": "^6.3.0",
         "@vueup/vue-quill": "^1.2.0",
+        "apexcharts": "^4.7.0",
         "mono-node": "^1.0.3",
         "papaparse": "^5.5.3",
         "quill": "^2.0.3",
+        "vue3-apexcharts": "^1.11.1",
         "xlsx": "^0.18.5"
     }
 }

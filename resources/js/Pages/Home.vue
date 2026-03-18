@@ -92,12 +92,12 @@ const activeFeature = ref(0);
 
                     <!-- Headline -->
                     <h1 class="reveal reveal-up text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-[3.5rem] lg:leading-[1.1]">
-                        Tax compliance for modern businesses
+                        Tax compliance that works for modern Nigerian businesses
                     </h1>
 
                     <!-- Sub-headline -->
                     <p class="reveal reveal-up mt-4 text-base leading-relaxed text-gray-500 sm:mt-6 sm:text-lg lg:text-xl">
-                        Automate PAYE, VAT, WHT & CIT calculations. Connect your bank, calculate taxes instantly, and generate filing and payment instructions for remittance.
+                        Automate PAYE, VAT, WHT & CIT calculations. Connect your bank, calculate taxes instantly, and generate validated, filing-ready exports and payment instructions so you file on time and avoid penalties.
                     </p>
 
                     <!-- CTA Buttons — Black -->
@@ -131,7 +131,7 @@ const activeFeature = ref(0);
                     </p>
                     <!-- Clarification about remittance -->
                     <p class="reveal reveal-up mt-2 text-xs text-gray-400">
-                        Note: TaxMaster generates filing-ready returns and exportable payment instructions. Manual remittance of payments is required today; programmatic remittance integrations are planned.
+                        Note: TaxMaster generates filing-ready returns and exportable payment instructions. Manual remittance is required today; scheduled programmatic remittance (card & bank) is available on higher plans.
                     </p>
                 </div>
 

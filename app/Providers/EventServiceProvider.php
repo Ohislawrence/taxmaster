@@ -19,6 +19,8 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
             \App\Listeners\AssignBusinessOwnerFromInvitation::class,
+            \App\Listeners\SendBusinessWelcomeEmail::class,
+            \App\Listeners\SendAccountantWelcomeEmail::class,
         ],
         TransactionCreated::class => [
             CategorizeTransactionWithAi::class,

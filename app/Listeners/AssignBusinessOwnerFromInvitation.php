@@ -23,14 +23,35 @@ class AssignBusinessOwnerFromInvitation
         }
 
         $business = $invite->business;
-        if ($business) {
-            // assign ownership to the newly registered user
-            $business->owner_id = $user->id;
-            $business->save();
-
-            $invite->used_at = now();
-            $invite->accepted_by = $user->id;
-            $invite->save();
+        if (! $business) {
+            return;
         }
+
+        $role = $invite->role ?? 'owner';
+
+        if ($role === 'accountant') {
+            // Only attach if there's no accountant yet
+            try {
+                if (! $business->accountants()->exists()) {
+                    $business->accountants()->attach($user->id);
+                } else {
+                    \Illuminate\Support\Facades\Log::info('Accountant invite accepted but business already has an accountant. Skipping attach.');
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to attach accountant from invite: ' . $e->getMessage());
+            }
+        } else {
+            // assign ownership only if unassigned
+            if (! $business->owner_id) {
+                $business->owner_id = $user->id;
+                $business->save();
+            } else {
+                \Illuminate\Support\Facades\Log::info('Owner invite accepted but business already has an owner. Skipping assignment.');
+            }
+        }
+
+        $invite->used_at = now();
+        $invite->accepted_by = $user->id;
+        $invite->save();
     }
 }

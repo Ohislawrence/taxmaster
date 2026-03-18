@@ -45,7 +45,7 @@ class TaxReturnController extends Controller
             ->orderBy('tax_period', 'desc')
             ->paginate(20);
 
-        $complianceStatus = $this->complianceService->getComplianceStatus($business);
+        $complianceStatus = $this->complianceService->getComplianceStatusCached($business);
 
         return Inertia::render('Business/TaxReturns/Index', [
             'taxReturns' => $taxReturns,

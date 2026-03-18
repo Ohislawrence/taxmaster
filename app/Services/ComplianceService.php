@@ -9,6 +9,7 @@ use App\Models\TaxReturn;
 use App\Models\TaxType;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ComplianceService
 {
@@ -185,12 +186,100 @@ class ComplianceService
         $upcomingDeadlines = $this->getUpcomingDeadlines($business, 30);
         $statusCounts['upcoming'] = $upcomingDeadlines->count();
 
+        $complianceRate = $this->calculateComplianceRate($statusCounts);
+        $risk = $this->computeComplianceRisk($statusCounts, $complianceRate, $totalPenalties, $upcomingDeadlines->count());
+
         return [
             'status_counts' => $statusCounts,
             'total_estimated_penalties' => round($totalPenalties, 2),
             'overdue_returns' => $overdueReturns,
             'upcoming_deadlines' => $upcomingDeadlines,
-            'compliance_rate' => $this->calculateComplianceRate($statusCounts),
+            'compliance_rate' => $complianceRate,
+            'risk' => $risk,
+        ];
+    }
+
+    /**
+     * Get cached compliance status for a business.
+     * Cache key: `compliance_status:business:{id}`
+     */
+    public function getComplianceStatusCached(Business $business, int $ttlSeconds = 600): array
+    {
+        $key = "compliance_status:business:{$business->id}";
+        return Cache::remember($key, $ttlSeconds, function () use ($business) {
+            return $this->getComplianceStatus($business);
+        });
+    }
+
+    /**
+     * Clear cached compliance status for a business.
+     */
+    public function clearComplianceStatusCache(Business $business): void
+    {
+        $key = "compliance_status:business:{$business->id}";
+        Cache::forget($key);
+    }
+
+    /**
+     * Compute a simple compliance risk score and category.
+     * Returns array with `level` (compliant|at_risk|high_risk), `emoji`, `score` and `reasons`.
+     */
+    protected function computeComplianceRisk(array $statusCounts, float $complianceRate, float $totalPenalties, int $upcomingCount): array
+    {
+        $points = 0;
+
+        // Missed deadlines (overdue returns)
+        $overdue = $statusCounts['overdue'] ?? 0;
+        $points += min($overdue, 10) * 3;
+
+        // Low compliance rate is a strong signal
+        if ($complianceRate < 80) {
+            $points += 6;
+        } elseif ($complianceRate < 95) {
+            $points += 2;
+        }
+
+        // Upcoming load: many upcoming deadlines increases risk
+        if ($upcomingCount >= 5) {
+            $points += 3;
+        } elseif ($upcomingCount >= 2) {
+            $points += 1;
+        }
+
+        // Estimated penalties increase risk proportionally (coarse)
+        if ($totalPenalties > 0) {
+            $points += min(10, (int) floor($totalPenalties / 10000));
+        }
+
+        // Determine level
+        if ($points <= 3) {
+            $level = 'compliant';
+            $emoji = '✅';
+        } elseif ($points <= 8) {
+            $level = 'at_risk';
+            $emoji = '⚠️';
+        } else {
+            $level = 'high_risk';
+            $emoji = '🚨';
+        }
+
+        $reasons = [];
+        if ($overdue > 0) {
+            $reasons[] = "{$overdue} overdue return(s)";
+        }
+        if ($upcomingCount > 0) {
+            $reasons[] = "{$upcomingCount} upcoming deadline(s)";
+        }
+        if ($totalPenalties > 0) {
+            $reasons[] = 'Estimated penalties: ₦' . number_format($totalPenalties, 2);
+        }
+        $reasons[] = "Compliance rate: {$complianceRate}%";
+
+        return [
+            'level' => $level,
+            'emoji' => $emoji,
+            'score' => $points,
+            'reasons' => $reasons,
         ];
     }
 

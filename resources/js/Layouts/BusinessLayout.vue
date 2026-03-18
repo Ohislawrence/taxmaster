@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-[#f9fafc]">
+    <div class="min-h-screen bg-gradient-to-br from-[#f9fafc] to-[#f3f6fd]">
         <!-- Flash Messages - Modern Toast Style -->
         <transition
             enter-active-class="transform ease-out duration-300 transition"
@@ -12,16 +12,16 @@
             <div
                 v-if="flashMessage"
                 :class="[
-                    'fixed bottom-4 right-4 z-[9999] w-auto max-w-md',
-                    'px-4 py-3 rounded-xl shadow-lg border backdrop-blur-sm',
-                    flashMessage.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : '',
-                    flashMessage.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-800' : '',
-                    flashMessage.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' : '',
-                    flashMessage.type === 'info' ? 'bg-sky-50 border-sky-200 text-sky-800' : ''
+                    'fixed bottom-6 right-6 z-[9999] w-auto max-w-md',
+                    'px-4 py-3 rounded-2xl shadow-lg border backdrop-blur-md',
+                    flashMessage.type === 'success' ? 'bg-emerald-50/90 border-emerald-200/50 text-emerald-800' : '',
+                    flashMessage.type === 'error' ? 'bg-rose-50/90 border-rose-200/50 text-rose-800' : '',
+                    flashMessage.type === 'warning' ? 'bg-amber-50/90 border-amber-200/50 text-amber-800' : '',
+                    flashMessage.type === 'info' ? 'bg-sky-50/90 border-sky-200/50 text-sky-800' : ''
                 ]"
             >
                 <div class="flex items-start gap-3">
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 mt-0.5">
                         <svg v-if="flashMessage.type === 'success'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -35,8 +35,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <p class="text-sm font-medium flex-1">{{ flashMessage.message }}</p>
-                    <button @click="dismissFlash" class="flex-shrink-0 hover:opacity-75">
+                    <p class="text-sm font-medium flex-1 leading-5">{{ flashMessage.message }}</p>
+                    <button @click="dismissFlash" class="flex-shrink-0 hover:opacity-75 transition-opacity mt-0.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -46,41 +46,53 @@
         </transition>
 
         <!-- Navigation Header -->
-        <nav class="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50">
+        <nav class="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50 supports-backdrop-blur:bg-white/95">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16 lg:h-20">
                     <!-- Mobile Menu Toggle -->
                     <button
                         v-if="auth?.user"
                         @click="showMobileMenu = !showMobileMenu"
-                        class="lg:hidden p-2 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100/50 transition-colors"
+                        class="lg:hidden p-2.5 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100/80 transition-all active:scale-95"
+                        :class="{ 'bg-gray-100/80': showMobileMenu }"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg v-if="!showMobileMenu" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
 
                     <!-- Logo/Title -->
                     <div class="flex items-center gap-2 lg:gap-4">
-                        <Link href="/business/dashboard" class="flex items-center gap-2">
-                            <img src="/taxmaster-one.png" alt="TaxMaster" class="h-7 lg:h-8 w-auto" />
-                            <span class="text-sm lg:text-base font-medium text-gray-600">Business Portal</span>
+                        <Link href="/business/dashboard" class="flex items-center gap-2 group">
+                            <img src="/taxmaster-one.png" alt="TaxMaster" class="h-7 lg:h-8 w-auto transition-transform group-hover:scale-105" />
+                            <span class="text-sm lg:text-base font-medium text-gray-600 group-hover:text-gray-900 transition-colors">Business Portal</span>
                         </Link>
                     </div>
 
                     <!-- User Menu -->
                     <div v-if="auth?.user" class="flex items-center gap-2 lg:gap-4">
+                        <!-- Quick Actions -->
+                        <button class="hidden lg:block p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 rounded-xl transition-all active:scale-95">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </button>
+
                         <!-- User Menu -->
                         <div class="relative user-menu-container">
                             <button
                                 @click.stop="showUserMenu = !showUserMenu"
-                                class="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-gray-50 transition-colors"
+                                class="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-gray-100/80 transition-all active:scale-95"
+                                :class="{ 'bg-gray-100/80': showUserMenu }"
                             >
                                 <div class="hidden sm:block text-right">
-                                    <p class="text-sm font-medium text-gray-700">{{ auth.user.name }}</p>
-                                    <p class="text-xs text-gray-500">{{ auth.user.email }}</p>
+                                    <p class="text-sm font-semibold text-gray-700">{{ auth.user.name }}</p>
+                                    <p class="text-xs text-gray-500">{{ truncateEmail(auth.user.email) }}</p>
                                 </div>
-                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-semibold flex items-center justify-center shadow-sm">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-semibold flex items-center justify-center shadow-sm ring-2 ring-white/50">
                                     {{ auth.user.name.charAt(0).toUpperCase() }}
                                 </div>
                             </button>
@@ -88,21 +100,25 @@
                             <!-- Dropdown Menu -->
                             <transition
                                 enter-active-class="transition ease-out duration-200"
-                                enter-from-class="opacity-0 translate-y-1"
+                                enter-from-class="opacity-0 -translate-y-2"
                                 enter-to-class="opacity-100 translate-y-0"
                                 leave-active-class="transition ease-in duration-150"
                                 leave-from-class="opacity-100 translate-y-0"
-                                leave-to-class="opacity-0 translate-y-1"
+                                leave-to-class="opacity-0 -translate-y-2"
                             >
-                                <div v-if="showUserMenu" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-50">
-                                    <Link :href="route('profile.show')" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                <div v-if="showUserMenu" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-50 overflow-hidden">
+                                    <div class="px-4 py-3 border-b border-gray-100">
+                                        <p class="text-sm font-semibold text-gray-900">{{ auth.user.name }}</p>
+                                        <p class="text-xs text-gray-500 mt-0.5">{{ auth.user.email }}</p>
+                                    </div>
+                                    <Link :href="route('profile.show')" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.341A8 8 0 116.659 6.572" />
                                         </svg>
                                         Profile
                                     </Link>
-                                    <Link href="/business/settings" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                    <Link href="/business/settings" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -110,7 +126,7 @@
                                         Settings
                                     </Link>
                                     <form @submit.prevent="logout">
-                                        <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                        <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                             </svg>
@@ -136,16 +152,16 @@
         <div class="flex flex-col lg:flex-row">
             <!-- Mobile Menu Overlay -->
             <transition
-                enter-active-class="transition-opacity duration-300"
+                enter-active-class="transition-opacity duration-300 ease-out"
                 enter-from-class="opacity-0"
                 enter-to-class="opacity-100"
-                leave-active-class="transition-opacity duration-200"
+                leave-active-class="transition-opacity duration-200 ease-in"
                 leave-from-class="opacity-100"
                 leave-to-class="opacity-0"
             >
                 <div
                     v-if="showMobileMenu && auth?.user"
-                    class="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+                    class="lg:hidden fixed inset-0 bg-gradient-to-b from-black/30 to-black/20 backdrop-blur-sm z-40"
                     @click="showMobileMenu = false"
                 ></div>
             </transition>
@@ -154,283 +170,313 @@
             <aside
                 v-if="auth?.user"
                 :class="[
-                    'fixed lg:sticky left-0 top-16 lg:top-20 h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)] w-72 bg-white border-r border-gray-200/50 transition-transform duration-300 z-40 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent',
-                    showMobileMenu ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+                    'fixed lg:sticky left-0 top-16 lg:top-20 h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)] w-72 bg-white/95 backdrop-blur-sm border-r border-gray-200/50 transition-transform duration-300 ease-out z-40 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent sidebar-smooth-scroll',
+                    showMobileMenu ? 'translate-x-0 shadow-xl' : '-translate-x-full lg:translate-x-0 lg:shadow-none'
                 ]"
             >
-                <nav class="px-3 py-6">
+                <nav class="px-4 py-6">
+                    <div v-if="page.props.current_business?.compliance_status?.risk" class="mb-4 px-3">
+                        <RiskBadge :risk="page.props.current_business.compliance_status.risk" />
+                    </div>
+
                     <!-- Main Navigation -->
-                    <div class="space-y-1">
+                    <div class="space-y-0.5">
                         <!-- Get Started Guide -->
                         <Link
                             href="/business/get-started"
                             :class="[
-                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                 isActive('/business/get-started')
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-100/80'
                             ]"
                         >
-                            <svg class="w-5 h-5" :class="isActive('/business/get-started') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/get-started') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                             </svg>
-                            <span>Get Started</span>
+                            <span class="flex-1">Get Started</span>
+                            <span v-if="isActive('/business/get-started')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
 
                         <!-- Dashboard -->
                         <Link
                             href="/business/dashboard"
                             :class="[
-                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                 isActive('/business/dashboard')
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-100/80'
                             ]"
                         >
-                            <svg class="w-5 h-5" :class="isActive('/business/dashboard') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/dashboard') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                             </svg>
-                            <span>Dashboard</span>
+                            <span class="flex-1">Dashboard</span>
+                            <span v-if="isActive('/business/dashboard')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
 
                         <!-- Tax Returns -->
                         <Link
                             href="/business/tax-returns"
                             :class="[
-                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                 isActive('/business/tax-returns')
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-100/80'
                             ]"
                         >
-                            <svg class="w-5 h-5" :class="isActive('/business/tax-returns') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/tax-returns') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <span>Tax Returns</span>
+                            <span class="flex-1">Tax Returns</span>
+                            <span v-if="isActive('/business/tax-returns')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
 
                         <!-- Payments -->
                         <Link
                             href="/business/payments"
                             :class="[
-                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                 isActive('/business/payments')
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-100/80'
                             ]"
                         >
-                            <svg class="w-5 h-5" :class="isActive('/business/payments') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/payments') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span>Payments</span>
+                            <span class="flex-1">Payments</span>
+                            <span v-if="isActive('/business/payments')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
 
                         <!-- Staff Management -->
                         <Link
                             href="/business/staff"
                             :class="[
-                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                 isActive('/business/staff')
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-100/80'
                             ]"
                         >
-                            <svg class="w-5 h-5" :class="isActive('/business/staff') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/staff') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.593M9 21h6" />
                             </svg>
-                            <span>Staff</span>
+                            <span class="flex-1">Staff</span>
+                            <span v-if="isActive('/business/staff')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
 
                         <!-- Bank Accounts -->
                         <Link
                             href="/business/banks"
                             :class="[
-                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                 isActive('/business/banks')
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-100/80'
                             ]"
                         >
-                            <svg class="w-5 h-5" :class="isActive('/business/banks') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/banks') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                             </svg>
-                            <span>Bank Accounts</span>
+                            <span class="flex-1">Bank Accounts</span>
+                            <span v-if="isActive('/business/banks')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
 
                         <!-- Transactions -->
                         <Link
                             href="/business/transactions"
                             :class="[
-                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                 isActive('/business/transactions')
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-100/80'
                             ]"
                         >
-                            <svg class="w-5 h-5" :class="isActive('/business/transactions') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/transactions') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                             </svg>
-                            <span>Transactions</span>
+                            <span class="flex-1">Transactions</span>
+                            <span v-if="isActive('/business/transactions')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
                     </div>
 
                     <!-- Tax Compliance -->
-                    <div class="mt-8 pt-8 border-t border-gray-100">
-                        <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Tax Compliance</p>
-                        <div class="space-y-1">
+                    <div class="mt-8 pt-6 border-t border-gray-200/70">
+                        <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                            Tax Compliance
+                        </p>
+                        <div class="space-y-0.5">
                             <Link
                                 href="/business/compliance"
                                 :class="[
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                     isActive('/business/compliance')
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                        : 'text-gray-600 hover:bg-gray-100/80'
                                 ]"
                             >
-                                <svg class="w-5 h-5" :class="isActive('/business/compliance') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/compliance') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <span>Compliance Calendar</span>
+                                <span class="flex-1">Compliance Calendar</span>
+                                <span v-if="isActive('/business/compliance')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                             </Link>
                             <Link
                                 href="/business/paye"
                                 :class="[
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                     isActive('/business/paye')
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                        : 'text-gray-600 hover:bg-gray-100/80'
                                 ]"
                             >
-                                <svg class="w-5 h-5" :class="isActive('/business/paye') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/paye') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span>PAYE Returns</span>
+                                <span class="flex-1">PAYE Returns</span>
+                                <span v-if="isActive('/business/paye')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                             </Link>
                             <Link
                                 href="/business/cit"
                                 :class="[
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                     isActive('/business/cit')
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                        : 'text-gray-600 hover:bg-gray-100/80'
                                 ]"
                             >
-                                <svg class="w-5 h-5" :class="isActive('/business/cit') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/cit') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span>CIT Returns</span>
+                                <span class="flex-1">CIT Returns</span>
+                                <span v-if="isActive('/business/cit')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                             </Link>
                             <Link
                                 href="/business/wht"
                                 :class="[
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                     isActive('/business/wht')
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                        : 'text-gray-600 hover:bg-gray-100/80'
                                 ]"
                             >
-                                <svg class="w-5 h-5" :class="isActive('/business/wht') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/wht') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span>WHT Transactions</span>
+                                <span class="flex-1">WHT Transactions</span>
+                                <span v-if="isActive('/business/wht')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                             </Link>
                             <Link
                                 href="/business/vat"
                                 :class="[
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                     isActive('/business/vat')
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                        : 'text-gray-600 hover:bg-gray-100/80'
                                 ]"
                             >
-                                <svg class="w-5 h-5" :class="isActive('/business/vat') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/vat') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span>VAT Returns</span>
+                                <span class="flex-1">VAT Returns</span>
+                                <span v-if="isActive('/business/vat')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                             </Link>
                             <Link
                                 href="/business/reports/financial-statements"
                                 :class="[
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                     isActive('/business/reports/financial-statements')
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                        : 'text-gray-600 hover:bg-gray-100/80'
                                 ]"
                             >
-                                <svg class="w-5 h-5" :class="isActive('/business/reports/financial-statements') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/reports/financial-statements') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h18v4H3V3zm0 6h18v4H3V9zm0 6h18v6H3v-6z" />
                                 </svg>
-                                <span>Financial Statements</span>
+                                <span class="flex-1">Financial Statements</span>
+                                <span v-if="isActive('/business/reports/financial-statements')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                             </Link>
                             <Link
                                 href="/business/reports/cac-forms"
                                 :class="[
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                     isActive('/business/reports/cac-forms')
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                        : 'text-gray-600 hover:bg-gray-100/80'
                                 ]"
                             >
-                                <svg class="w-5 h-5" :class="isActive('/business/reports/cac-forms') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/reports/cac-forms') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h10M7 11h10M7 15h6m-9 5h18a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
-                                <span>CAC Annual Return</span>
+                                <span class="flex-1">CAC Annual Return</span>
+                                <span v-if="isActive('/business/reports/cac-forms')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                             </Link>
                         </div>
                     </div>
 
                     <!-- AI & Insights -->
-                    <div class="mt-8 pt-8 border-t border-gray-100">
-                        <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">AI & Intelligence</p>
-                        <div class="space-y-1">
+                    <div class="mt-8 pt-6 border-t border-gray-200/70">
+                        <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                            AI & Intelligence
+                        </p>
+                        <div class="space-y-0.5">
                             <Link
-                                href="/business/ai/insights"
+                                href="/business/insights"
                                 :class="[
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
-                                    isActive('/business/ai/insights')
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
+                                    isActive('/business/insights')
+                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                        : 'text-gray-600 hover:bg-gray-100/80'
                                 ]"
                             >
-                                <svg class="w-5 h-5" :class="isActive('/business/ai/insights') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/insights') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5h.01M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span>Tax Insights</span>
+                                <span class="flex-1">Tax Insights</span>
+                                <span v-if="isActive('/business/insights')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                             </Link>
                             <Link
                                 href="/business/ai/chat"
                                 :class="[
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                     isActive('/business/ai/chat')
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                        : 'text-gray-600 hover:bg-gray-100/80'
                                 ]"
                             >
-                                <svg class="w-5 h-5" :class="isActive('/business/ai/chat') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/ai/chat') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
-                                <span>AI Chat</span>
+                                <span class="flex-1">AI Chat</span>
+                                <span v-if="isActive('/business/ai/chat')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                             </Link>
                         </div>
                     </div>
 
                     <!-- Account -->
-                    <div class="mt-8 pt-8 border-t border-gray-100">
-                        <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Account</p>
-                        <div class="space-y-1">
+                    <div class="mt-8 pt-6 border-t border-gray-200/70">
+                        <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                            Account
+                        </p>
+                        <div class="space-y-0.5">
                             <Link
                                 href="/business/settings"
                                 :class="[
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
                                     isActive('/business/settings')
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                        : 'text-gray-600 hover:bg-gray-100/80'
                                 ]"
                             >
-                                <svg class="w-5 h-5" :class="isActive('/business/settings') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/settings') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5A2.25 2.25 0 008.25 22.5h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 5.25h3m-3 3h3m-3 3h3M9 15.75h.008v.008H9v-.008zm3 0h.008v.008h-.008v-.008zm3 0h.008v.008h-.008v-.008z" />
                                 </svg>
-                                <span>Settings</span>
+                                <span class="flex-1">Settings</span>
+                                <span v-if="isActive('/business/settings')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                             </Link>
                         </div>
                     </div>
@@ -443,20 +489,25 @@
                     <!-- AI Automation Banner -->
                     <div
                         v-if="auth?.user"
-                        class="mb-6 rounded-xl border border-blue-200 bg-blue-50/50 backdrop-blur-sm px-4 py-3"
+                        class="mb-8 rounded-2xl border border-blue-200/50 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm px-5 py-4 shadow-sm"
                     >
-                        <div class="flex flex-col sm:flex-row sm:items-start gap-3">
-                            <div class="flex items-start gap-2 flex-1">
-                                <span class="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-                                    i
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div class="flex items-start gap-3 flex-1">
+                                <span class="inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700 shadow-sm">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
                                 </span>
                                 <div class="text-sm text-blue-900">
-                                    <p class="font-semibold">AI Automation is active</p>
-                                    <p class="text-blue-800">
-                                        Transactions can be auto-categorized, compliance reminders are sent, and payment recovery runs in the background.
-                                        <Link href="/business/ai/insights" class="font-medium underline hover:text-blue-700">
-                                            Review suggestions in AI Insights
-                                        </Link>.
+                                    <p class="font-semibold flex items-center gap-2">
+                                        AI Automation Active
+                                        <span class="px-1.5 py-0.5 text-xs bg-blue-200/50 text-blue-700 rounded-full">Live</span>
+                                    </p>
+                                    <p class="text-blue-700/90 mt-0.5">
+                                        Transactions auto-categorized • Compliance reminders • Payment recovery running
+                                        <Link href="/business/ai/insights" class="font-medium text-blue-700 underline decoration-blue-300 underline-offset-2 hover:decoration-blue-700 ml-1">
+                                            View insights →
+                                        </Link>
                                     </p>
                                 </div>
                             </div>
@@ -464,7 +515,7 @@
                                 <button
                                     v-if="page.props.current_business"
                                     @click.prevent="showLeaveConfirm = true"
-                                    class="px-3 py-1.5 text-xs sm:text-sm bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                                    class="px-4 py-2 text-sm bg-white/80 border border-gray-200/80 text-gray-600 rounded-xl hover:bg-white hover:border-gray-300 transition-all active:scale-95 shadow-sm whitespace-nowrap"
                                 >
                                     Return to accountant
                                 </button>
@@ -491,15 +542,19 @@
                 class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-[100] p-4"
                 @click.self="closeUpgradeModal"
             >
-                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-                    <!-- Header -->
-                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-6">
-                        <h3 class="text-xl font-bold text-white flex items-center gap-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            <span>Feature Locked</span>
-                        </h3>
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+                    <!-- Header with gradient and icon -->
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-grid-white/10 opacity-20"></div>
+                        <div class="relative">
+                            <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-white">Upgrade to Unlock</h3>
+                            <p class="text-blue-100 mt-1 text-sm">Get access to premium features</p>
+                        </div>
                     </div>
 
                     <!-- Body -->
@@ -580,6 +635,7 @@ import { ref, computed, watchEffect, onMounted, onUnmounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import TaxMasterChat from '@/Components/TaxMasterChat.vue';
 import CookieConsent from '@/Components/CookieConsent.vue';
+import RiskBadge from '@/Components/Shared/RiskBadge.vue';
 
 const page = usePage();
 const auth = computed(() => page.props.auth);
@@ -590,6 +646,16 @@ const upgradeModalData = ref(null);
 const flashMessage = ref(null);
 const showLeaveConfirm = ref(false);
 let flashTimeout = null;
+
+// Helper function to truncate email for display
+const truncateEmail = (email) => {
+    if (!email) return '';
+    const [localPart, domain] = email.split('@');
+    if (localPart.length > 10) {
+        return `${localPart.substring(0, 8)}...@${domain}`;
+    }
+    return email;
+};
 
 // Close user menu when clicking outside
 const handleClickOutside = (e) => {
@@ -732,5 +798,96 @@ const cancelLeave = () => {
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: #d1d5db;
+}
+
+/* Support for backdrop blur in different browsers */
+@supports (backdrop-filter: blur(0)) {
+    .supports-backdrop-blur\:bg-white\/95 {
+        background-color: rgba(255, 255, 255, 0.95);
+    }
+}
+
+/* Active navigation indicator animation */
+.router-link-active {
+    position: relative;
+}
+
+.router-link-active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: linear-gradient(to bottom, #3b82f6, #6366f1);
+    border-radius: 0 3px 3px 0;
+    opacity: 0;
+    animation: slideIn 0.2s ease-out forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+/* Smooth scrolling for sidebar */
+.sidebar-smooth-scroll {
+    scroll-behavior: smooth;
+}
+
+/* Grid pattern for modals */
+.bg-grid-white {
+    background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* Glassmorphism effect */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Hover scale effect for interactive elements */
+.hover-scale {
+    transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.02);
+}
+
+/* Focus outline for accessibility */
+*:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Mobile menu animation */
+.mobile-menu-enter-active,
+.mobile-menu-leave-active {
+    transition: transform 0.3s ease-out, opacity 0.2s ease;
+}
+
+.mobile-menu-enter-from,
+.mobile-menu-leave-to {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+
+.mobile-menu-enter-to,
+.mobile-menu-leave-from {
+    transform: translateX(0);
+    opacity: 1;
 }
 </style>

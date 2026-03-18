@@ -2,7 +2,7 @@
   <AccountantLayout>
     <template #default>
       <Head title="My Businesses" />
-      
+
       <div class="py-6 lg:py-8 px-4 sm:px-6 lg:px-8">
         <!-- Header Section -->
         <div class="max-w-7xl mx-auto">
@@ -11,9 +11,9 @@
               <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">My Businesses</h1>
               <p class="text-sm text-gray-500 mt-1">Manage and oversee all businesses under your portfolio</p>
             </div>
-            
-            <Link 
-              :href="route('accountant.businesses.create')" 
+
+            <Link
+              :href="route('accountant.businesses.create')"
               class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,15 +31,36 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <h2 class="text-xl font-semibold text-gray-900">Owned Businesses</h2>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xl font-semibold text-gray-900">Owned Businesses</h2>
+                <span class="relative">
+                  <button
+                    type="button"
+                    class="text-xs text-gray-400 p-1 rounded hover:bg-gray-100"
+                    @mouseenter="ownedTooltip = true"
+                    @mouseleave="ownedTooltip = false"
+                    @click="ownedTooltip = !ownedTooltip"
+                    :aria-expanded="ownedTooltip.toString()"
+                    aria-label="Owned businesses info"
+                  >
+                    <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                    </svg>
+                  </button>
+
+                  <div v-if="ownedTooltip" class="absolute left-0 mt-2 w-64 bg-white text-xs text-gray-700 border border-gray-100 rounded-md shadow-lg p-2">
+                    Owned = you are recorded as the business owner. These businesses list you as the owner.
+                  </div>
+                </span>
+              </div>
               <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">{{ businesses.length }}</span>
             </div>
 
             <div v-if="businesses.length === 0" class="bg-white rounded-xl border border-gray-200/50 p-8 text-center">
               <h3 class="text-sm font-medium text-gray-900 mb-1">No owned businesses yet</h3>
               <p class="text-sm text-gray-500 mb-4">Create your first business to start managing tax compliance</p>
-              <Link 
-                :href="route('accountant.businesses.create')" 
+              <Link
+                :href="route('accountant.businesses.create')"
                 class="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
                 <span>Create a business</span>
@@ -50,9 +71,9 @@
             </div>
 
             <div v-else class="grid gap-4">
-              <div 
-                v-for="b in businesses" 
-                :key="b.id" 
+              <div
+                v-for="b in businesses"
+                :key="b.id"
                 class="bg-white rounded-xl border border-gray-200/50 hover:border-gray-200 hover:shadow-lg transition-all overflow-hidden group"
               >
                 <div class="p-5">
@@ -64,12 +85,15 @@
                           {{ b.name.charAt(0).toUpperCase() }}
                         </div>
                         <div>
-                          <Link 
-                            :href="route('accountant.businesses.show', b.id)" 
+                          <Link
+                            :href="route('accountant.businesses.show', b.id)"
                             class="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors"
                           >
                             {{ b.name }}
                           </Link>
+                          <div class="mt-1">
+                            <RiskBadge v-if="b.compliance_status?.risk" :risk="b.compliance_status.risk" />
+                          </div>
                           <div class="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                             <span>{{ b.registration_number || 'No reg. number' }}</span>
                             <span class="w-1 h-1 rounded-full bg-gray-300"></span>
@@ -81,16 +105,16 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-2">
-                      <Link 
-                        :href="route('accountant.businesses.show', b.id)" 
+                      <Link
+                        :href="route('accountant.businesses.show', b.id)"
                         class="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium rounded-lg transition-colors"
                       >
                         Manage
                       </Link>
                       <form @submit.prevent="switchBusiness(b.id)" class="inline">
                         <input type="hidden" name="_token" :value="$page.props.csrf_token" />
-                        <button 
-                          type="submit" 
+                        <button
+                          type="submit"
                           class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                         >
                           Open Dashboard
@@ -127,7 +151,28 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h2 class="text-xl font-semibold text-gray-900">Managed Businesses</h2>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xl font-semibold text-gray-900">Managed Businesses</h2>
+                <span class="relative">
+                  <button
+                    type="button"
+                    class="text-xs text-gray-400 p-1 rounded hover:bg-gray-100"
+                    @mouseenter="managedTooltip = true"
+                    @mouseleave="managedTooltip = false"
+                    @click="managedTooltip = !managedTooltip"
+                    :aria-expanded="managedTooltip.toString()"
+                    aria-label="Managed businesses info"
+                  >
+                    <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                    </svg>
+                  </button>
+
+                  <div v-if="managedTooltip" class="absolute left-0 mt-2 w-64 bg-white text-xs text-gray-700 border border-gray-100 rounded-md shadow-lg p-2">
+                    Managed = you have been granted access to manage this business, but you are not the recorded owner.
+                  </div>
+                </span>
+              </div>
               <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">{{ managedBusinesses.length }}</span>
             </div>
 
@@ -137,9 +182,9 @@
             </div>
 
             <div v-else class="grid gap-4">
-              <div 
-                v-for="b in managedBusinesses" 
-                :key="b.id" 
+              <div
+                v-for="b in managedBusinesses"
+                :key="b.id"
                 class="bg-white rounded-xl border border-gray-200/50 hover:border-gray-200 hover:shadow-lg transition-all overflow-hidden"
               >
                 <div class="p-5">
@@ -151,12 +196,15 @@
                           {{ b.name.charAt(0).toUpperCase() }}
                         </div>
                         <div>
-                          <Link 
-                            :href="route('accountant.businesses.show', b.id)" 
+                          <Link
+                            :href="route('accountant.businesses.show', b.id)"
                             class="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors"
                           >
                             {{ b.name }}
                           </Link>
+                          <div class="mt-1">
+                            <RiskBadge v-if="b.compliance_status?.risk" :risk="b.compliance_status.risk" />
+                          </div>
                           <div class="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                             <span>{{ b.registration_number || 'No reg. number' }}</span>
                             <span class="w-1 h-1 rounded-full bg-gray-300"></span>
@@ -168,16 +216,16 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-2">
-                      <Link 
-                        :href="route('accountant.businesses.show', b.id)" 
+                      <Link
+                        :href="route('accountant.businesses.show', b.id)"
                         class="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium rounded-lg transition-colors"
                       >
                         Manage
                       </Link>
                       <form @submit.prevent="detachBusiness(b.id)" class="inline">
                         <input type="hidden" name="_token" :value="$page.props.csrf_token" />
-                        <button 
-                          type="submit" 
+                        <button
+                          type="submit"
                           class="p-2 text-gray-400 hover:text-red-600 transition-colors"
                           title="Remove access"
                         >
@@ -218,12 +266,19 @@
 import AccountantLayout from '@/Layouts/AccountantLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { router } from '@inertiajs/vue3';
+import RiskBadge from '@/Components/Shared/RiskBadge.vue';
 
 export default {
-  components: { AccountantLayout, Link, Head },
+  components: { AccountantLayout, Link, Head, RiskBadge },
   props: {
     businesses: Array,
     managedBusinesses: Array,
+  },
+  data() {
+    return {
+      ownedTooltip: false,
+      managedTooltip: false,
+    };
   },
   methods: {
     formatStatus(status) {

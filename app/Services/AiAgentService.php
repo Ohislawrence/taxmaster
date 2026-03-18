@@ -47,6 +47,46 @@ class AiAgentService
     }
 
     /**
+     * Explain an insight and suggest actions using the AI provider.
+     * Returns array with 'success' and 'explanation' keys on success.
+     */
+    public function explainInsight(string $title, string $message): array
+    {
+        try {
+            $apiKey = $this->getApiKey();
+
+            if (! $apiKey) {
+                return [
+                    'success' => false,
+                    'error' => 'AI configuration not found',
+                ];
+            }
+
+            $prompt = "You are an expert Nigerian tax advisor.\n\nInsight: {$title}\n\nDetails: {$message}\n\nProvide a concise (1-2 sentence) explanation of what this likely means for the business, and list 3 short, actionable next steps the business should take. Return the explanation followed by a numbered list of actions.";
+
+            $response = $this->callAiApi($prompt, 'insight_explain');
+
+            if ($response['success']) {
+                $this->logAiInteraction('insight_explain', $prompt, $response['analysis'] ?? null, 'completed');
+
+                return [
+                    'success' => true,
+                    'explanation' => $response['analysis'] ?? null,
+                ];
+            }
+
+            $this->logAiInteraction('insight_explain', $prompt, null, 'failed', $response['error'] ?? 'Unknown');
+
+            return $response;
+        } catch (Exception $e) {
+            Log::error('AI explainInsight error', ['error' => $e->getMessage()]);
+            return [
+                'success' => false,
+                'error' => 'AI explainInsight failed',
+            ];
+        }
+    }
+    /**
      * Analyze tax return using AI
      */
     public function analyzeTaxReturn(TaxReturn $taxReturn): array

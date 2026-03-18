@@ -92,4 +92,54 @@ class SubscriptionPlan extends Model
             'Custom Branding' => $this->custom_branding,
         ];
     }
+
+    /**
+     * Ensure `features` attribute is always an array of display strings.
+     * If the DB `features` column is empty, derive a sensible list from flags.
+     */
+    public function getFeaturesAttribute($value): array
+    {
+        // If features JSON exists, cast and return it
+        if ($value) {
+            $decoded = json_decode($value, true);
+            if (is_array($decoded) && count($decoded) > 0) {
+                return $decoded;
+            }
+        }
+
+        // Fallback: build feature list from boolean flags and capacities
+        $features = [];
+
+        // Capacity / numeric features
+        if ($this->max_returns_per_year) {
+            $features[] = $this->max_returns_per_year === 9999 ? 'Unlimited tax return filing' : "{$this->max_returns_per_year} Tax Returns per Year";
+        }
+
+        if ($this->max_staff_members) {
+            $features[] = $this->max_staff_members === 999 ? 'Unlimited staff members' : "Up to {$this->max_staff_members} staff members";
+        }
+
+        if ($this->storage_gb) {
+            $features[] = "{$this->storage_gb} GB storage";
+        }
+
+        // Feature flags
+        if ($this->ai_analysis_included) {
+            $features[] = 'AI tax analysis & insights';
+        }
+
+        if ($this->payment_automation) {
+            $features[] = 'Automated payment processing';
+        }
+
+        if ($this->priority_support) {
+            $features[] = 'Priority support';
+        }
+
+        if ($this->custom_branding) {
+            $features[] = 'Custom branding';
+        }
+
+        return $features;
+    }
 }

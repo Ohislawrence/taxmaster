@@ -26,6 +26,18 @@ class BusinessInvitationNotification extends Notification
     {
         $link = url('/register') . '?invite=' . $this->rawToken . '&email=' . urlencode($this->invite->email);
 
+        $role = $this->invite->role ?? 'owner';
+
+        if ($role === 'accountant') {
+            return (new MailMessage)
+                ->subject('You have been invited to manage a business on TaxMaster')
+                ->greeting('Hello')
+                ->line("You've been invited to manage the business: {$this->invite->business->name} as an accountant.")
+                ->action('Accept invitation and register', $link)
+                ->line('If you did not expect this invitation, you may ignore this email.')
+                ->salutation('Regards, TaxMaster');
+        }
+
         return (new MailMessage)
             ->subject('You have been invited to own a business on TaxMaster')
             ->greeting('Hello')
