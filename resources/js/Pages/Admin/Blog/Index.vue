@@ -1,23 +1,36 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import axios from 'axios';
 
 defineOptions({ layout: AdminLayout });
 
-const posts = ref([]);
+const page = usePage();
+const posts = ref(page.props.posts || []);
 
 onMounted(async () => {
-    const res = await axios.get('/api/blog-posts?admin=1');
-    posts.value = res.data;
+    // if server-provided posts are empty for some reason, fall back to API
+    if (!posts.value || posts.value.length === 0) {
+        // fallback to API only if server didn't provide posts
+        try {
+            const res = await fetch('/api/blog-posts?admin=1', { credentials: 'include' });
+            if (res.ok) {
+                posts.value = await res.json();
+            }
+        } catch (e) {
+            // silent fallback
+        }
+    }
 });
 
-const deletePost = async (id) => {
-    if (confirm('Delete this post?')) {
-        await axios.delete(`/api/blog-posts/${id}`);
-        posts.value = posts.value.filter(p => p.id !== id);
-    }
+const deletePost = (id) => {
+    if (!confirm('Delete this post?')) return;
+    router.delete(route('admin.blog.destroy', id), {
+        preserveState: false,
+        onSuccess() {
+            posts.value = posts.value.filter(p => p.id !== id);
+        }
+    });
 };
 </script>
 

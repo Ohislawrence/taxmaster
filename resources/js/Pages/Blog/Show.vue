@@ -61,8 +61,8 @@ onMounted(async () => {
         <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <!-- Back link - Refined -->
             <div class="reveal mb-6 sm:mb-8">
-                <Link 
-                    href="/blog" 
+                <Link
+                    href="/blog"
                     class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors group"
                 >
                     <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -88,7 +88,7 @@ onMounted(async () => {
                         <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
                             Article
                         </span>
-                        
+
                         <!-- Author with avatar on desktop -->
                         <div class="flex items-center gap-2">
                             <div class="hidden sm:flex h-6 w-6 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 items-center justify-center text-xs font-medium text-slate-600">
@@ -96,12 +96,12 @@ onMounted(async () => {
                             </div>
                             <span class="font-medium text-slate-700">{{ post.user?.name }}</span>
                         </div>
-                        
+
                         <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                        
+
                         <!-- Date -->
                         <time :datetime="post.published_at">{{ formatDateFor(post, true) }}</time>
-                        
+
                         <!-- Read time - hidden on mobile, shown on tablet+ -->
                         <span v-if="post.read_time" class="hidden sm:inline-flex items-center gap-2">
                             <span class="w-1 h-1 rounded-full bg-slate-300"></span>
@@ -133,7 +133,7 @@ onMounted(async () => {
                 <figure v-if="post.cover_image" class="reveal mt-8 sm:mt-10">
                     <div class="relative aspect-[16/9] sm:aspect-[21/9] rounded-xl sm:rounded-2xl overflow-hidden bg-slate-50">
                         <img
-                            :src="assetPath(post.cover_image)"
+                            :src="'/' + post.cover_image"
                             class="absolute inset-0 w-full h-full object-cover"
                             :alt="post.title"
                             loading="eager"
@@ -150,8 +150,8 @@ onMounted(async () => {
                     <div v-if="post.toc" class="bg-slate-50 rounded-xl p-6 mb-8 not-prose">
                         <h4 class="text-sm font-semibold text-slate-900 mb-3">In this article</h4>
                         <nav class="space-y-1">
-                            <a 
-                                v-for="item in post.toc" 
+                            <a
+                                v-for="item in post.toc"
                                 :key="item.id"
                                 :href="`#${item.id}`"
                                 class="block text-sm text-slate-600 hover:text-blue-600 transition-colors"
@@ -167,8 +167,8 @@ onMounted(async () => {
                     <!-- Tags -->
                     <div v-if="post.tags?.length" class="mt-8 pt-6 border-t border-slate-100 not-prose">
                         <div class="flex flex-wrap gap-2">
-                            <span 
-                                v-for="tag in post.tags" 
+                            <span
+                                v-for="tag in post.tags"
                                 :key="tag"
                                 class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200 transition-colors cursor-default"
                             >
@@ -187,7 +187,7 @@ onMounted(async () => {
                                 {{ authorInitials(post.user?.name) }}
                             </div>
                         </div>
-                        
+
                         <!-- Author info -->
                         <div class="flex-1">
                             <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
@@ -197,15 +197,15 @@ onMounted(async () => {
                                 <span class="text-sm text-slate-400">·</span>
                                 <span class="text-sm text-slate-500">{{ post.user?.role || 'Contributor' }}</span>
                             </div>
-                            
+
                             <p class="text-sm sm:text-base text-slate-500 leading-relaxed max-w-2xl">
                                 {{ post.user?.bio || 'Sharing insights on tax technology and business growth in Nigeria.' }}
                             </p>
-                            
+
                             <!-- Author social links (if available) -->
                             <div v-if="post.user?.social" class="flex gap-3 mt-4">
-                                <a 
-                                    v-for="(url, platform) in post.user.social" 
+                                <a
+                                    v-for="(url, platform) in post.user.social"
                                     :key="platform"
                                     :href="url"
                                     target="_blank"
@@ -228,8 +228,8 @@ onMounted(async () => {
             <div v-if="hasRelatedPosts" class="reveal mt-16 sm:mt-20">
                 <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-6 sm:mb-8">Related articles</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                    <div 
-                        v-for="related in post.related_posts" 
+                    <div
+                        v-for="related in post.related_posts"
                         :key="related.id"
                         class="group bg-white rounded-xl sm:rounded-2xl border border-slate-100 p-5 transition-all duration-300 hover:border-slate-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
                     >
@@ -255,7 +255,7 @@ onMounted(async () => {
                 <div class="bg-slate-50 rounded-2xl sm:rounded-3xl p-8 sm:p-12">
                     <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Ready to simplify your tax compliance?</h2>
                     <p class="text-sm sm:text-base text-slate-500 mb-6">Join thousands of Nigerian businesses using TaxMaster</p>
-                    
+
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
                             :href="route('register')"
@@ -266,7 +266,7 @@ onMounted(async () => {
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
                         </Link>
-                        
+
                         <Link
                             href="/pricing"
                             class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 sm:px-8 py-3 sm:py-4 text-sm font-medium text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
@@ -301,7 +301,7 @@ onMounted(async () => {
 .blog-content :deep(p) {
     @apply text-slate-600 leading-relaxed mb-6 text-base sm:text-lg;
 }
-.blog-content :deep(ul), 
+.blog-content :deep(ul),
 .blog-content :deep(ol) {
     @apply mb-6 pl-5 text-slate-600 space-y-2;
 }
