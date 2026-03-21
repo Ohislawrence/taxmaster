@@ -30,8 +30,8 @@ onUnmounted(() => {
 });
 
 const navLinks = [
-    { label: 'Product', href: '/#product' },
     { label: 'For Businesses', href: '/for-businesses' },
+    { label: 'For Accountants', href: '/for-accountants' },
     { label: 'Tax Calculator', href: '/tax-calculator' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'About', href: '/about' },

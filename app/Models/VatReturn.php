@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class VatReturn extends Model
+class VATReturn extends Model
 {
     use SoftDeletes, TracksStatusChanges, HasStandardStatus, HasTaxAuthority;
 

@@ -48,6 +48,7 @@
         <!-- Navigation Header -->
         <nav class="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
                 <div class="flex justify-between items-center h-16 lg:h-20">
                     <!-- Logo/Title -->
                     <div class="flex items-center gap-2 lg:gap-4">
@@ -207,6 +208,21 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5.581m0 0H9m5.581 0a2 2 0 100-4H9m0 4a2 2 0 110-4m0 0H7a2 2 0 00-2 2v3m2-3V7a2 2 0 012-2h5.581a2 2 0 011.915 1.264m0 0H20" />
                             </svg>
                             <span>Businesses</span>
+                        </Link>
+
+                        <Link
+                            href="/admin/broadcast"
+                            :class="[
+                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                isActive('/admin/broadcast')
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-50'
+                            ]"
+                        >
+                            <svg class="w-5 h-5" :class="isActive('/admin/broadcast') ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                            <span>Broadcast</span>
                         </Link>
 
                         <!-- Subscriptions -->
@@ -582,11 +598,25 @@ const handleClickOutside = (e) => {
 
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
+    // Listen for programmatic flash events from pages
+    window.addEventListener('admin:flash', handleAdminFlash);
 });
 
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
+    window.removeEventListener('admin:flash', handleAdminFlash);
 });
+
+const handleAdminFlash = (e) => {
+    try {
+        const d = e?.detail || {};
+        const type = d.type || 'info';
+        const message = d.message || '';
+        if (message) showFlash(type, message);
+    } catch (ex) {
+        // ignore
+    }
+};
 
 // Watch for flash data changes
 watchEffect(() => {

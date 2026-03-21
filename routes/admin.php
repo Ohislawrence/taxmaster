@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\SyncFailureController;
 use App\Http\Controllers\Admin\AiAutomationController;
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\BroadcastEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -166,4 +167,8 @@ Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name(
         Route::put('/{id}', [BlogController::class, 'update'])->name('update');
         Route::delete('/{id}', [BlogController::class, 'destroy'])->name('destroy');
     });
+
+    // Broadcast emails
+    Route::get('broadcast', [BroadcastEmailController::class, 'create'])->name('broadcast.create');
+    Route::post('broadcast', [BroadcastEmailController::class, 'send'])->name('broadcast.send');
 });
