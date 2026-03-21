@@ -82,7 +82,7 @@ class GetStartedProgress extends Model
         // Step 5: File first tax return (PAYE, WHT, VAT or CIT)
         $hasReturns = PayeReturn::where('business_id', $business->id)->exists()
             || WhtReturn::where('business_id', $business->id)->exists()
-            || VatReturn::where('business_id', $business->id)->exists()
+            || VATReturn::where('business_id', $business->id)->exists()
             || CitReturn::where('business_id', $business->id)->exists();
         if ($hasReturns && !in_array('file_first_return', $completedSteps)) {
             $completedSteps[] = 'file_first_return';
