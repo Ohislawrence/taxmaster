@@ -511,7 +511,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 sm:ml-auto">
+                            <div v-if="auth.user.roles.includes('accountant')" class="flex items-center gap-2 sm:ml-auto">
                                 <button
                                     v-if="page.props.current_business"
                                     @click.prevent="showLeaveConfirm = true"
