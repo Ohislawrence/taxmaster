@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Http\Controllers\Controller;
-use App\Models\VatReturn;
+use App\Models\VATReturn;
 use App\Models\Business;
 use App\Models\User;
 use App\Services\GovernmentPaymentService;
@@ -26,33 +26,33 @@ class VatController extends Controller
     {
         $business = $this->resolveBusiness($request);
 
-        $returns = VatReturn::where('business_id', $business->id)
+        $returns = VATReturn::where('business_id', $business->id)
             ->with('reviewer')
             ->orderBy('period', 'desc')
             ->paginate(12);
 
         $stats = [
-            'total_returns' => VatReturn::where('business_id', $business->id)->count(),
-            'total_vat_paid' => VatReturn::where('business_id', $business->id)
+            'total_returns' => VATReturn::where('business_id', $business->id)->count(),
+            'total_vat_paid' => VATReturn::where('business_id', $business->id)
                 ->where('status', 'paid')
                 ->sum('settlement_amount') ?? 0,
-            'pending_returns' => VatReturn::where('business_id', $business->id)
+            'pending_returns' => VATReturn::where('business_id', $business->id)
                 ->whereIn('status', ['draft', 'submitted'])
                 ->count(),
-            'overdue_returns' => VatReturn::where('business_id', $business->id)
+            'overdue_returns' => VATReturn::where('business_id', $business->id)
                 ->where('due_date', '<', now())
                 ->whereIn('status', ['draft', 'submitted'])
                 ->count(),
-            'this_month_vat' => VatReturn::where('business_id', $business->id)
+            'this_month_vat' => VATReturn::where('business_id', $business->id)
                 ->where('period', now()->format('Y-m'))
                 ->sum('settlement_amount') ?? 0,
-            'pending_refunds' => VatReturn::where('business_id', $business->id)
+            'pending_refunds' => VATReturn::where('business_id', $business->id)
                 ->where('settlement_type', 'refund')
                 ->where('status', 'refund_pending')
                 ->count(),
         ];
 
-        $latestReturn = VatReturn::where('business_id', $business->id)
+        $latestReturn = VATReturn::where('business_id', $business->id)
             ->latest('period')
             ->first();
 
@@ -117,7 +117,7 @@ class VatController extends Controller
             'status' => 'nullable|in:draft,submitted',
         ]);
 
-        $vatReturn = VatReturn::create([
+        $vatReturn = VATReturn::create([
             'business_id' => $business->id,
             'period' => $validated['period'],
             'form_type' => $validated['form_type'],
@@ -163,7 +163,7 @@ class VatController extends Controller
     /**
      * Show VAT return details
      */
-    public function show(Request $request, VatReturn $vatReturn)
+    public function show(Request $request, VATReturn $vatReturn)
     {
         $business = $this->resolveBusiness($request);
 
@@ -184,7 +184,7 @@ class VatController extends Controller
     /**
      * Show form to edit VAT return
      */
-    public function edit(Request $request, VatReturn $vatReturn)
+    public function edit(Request $request, VATReturn $vatReturn)
     {
         $business = $this->resolveBusiness($request);
 
@@ -211,7 +211,7 @@ class VatController extends Controller
     /**
      * Update VAT return
      */
-    public function update(Request $request, VatReturn $vatReturn)
+    public function update(Request $request, VATReturn $vatReturn)
     {
         $business = $this->resolveBusiness($request);
 
@@ -269,7 +269,7 @@ class VatController extends Controller
     /**
      * Generate government payment RRR
      */
-    public function generatePaymentRRR(Request $request, VatReturn $vatReturn)
+    public function generatePaymentRRR(Request $request, VATReturn $vatReturn)
     {
         $business = $this->resolveBusiness($request);
 
@@ -312,7 +312,7 @@ class VatController extends Controller
     /**
      * Update return status
      */
-    public function updateStatus(Request $request, VatReturn $vatReturn)
+    public function updateStatus(Request $request, VATReturn $vatReturn)
     {
         $business = $this->resolveBusiness($request);
 
@@ -366,7 +366,7 @@ class VatController extends Controller
         ]);
 
         // Create temporary instance for calculation (don't save)
-        $vatReturn = new VatReturn($validated);
+        $vatReturn = new VATReturn($validated);
         $vatReturn->performCalculations();
 
         return response()->json([
@@ -378,7 +378,7 @@ class VatController extends Controller
     /**
      * Export VAT return as PDF
      */
-    public function exportPdf(VatReturn $vatReturn)
+    public function exportPdf(VATReturn $vatReturn)
     {
         $business = auth()->user()->defaultBusiness();
 
@@ -404,7 +404,7 @@ class VatController extends Controller
     {
         $business = $this->resolveBusiness($request);
 
-        $returns = VatReturn::where('business_id', $business->id)
+        $returns = VATReturn::where('business_id', $business->id)
             ->when($request->period, fn($q, $p) => $q->where('period', $p))
             ->when($request->year, fn($q, $y) => $q->whereRaw('YEAR(STR_TO_DATE(period, "%Y-%m")) = ?', [$y]))
             ->orderBy('period', 'desc')
@@ -458,7 +458,7 @@ class VatController extends Controller
     /**
      * Export VAT Form 002 for a single return (business)
      */
-    public function exportForm002ForReturn(Request $request, VatReturn $vatReturn)
+    public function exportForm002ForReturn(Request $request, VATReturn $vatReturn)
     {
         $business = $this->resolveBusiness($request);
 

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\PayeReturn;
-use App\Models\VatReturn;
+use App\Models\VATReturn;
 use App\Models\WhtReturn;
 use App\Models\CitReturn;
 use App\Models\Business;
@@ -284,7 +284,7 @@ HTML;
     /**
      * Generate PDF for VAT Return
      */
-    public function generateVatReturnPdf(VatReturn $vatReturn): string
+    public function generateVatReturnPdf(VATReturn $vatReturn): string
     {
         $vatReturn->load('business');
         $html = $this->generateVatHtml($vatReturn);
@@ -296,7 +296,7 @@ HTML;
         return $mpdf->Output('vat-return-' . $vatReturn->id . '.pdf', Destination::STRING_RETURN);
     }
 
-    private function generateVatHtml(VatReturn $vatReturn): string
+    private function generateVatHtml(VATReturn $vatReturn): string
     {
         $business = $vatReturn->business;
         $styles = $this->getStyles();

@@ -8,7 +8,7 @@ use App\Models\GetStartedProgress;
 use App\Models\BankAccount;
 use App\Models\CitReturn;
 use App\Models\PayeReturn;
-use App\Models\VatReturn;
+use App\Models\VATReturn;
 use App\Models\WhtReturn;
 use App\Models\BusinessStaff;
 use Illuminate\Http\Request;
@@ -142,7 +142,7 @@ class GetStartedController extends Controller
         $hasReturns = PayeReturn::where('business_id', $business->id)->exists() ||
                      WhtReturn::where('business_id', $business->id)->exists() ||
                      CitReturn::where('business_id', $business->id)->exists() ||
-                     VatReturn::where('business_id', $business->id)->exists();
+                     VATReturn::where('business_id', $business->id)->exists();
 
         return [
             [
@@ -252,7 +252,7 @@ class GetStartedController extends Controller
                     'Returns filed: ' . (PayeReturn::where('business_id', $business->id)->count() +
                                          WhtReturn::where('business_id', $business->id)->count() +
                                          CitReturn::where('business_id', $business->id)->count() +
-                                         VatReturn::where('business_id', $business->id)->count()),
+                                         VATReturn::where('business_id', $business->id)->count()),
                 ],
             ],
             [

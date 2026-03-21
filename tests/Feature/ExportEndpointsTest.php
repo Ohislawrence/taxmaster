@@ -6,7 +6,7 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
 use App\Models\Business;
-use App\Models\VatReturn;
+use App\Models\VATReturn;
 use App\Models\PayeReturn;
 use App\Models\BusinessStaff;
 use App\Models\PayeSchedule;
@@ -34,7 +34,7 @@ class ExportEndpointsTest extends TestCase
         // Disable FK checks so we can insert returns without populating full business row
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
-        $vat = VatReturn::create([
+        $vat = VATReturn::create([
             'business_id' => 1,
             'period' => date('Y-m'),
             'sales_turnover' => 100000,

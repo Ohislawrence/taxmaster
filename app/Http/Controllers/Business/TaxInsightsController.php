@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Http\Controllers\Controller;
-use App\Models\VatReturn;
+use App\Models\VATReturn;
 use App\Models\PayeReturn;
 use App\Models\WhtReturn;
 use App\Services\AiAgentService;
@@ -38,7 +38,7 @@ class TaxInsightsController extends Controller
             $cursor->addMonth();
         }
 
-        $vat = VatReturn::select('period', DB::raw('COALESCE(SUM(vat_due),0) as total'))
+        $vat = VATReturn::select('period', DB::raw('COALESCE(SUM(vat_due),0) as total'))
             ->whereBetween('period', [$start->format('Y-m'), $end->format('Y-m')])
             ->groupBy('period')
             ->pluck('total', 'period')
@@ -94,7 +94,7 @@ class TaxInsightsController extends Controller
             $cursor->addMonth();
         }
 
-        $vat = VatReturn::select('period', DB::raw('COALESCE(SUM(vat_due),0) as total'))
+        $vat = VATReturn::select('period', DB::raw('COALESCE(SUM(vat_due),0) as total'))
             ->whereBetween('period', [$start->format('Y-m'), $end->format('Y-m')])
             ->groupBy('period')
             ->pluck('total', 'period')

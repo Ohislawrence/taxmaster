@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\VatReturn;
+use App\Models\VATReturn;
 use App\Models\Business;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ class VatController
      */
     public function index(Request $request)
     {
-        $returns = VatReturn::with('business.owner')
+        $returns = VATReturn::with('business.owner')
             ->when($request->status, function ($query, $status) {
                 return $query->where('status', $status);
             })
@@ -54,12 +54,12 @@ class VatController
 
         // Summary statistics
         $stats = [
-            'total_returns' => VatReturn::count(),
-            'submitted' => VatReturn::where('status', 'submitted')->count(),
-            'paid' => VatReturn::where('status', 'paid')->count(),
-            'total_vat_collected' => VatReturn::sum('vat_on_sales'), // already correct
-            'total_vat_paid' => VatReturn::where('status', 'paid')->sum('vat_due'),
-            'total_vat_pending' => VatReturn::whereIn('status', ['draft', 'submitted'])->sum('vat_due'),
+            'total_returns' => VATReturn::count(),
+                'submitted' => VATReturn::where('status', 'submitted')->count(),
+                'paid' => VATReturn::where('status', 'paid')->count(),
+                'total_vat_collected' => VATReturn::sum('vat_on_sales'), // already correct
+                'total_vat_paid' => VATReturn::where('status', 'paid')->sum('vat_due'),
+                'total_vat_pending' => VATReturn::whereIn('status', ['draft', 'submitted'])->sum('vat_due'),
         ];
 
         // Get businesses for filter dropdown
@@ -79,7 +79,7 @@ class VatController
     /**
      * Show VAT return details
      */
-    public function show(VatReturn $return)
+    public function show(VATReturn $return)
     {
         $return->load('business.owner');
 
@@ -122,7 +122,7 @@ class VatController
      */
     public function export(Request $request)
     {
-        $returns = VatReturn::with('business')
+        $returns = VATReturn::with('business')
             ->when($request->business_id, fn($q, $id) => $q->where('business_id', $id))
             ->when($request->year, fn($q, $year) => $q->whereRaw('YEAR(STR_TO_DATE(period, "%Y-%m")) = ?', [$year]))
             ->orderBy('period', 'desc')
@@ -157,7 +157,7 @@ class VatController
      */
     public function exportForm002(Request $request)
     {
-        $returns = VatReturn::with('business')
+        $returns = VATReturn::with('business')
             ->when($request->business_id, fn($q, $id) => $q->where('business_id', $id))
             ->when($request->year, fn($q, $year) => $q->whereRaw('YEAR(STR_TO_DATE(period, "%Y-%m")) = ?', [$year]))
             ->when($request->period, fn($q, $period) => $q->where('period', $period))
@@ -214,7 +214,7 @@ class VatController
     /**
      * Export VAT Form 002 for a single return
      */
-    public function exportForm002ForReturn(Request $request, VatReturn $return)
+    public function exportForm002ForReturn(Request $request, VATReturn $return)
     {
         $format = strtolower($request->get('format', 'csv'));
 
@@ -264,7 +264,7 @@ class VatController
         $status = $request->status;
 
         // Get monthly data
-        $monthlyDataQuery = VatReturn::with('business')
+        $monthlyDataQuery = VATReturn::with('business')
             ->whereRaw('YEAR(STR_TO_DATE(period, "%Y-%m")) = ?', [$year])
             ->when($businessId, fn($q, $id) => $q->where('business_id', $id))
             ->when($status, function($q, $status) {
@@ -294,7 +294,7 @@ class VatController
         })->sortBy('month')->values();
 
         // Top businesses
-        $topBusinesses = VatReturn::with('business')
+        $topBusinesses = VATReturn::with('business')
             ->whereRaw('YEAR(STR_TO_DATE(period, "%Y-%m")) = ?', [$year])
             ->get()
             ->groupBy('business_id')
@@ -318,7 +318,7 @@ class VatController
             ->values();
 
         // Payment breakdown
-        $allReturns = VatReturn::whereRaw('YEAR(STR_TO_DATE(period, "%Y-%m")) = ?', [$year])
+        $allReturns = VATReturn::whereRaw('YEAR(STR_TO_DATE(period, "%Y-%m")) = ?', [$year])
             ->when($businessId, fn($q, $id) => $q->where('business_id', $id))
             ->get();
 

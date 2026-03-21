@@ -1,1 +1,0 @@
-import{c as t,w as e,a as s,e as r,l as o,o as n}from"./app-DTFCm6pC.js";const _={__name:"AuthenticationCardLogo",setup(l){return(c,a)=>(n(),t(r(o),{href:"/"},{default:e(()=>[...a[0]||(a[0]=[s("img",{src:"/taxmaster-one.png",alt:"TaxMaster",class:"h-12 w-auto"},null,-1)])]),_:1}))}};export{_};

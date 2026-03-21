@@ -657,6 +657,33 @@ const truncateEmail = (email) => {
     return email;
 };
 
+// Extract role names from user payload (handles multiple shapes)
+const extractRoleNames = (u) => {
+    if (!u) return [];
+
+    const roles = u.roles;
+    if (Array.isArray(roles) && roles.length > 0) {
+        return roles.map(r => typeof r === 'string' ? r : (r.name || r)).filter(Boolean).map(s => String(s).toLowerCase());
+    }
+
+    if (roles && Array.isArray(roles.data) && roles.data.length > 0) {
+        return roles.data.map(r => typeof r === 'string' ? r : (r.name || r)).filter(Boolean).map(s => String(s).toLowerCase());
+    }
+
+    if (Array.isArray(u.role_names) && u.role_names.length > 0) return u.role_names.map(s => String(s).toLowerCase());
+    if (Array.isArray(u.roleNames) && u.roleNames.length > 0) return u.roleNames.map(s => String(s).toLowerCase());
+    if (typeof u.role === 'string' && u.role) return [String(u.role).toLowerCase()];
+    if (typeof roles === 'string' && roles) return [String(roles).toLowerCase()];
+
+    return [];
+};
+
+const isAccountant = computed(() => {
+    const u = auth.value?.user || page.props.user || {};
+    const names = extractRoleNames(u);
+    return names.includes('accountant');
+});
+
 // Close user menu when clicking outside
 const handleClickOutside = (e) => {
     if (showUserMenu.value && !e.target.closest('.user-menu-container')) {
