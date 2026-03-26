@@ -299,6 +299,23 @@
                             <span class="flex-1">Transactions</span>
                             <span v-if="isActive('/business/transactions')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
+
+                        <!-- Invoices -->
+                        <Link
+                            href="/business/invoices"
+                            :class="[
+                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
+                                isActive('/business/invoices')
+                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-100/80'
+                            ]"
+                        >
+                            <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/invoices') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h10M7 11h10M7 15h6M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                            </svg>
+                            <span class="flex-1">Invoices</span>
+                            <span v-if="isActive('/business/invoices')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
+                        </Link>
                     </div>
 
                     <!-- Tax Compliance -->

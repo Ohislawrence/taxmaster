@@ -117,12 +117,20 @@
                                     <span v-else class="text-gray-400 text-xs">Not set</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button
-                                        @click="editingId = transaction.id"
-                                        class="text-blue-600 hover:text-blue-700 font-medium"
-                                    >
-                                        {{ transaction.category ? 'Edit' : 'Categorize' }}
-                                    </button>
+                                    <div class="flex items-center gap-3">
+                                        <button
+                                            @click="editingId = transaction.id"
+                                            class="text-blue-600 hover:text-blue-700 font-medium"
+                                        >
+                                            {{ transaction.category ? 'Edit' : 'Categorize' }}
+                                        </button>
+                                        <button
+                                            @click="confirmDelete(transaction.id)"
+                                            class="text-red-600 hover:text-red-700 font-medium"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -371,4 +379,38 @@ const saveCategory = () => {
         savingCategory.value = false
     })
 }
+
+const confirmDelete = (id) => {
+    if (!confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) return
+    deletingId.value = id
+    const token = document.querySelector('meta[name="csrf-token"]')?.content
+
+    fetch(`/business/transactions/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': token,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Failed to delete')
+        return res.json()
+    })
+    .then(data => {
+        // Remove from props.transactions.data
+        const idx = props.transactions?.data?.findIndex(t => t.id === id)
+        if (idx > -1) props.transactions.data.splice(idx, 1)
+        successMessage.value = data.message || 'Transaction deleted'
+        setTimeout(() => successMessage.value = '', 3000)
+    })
+    .catch(err => {
+        successMessage.value = 'Failed to delete transaction'
+        setTimeout(() => successMessage.value = '', 3000)
+    })
+    .finally(() => deletingId.value = null)
+}
+
+const deletingId = ref(null)
 </script>

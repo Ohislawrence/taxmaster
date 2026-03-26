@@ -40,9 +40,22 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Invoices (Phase 1 e-invoicing)
+    // List invoices for business
+    Route::get('invoices', [App\Http\Controllers\Business\InvoiceController::class, 'index'])->name('invoices.index');
+    // Create sales invoice (business) - must come before the parameterized {invoice} route
+    Route::get('invoices/create', [App\Http\Controllers\Business\SalesInvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('invoices', [App\Http\Controllers\Business\SalesInvoiceController::class, 'store'])->name('invoices.store');
+    // Edit/update invoice
+    Route::get('invoices/{invoice}/edit', [App\Http\Controllers\Business\SalesInvoiceController::class, 'edit'])->name('invoices.edit');
+    Route::put('invoices/{invoice}', [App\Http\Controllers\Business\SalesInvoiceController::class, 'update'])->name('invoices.update');
+    Route::patch('invoices/{invoice}/status', [App\Http\Controllers\Business\SalesInvoiceController::class, 'updateStatus'])->name('invoices.update-status');
+    Route::post('invoices/{invoice}/mark-paid', [App\Http\Controllers\Business\SalesInvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
+
     Route::get('invoices/{invoice}', [App\Http\Controllers\Business\InvoiceController::class, 'show'])->name('invoices.show');
     Route::get('invoices/{invoice}/jades', [App\Http\Controllers\Business\InvoiceController::class, 'generateJadesInvoice'])->name('invoices.jades');
     Route::get('invoices/{invoice}/qr', [App\Http\Controllers\Business\InvoiceController::class, 'qr']);
+    // Signed PDF (public business route) - provide direct access without transactions middleware
+    Route::get('invoices/{invoice}/pdf/signed', [App\Http\Controllers\Business\FileController::class, 'invoicePdfSigned'])->name('invoices.pdf.signed.business');
 
     // Get Started Guide
     Route::prefix('get-started')->name('get-started.')->group(function () {
@@ -135,9 +148,15 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
 
         // Transactions
         Route::prefix('transactions')->name('transactions.')->middleware('subscription.features:link_bank_account')->group(function () {
+            // Transaction import (CSV/Excel) with AI mapping
+            Route::get('/import', [App\Http\Controllers\Business\TransactionImportController::class, 'showImportForm'])->name('import.form');
+            Route::post('/import/parse', [App\Http\Controllers\Business\TransactionImportController::class, 'parseFile'])->name('import.parse');
+            Route::post('/import/map-columns', [App\Http\Controllers\Business\TransactionImportController::class, 'mapColumns'])->name('import.map-columns');
+            Route::post('/import/process', [App\Http\Controllers\Business\TransactionImportController::class, 'processImport'])->name('import.process');
             Route::get('/', [TransactionController::class, 'index'])->name('index');
             Route::get('/{transaction}/categorize', [TransactionController::class, 'categorize'])->name('categorize');
             Route::put('/{transaction}/category', [TransactionController::class, 'updateCategory'])->name('update-category');
+            Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('destroy');
             Route::post('/batch-categorize', [TransactionController::class, 'batchCategorize'])->name('batch-categorize');
             // Reconciliations review
             Route::get('/reconciliations', [App\Http\Controllers\Business\ReconciliationController::class, 'index'])->name('reconciliations.index');
@@ -145,7 +164,6 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
             Route::post('/reconciliations/{reconciliation}/reject', [App\Http\Controllers\Business\ReconciliationController::class, 'reject'])->name('reconciliations.reject');
                 // Signed URLs for attachments and PDFs
                 Route::get('/reconciliations/{reconciliation}/attachment/{index}/signed', [App\Http\Controllers\Business\FileController::class, 'reconciliationAttachment'])->name('reconciliations.attachment.signed');
-                Route::get('/invoices/{invoice}/pdf/signed', [App\Http\Controllers\Business\FileController::class, 'invoicePdfSigned'])->name('invoices.pdf.signed');
             Route::middleware('subscription.features:export_pdf')->get('/export', [TransactionController::class, 'export'])->name('export');
         });
 

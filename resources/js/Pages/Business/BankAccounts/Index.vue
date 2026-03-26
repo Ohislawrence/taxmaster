@@ -11,20 +11,37 @@
                         <span class="font-medium">{{ bankAccountsCount }}</span> of <span class="font-medium">{{ bankAccountsLimit >= 999 ? 'Unlimited' : bankAccountsLimit }}</span> accounts linked
                     </p>
                 </div>
-                <button
-                    v-if="canLinkMore"
-                    @click="showConnectModal = true"
-                    class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center sm:justify-start space-x-2"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>Connect Bank</span>
-                </button>
+                <div v-if="canLinkMore" class="flex gap-2">
+                    <button
+                        @click="showConnectModal = true"
+                        class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center sm:justify-start space-x-2"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Connect Bank</span>
+                    </button>
+
+                    <a href="/business/transactions/import" class="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 px-4 sm:px-6 py-2 rounded-lg font-medium text-sm hover:bg-gray-50 flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M12 3v14" />
+                        </svg>
+                        <span>Import</span>
+                    </a>
+                </div>
                 <div v-else class="w-full sm:w-auto text-center">
                     <p class="text-sm text-amber-600 font-medium">Account limit reached</p>
                     <a href="/business/subscription" class="text-xs text-blue-600 hover:underline">Upgrade plan</a>
                 </div>
+            </div>
+
+            <!-- Import card (opens full import page) -->
+            <div class="bg-white rounded-lg shadow p-4 sm:p-6 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold">Import Transactions</h2>
+                    <p class="text-sm text-gray-600">Upload CSV or Excel files and use AI to map columns to transaction fields.</p>
+                </div>
+                <a href="/business/transactions/import" class="ml-4 w-36 sm:w-auto bg-white border border-gray-200 px-4 py-2 rounded text-sm hover:bg-gray-50 text-gray-700">Open Import</a>
             </div>
 
             <!-- Connected Accounts -->
@@ -265,7 +282,7 @@ const toggleAutoSync = (account) => {
     fetch(`/business/banks/${account.id}/toggle-auto-sync`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+
             'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content,
         },
     })
@@ -278,9 +295,9 @@ const toggleAutoSync = (account) => {
 }
 
 const disconnectAccount = (account) => {
-    if (!confirm(`Disconnect ${account.bank_name}? Transaction history will be preserved.`)) {
-        return
-    }
+                if (!confirm(`Disconnect ${account.bank_name}? Transaction history will be preserved.`)) {
+                    return
+                }
 
     fetch(`/business/banks/${account.id}`, {
         method: 'DELETE',

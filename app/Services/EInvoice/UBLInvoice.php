@@ -20,6 +20,12 @@ class UBLInvoice
     public string $currency;
     public string $irn; // Invoice Reference Number
     public string $signature; // Digital signature (JAdES)
+    /**
+     * Seller structured data (name, tin, registration, address, contact)
+     * Kept as array to allow extension to full NRS schema
+     * @var array
+     */
+    public array $seller;
     // ... add all other mandatory UBL 3.0 fields
 
     public function __construct(array $data)
@@ -35,6 +41,20 @@ class UBLInvoice
         $this->currency = $data['currency'] ?? 'NGN';
         $this->irn = $data['irn'] ?? '';
         $this->signature = $data['signature'] ?? '';
+        $this->seller = $data['seller'] ?? [
+            'name' => $this->sellerName,
+            'tin' => $this->sellerTIN,
+            'registrationNumber' => $data['sellerRegistrationNumber'] ?? ($data['registrationNumber'] ?? ''),
+            'address' => [
+                'street' => $data['sellerAddressLine'] ?? ($data['address'] ?? ''),
+                'city' => $data['sellerCity'] ?? ($data['city'] ?? ''),
+                'state' => $data['sellerState'] ?? ($data['state'] ?? ''),
+                'country' => $data['sellerCountry'] ?? ($data['country'] ?? ''),
+                'postalCode' => $data['sellerPostalCode'] ?? '',
+            ],
+            'email' => $data['sellerEmail'] ?? ($data['email'] ?? ''),
+            'phone' => $data['sellerPhone'] ?? ($data['phone'] ?? ''),
+        ];
         // ... assign all other fields
     }
 
@@ -45,6 +65,7 @@ class UBLInvoice
             'issueDate' => $this->issueDate,
             'sellerName' => $this->sellerName,
             'sellerTIN' => $this->sellerTIN,
+            'seller' => $this->seller,
             'buyerName' => $this->buyerName,
             'buyerTIN' => $this->buyerTIN,
             'totalAmount' => $this->totalAmount,

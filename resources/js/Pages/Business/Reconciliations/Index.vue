@@ -24,7 +24,7 @@ async function openDetails(item) {
   try {
     // Fetch signed invoice PDF URL if invoice exists
     if (selected.value.invoice && selected.value.invoice.id) {
-      const res = await fetch(route('business.transactions.invoices.pdf.signed', { invoice: selected.value.invoice.id }), { credentials: 'same-origin' });
+      const res = await fetch(route('business.invoices.pdf.signed.business', { invoice: selected.value.invoice.id }), { credentials: 'same-origin' });
       if (res.ok) {
         const payload = await res.json();
         selected.value.signedInvoiceUrl = payload.url;

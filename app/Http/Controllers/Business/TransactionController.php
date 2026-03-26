@@ -253,4 +253,32 @@ class TransactionController extends Controller
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }
+
+    /**
+     * Delete a transaction
+     */
+    public function destroy(Request $request, Transaction $transaction)
+    {
+        $this->authorize('delete', $transaction);
+
+        $business = $request->user()->defaultBusiness();
+        if ($transaction->business_id !== $business->id) {
+            abort(403);
+        }
+
+        try {
+            $transaction->delete();
+        } catch (\Throwable $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['message' => 'Failed to delete transaction', 'error' => $e->getMessage()], 500);
+            }
+            return back()->with('error', 'Failed to delete transaction');
+        }
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['message' => 'Transaction deleted successfully']);
+        }
+
+        return back()->with('success', 'Transaction deleted successfully');
+    }
 }

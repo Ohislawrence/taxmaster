@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Dompdf\Dompdf;
 
 class FileController extends Controller
 {
@@ -24,8 +25,56 @@ class FileController extends Controller
         }
 
         $path = $invoice->pdf_path;
-        if (!$path) {
-            abort(404);
+
+        // If no stored PDF, attempt to generate a simple PDF on-demand (requires dompdf)
+        if (! $path) {
+            try {
+                $filename = 'invoices/invoice-' . $invoice->id . '.pdf';
+
+                // Render a minimal invoice HTML view if available, otherwise build inline HTML
+                if (file_exists(resource_path('views/invoices/simple_pdf.blade.php'))) {
+                    $html = view('invoices.simple_pdf', ['invoice' => $invoice])->render();
+                } else {
+                    $html = '<html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif} .h{font-size:18px;font-weight:700} .muted{color:#666}</style></head><body>';
+                    $html .= '<div class="h">Invoice ' . e($invoice->invoice_number ?? $invoice->id) . '</div>';
+                    $html .= '<p class="muted">Date: ' . e($invoice->invoice_date?->toDateString() ?? $invoice->created_at?->toDateString()) . '</p>';
+                    $html .= '<p>Bill To: ' . e($invoice->data['buyer_name'] ?? $invoice->business?->name) . '</p>';
+                    $html .= '<table width="100%" style="border-collapse:collapse;margin-top:10px">';
+                    $html .= '<tr><th style="text-align:left">Description</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit</th><th style="text-align:right">Total</th></tr>';
+                    if (is_array($invoice->data['items'] ?? null)) {
+                        foreach ($invoice->data['items'] as $it) {
+                            $html .= '<tr><td>' . e($it['description'] ?? '') . '</td><td style="text-align:right">' . e($it['quantity'] ?? '') . '</td><td style="text-align:right">' . e(number_format($it['unit_price'] ?? 0,2)) . '</td><td style="text-align:right">' . e(number_format($it['line_total'] ?? 0,2)) . '</td></tr>';
+                        }
+                    }
+                    $html .= '</table>';
+                    $html .= '<p style="text-align:right;font-weight:700;margin-top:10px">Total: ' . number_format($invoice->total ?? 0,2) . '</p>';
+                    $html .= '</body></html>';
+                }
+
+                $dompdf = new Dompdf();
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+
+                // Save using the configured filesystem disk so Storage::exists() can find it
+                $diskName = config('filesystems.default');
+                $disk = Storage::disk($diskName);
+                // Ensure directory exists on disk
+                $dir = dirname($filename);
+                if ($dir && $dir !== '.') {
+                    $disk->makeDirectory($dir);
+                }
+
+                $disk->put($filename, $dompdf->output());
+
+                $invoice->pdf_path = $filename;
+                $invoice->save();
+
+                $path = $filename;
+            } catch (\Throwable $e) {
+                \Log::error('Invoice PDF generation failed', ['invoice_id' => $invoice->id, 'error' => $e->getMessage()]);
+                return response()->json(['error' => 'PDF generation not available: ' . ($e->getMessage() ?: 'unknown error')], 500);
+            }
         }
 
         return response()->json(['url' => $this->signedUrlForPath($path)]);

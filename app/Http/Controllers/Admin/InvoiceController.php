@@ -200,6 +200,20 @@ class InvoiceController
             'issueDate' => $invoice->invoice_date->format('Y-m-d'),
             'sellerName' => $business->name,
             'sellerTIN' => $business->tax_identification_number,
+            // Include structured seller fields to satisfy NRS/UBL full schema
+            'seller' => [
+                'name' => $business->name,
+                'tin' => $business->tax_identification_number,
+                'registrationNumber' => $business->registration_number ?? null,
+                'address' => [
+                    'street' => $business->address ?? '',
+                    'city' => $business->city ?? '',
+                    'state' => $business->state ?? '',
+                    'country' => $business->country ?? '',
+                ],
+                'email' => $business->email ?? null,
+                'phone' => $business->phone ?? null,
+            ],
             'buyerName' => $invoice->data['buyer_name'] ?? '',
             'buyerTIN' => $invoice->data['buyer_tin'] ?? '',
             'totalAmount' => $invoice->total,

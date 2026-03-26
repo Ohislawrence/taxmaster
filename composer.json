@@ -7,6 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "dompdf/dompdf": "^3.1",
         "endroid/qr-code": "^6.1",
         "guzzlehttp/guzzle": "^7.10",
         "inertiajs/inertia-laravel": "^2.0",
@@ -15,6 +16,8 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "mpdf/mpdf": "*",
+        "phpoffice/phpspreadsheet": "^5.5",
+        "phpseclib/phpseclib": "3.0",
         "spatie/laravel-backup": "10.0.1",
         "spatie/laravel-permission": "^7.2",
         "tightenco/ziggy": "^2.0",

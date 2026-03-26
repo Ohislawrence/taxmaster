@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Transaction;
 
 class Invoice extends Model
 {
@@ -82,6 +83,51 @@ class Invoice extends Model
             'paid_at' => now(),
             'payment_reference' => $paymentReference,
         ]);
+
+        // Create a matching Transaction so tax calculations include this sale.
+        try {
+            // Avoid duplicate transactions by checking known references or similar recent amounts
+            $exists = false;
+            if ($paymentReference) {
+                $exists = Transaction::where('mono_transaction_id', $paymentReference)
+                    ->where('business_id', $this->business_id)
+                    ->exists();
+            }
+
+            if (! $exists) {
+                // Also check for a recent transaction with same amount to reduce duplicates
+                $recentMatch = Transaction::where('business_id', $this->business_id)
+                    ->where('amount', $this->total)
+                    ->whereBetween('transaction_date', [now()->subDays(2), now()->addDays(2)])
+                    ->exists();
+
+                if (! $recentMatch) {
+                    $bankAccountId = $this->data['bank_account_id'] ?? null;
+
+                    Transaction::create([
+                        'business_id' => $this->business_id,
+                        'bank_account_id' => $bankAccountId,
+                        'mono_transaction_id' => $paymentReference,
+                        'type' => 'credit',
+                        'amount' => $this->total,
+                        'currency' => 'NGN',
+                        'description' => 'Payment received for invoice ' . ($this->invoice_number ?? $this->id),
+                        'counterparty' => $this->business?->name ?? null,
+                        'transaction_date' => now(),
+                        'category' => 'REVENUE',
+                        'sub_category' => ($this->tax && $this->tax > 0) ? 'VAT_OUTPUT' : 'REVENUE',
+                        'confidence' => 1.00,
+                        'vat_applicable' => ($this->tax && $this->tax > 0),
+                        'is_business_expense' => false,
+                        'user_verified' => true,
+                        'meta' => ['invoice_id' => $this->id, 'invoice_number' => $this->invoice_number],
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Don't break flow if transaction creation fails; log for later
+            \Illuminate\Support\Facades\Log::error('Failed to create transaction for paid invoice', ['invoice_id' => $this->id, 'error' => $e->getMessage()]);
+        }
     }
 
     /**
