@@ -16,6 +16,8 @@ class BlogController extends Controller
     {
         return Inertia::render('Blog/Index', [
             'title' => 'Blog - Tax News & Updates',
+            'description' => 'Tax compliance news, product updates, and guidance for Nigerian businesses. Stay informed on VAT, PAYE, WHT, CIT, and regulatory changes.',
+            'ogImage' => asset('company-Income-Tax.jpg'),
             'meta' => [
                 'description' => 'Tax compliance news, product updates, and guidance for Nigerian businesses. Stay informed on VAT, PAYE, WHT, CIT, and regulatory changes.',
                 'keywords' => 'Nigerian tax blog, tax compliance news, VAT updates, PAYE news, WHT guidance, tax regulations Nigeria',
@@ -47,12 +49,18 @@ class BlogController extends Controller
     {
         // Fetch the blog post by slug
         $post = BlogPost::where('slug', $slug)
-            ->where('published_at', '<=', now())
+            ->where(function($query) {
+                $query->whereNull('published_at')
+                    ->orWhere('published_at', '<=', now());
+            })
             ->firstOrFail();
 
         // Get related posts (same category or recent posts)
         $relatedPosts = BlogPost::where('id', '!=', $post->id)
-            ->where('published_at', '<=', now())
+            ->where(function($query) {
+                $query->whereNull('published_at')
+                    ->orWhere('published_at', '<=', now());
+            })
             ->latest('published_at')
             ->take(3)
             ->get(['id', 'slug', 'title', 'excerpt', 'cover_image', 'published_at']);
@@ -66,6 +74,8 @@ class BlogController extends Controller
         return Inertia::render('Blog/Show', [
             'slug' => $slug,
             'title' => $post->title . ' - TaxMaster Blog',
+            'description' => $metaDescription,
+            'ogImage' => $ogImage,
             'meta' => [
                 'description' => $metaDescription,
                 'keywords' => 'Nigerian tax, tax compliance, ' . $post->title,
