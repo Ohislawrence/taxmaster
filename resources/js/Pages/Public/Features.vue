@@ -67,11 +67,29 @@ const features = {
     ],
     stat: '3hrs',
     statLabel: 'Vs 2 days manual'
+  },
+  einvoice: {
+    label: 'E-Invoicing',
+    title: 'FIRS-compliant invoicing',
+    description: 'Create UBL 2.1 invoices with digital signatures. Automated FIRS submission or manual export for offline filing.',
+    icon: 'document-text',
+    color: 'indigo',
+    capabilities: [
+      { title: 'UBL 2.1 format', desc: 'FIRS-compliant invoices' },
+      { title: 'TIN validation', desc: 'Live buyer TIN check' },
+      { title: 'Digital signatures', desc: 'ECDSA cryptographic signing' },
+      { title: 'Auto submission', desc: 'Direct to FIRS portal' },
+      { title: 'Manual export', desc: 'UBL XML/JSON download' },
+      { title: 'Professional PDFs', desc: 'Client-ready invoices' },
+    ],
+    stat: '100%',
+    statLabel: 'FIRS compliance'
   }
 };
 
 const integrations = [
   { name: 'Mono', category: 'Banking', status: 'Live', description: 'Transaction import & categorization' },
+  { name: 'FIRS E-Invoicing', category: 'Invoicing', status: 'Live', description: 'UBL 2.1 invoice submission & validation' },
   { name: 'FIRS TaxPro-Max', category: 'Filing', status: 'Export', description: 'Schedule uploads & compliance' },
   { name: 'State IRS', category: 'Filing', status: 'Export', description: 'LIRS, OIRS, multi-state support' },
 ];
@@ -240,7 +258,7 @@ onMounted(() => {
                 </div>
 
                 <div v-else-if="activeTab === 'wht'" class="space-y-3">
-                  <div v-for="wht in [{type:'Contract', rate:'10%', amt:'₦125K'}, {type:'Rent', rate:'10%', amt:'₦34.5K'}, {type:'Dividend', rate:'10%', amt:'₦50K'}]" :key="wht.type" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div v-for="wht in [{type:'Contract', rate:'5%', amt:'₦62.5K'}, {type:'Rent', rate:'10%', amt:'₦34.5K'}, {type:'Dividend', rate:'10%', amt:'₦50K'}]" :key="wht.type" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p class="text-sm font-medium text-gray-900">{{ wht.type }}</p>
                       <p class="text-xs text-gray-500">{{ wht.rate }} rate</p>

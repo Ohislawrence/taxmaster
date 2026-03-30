@@ -27,6 +27,9 @@ class Business extends Model
         'city',
         'address',
         'tax_identification_number',
+        'is_vat_exempt',
+        'vat_exempt_category',
+        'vat_exempt_reason',
         'annual_revenue',
         'industry',
         'logo_path',
@@ -51,6 +54,7 @@ class Business extends Model
         'accounting_year_end' => 'date',
         'incorporation_date' => 'date',
         'has_staff' => 'boolean',
+        'is_vat_exempt' => 'boolean',
         // NDPA 2023 — encrypt PII at rest
         'tax_identification_number' => 'encrypted',
         'registration_number' => 'encrypted',

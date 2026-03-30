@@ -6,6 +6,7 @@ use App\Models\BusinessActivityLog;
 use App\Models\SubscriptionPlan;
 use App\Services\SubscriptionService;
 use App\Services\PaymentService;
+use App\Services\VatExemptionService;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -39,10 +40,12 @@ class SettingsController
             ->limit(15)
             ->get();
 
-        return Inertia::render('Business/Settings/Index', [
+        return Inertia::render('Business/Settings', [
             'business' => $business,
             'subscription' => $subscription,
             'activityLog' => $activityLog,
+            'exemptGoods' => VatExemptionService::getExemptGoodsCategories(),
+            'exemptServices' => VatExemptionService::getExemptServicesCategories(),
         ]);
     }
 
@@ -396,5 +399,50 @@ class SettingsController
         }
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Update VAT exempt status
+     * Per Nigerian VAT Act and Finance Acts 2019/2020
+     */
+    public function updateVatExemptStatus(Request $request)
+    {
+        $business = auth()->user()->defaultBusiness();
+
+        $validated = $request->validate([
+            'is_vat_exempt' => 'required|boolean',
+            'vat_exempt_category' => 'required_if:is_vat_exempt,true|nullable|string',
+            'vat_exempt_reason' => 'nullable|string|max:1000',
+        ]);
+
+        // Validate category if provided
+        if ($validated['is_vat_exempt'] && $validated['vat_exempt_category']) {
+            if (!VatExemptionService::isValidExemptCategory($validated['vat_exempt_category'])) {
+                return back()->withErrors(['vat_exempt_category' => 'Invalid VAT exempt category selected.']);
+            }
+        }
+
+        // Clear category and reason if not exempt
+        if (!$validated['is_vat_exempt']) {
+            $validated['vat_exempt_category'] = null;
+            $validated['vat_exempt_reason'] = null;
+        }
+
+        $business->update($validated);
+
+        BusinessActivityLog::create([
+            'business_id' => $business->id,
+            'user_id' => auth()->id(),
+            'action' => 'vat_exempt_status_updated',
+            'description' => $validated['is_vat_exempt']
+                ? 'Business marked as VAT exempt: ' . VatExemptionService::getCategoryDisplayName($validated['vat_exempt_category'])
+                : 'Business VAT exempt status removed',
+        ]);
+
+        return back()->with('success',
+            $validated['is_vat_exempt']
+                ? 'Business marked as VAT exempt. Transactions will no longer have VAT applied.'
+                : 'VAT exempt status removed. Normal VAT will apply to transactions.'
+        );
     }
 }

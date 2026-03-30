@@ -154,11 +154,13 @@ class InvoiceController
     public function viewPdf(Invoice $invoice)
     {
         try {
-            if (!$invoice->pdf_path || !file_exists(storage_path('app/' . $invoice->pdf_path))) {
+            $disk = config('filesystems.default');
+            if (!$invoice->pdf_path || !\Illuminate\Support\Facades\Storage::disk($disk)->exists($invoice->pdf_path)) {
                 return back()->with('error', 'PDF not found for this invoice.');
             }
 
-            return response()->file(storage_path('app/' . $invoice->pdf_path));
+            $full = \Illuminate\Support\Facades\Storage::disk($disk)->path($invoice->pdf_path);
+            return response()->file($full);
         } catch (\Exception $e) {
             Log::error('Error viewing invoice PDF', ['error' => $e->getMessage()]);
             return back()->with('error', 'Failed to retrieve PDF.');
@@ -171,14 +173,13 @@ class InvoiceController
     public function downloadPdf(Invoice $invoice)
     {
         try {
-            if (!$invoice->pdf_path || !file_exists(storage_path('app/' . $invoice->pdf_path))) {
+            $disk = config('filesystems.default');
+            if (!$invoice->pdf_path || !\Illuminate\Support\Facades\Storage::disk($disk)->exists($invoice->pdf_path)) {
                 return back()->with('error', 'PDF not found for this invoice.');
             }
 
-            return response()->download(
-                storage_path('app/' . $invoice->pdf_path),
-                $invoice->invoice_number . '.pdf'
-            );
+            $full = \Illuminate\Support\Facades\Storage::disk($disk)->path($invoice->pdf_path);
+            return response()->download($full, ($invoice->invoice_number ?: $invoice->id) . '.pdf');
         } catch (\Exception $e) {
             Log::error('Error downloading invoice PDF', ['error' => $e->getMessage()]);
             return back()->with('error', 'Failed to download PDF.');

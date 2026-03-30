@@ -97,7 +97,7 @@ const activeFeature = ref(0);
 
                     <!-- Sub-headline -->
                     <p class="reveal reveal-up mt-4 text-base leading-relaxed text-gray-500 sm:mt-6 sm:text-lg lg:text-xl">
-                        Automate PAYE, VAT, WHT & CIT calculations. Connect your bank, calculate taxes instantly, and generate validated, filing-ready exports and payment instructions so you file on time and avoid penalties.
+                        Automate PAYE, VAT, WHT & CIT calculations. Create FIRS-compliant e-invoices. Connect your bank, calculate taxes instantly, and generate validated, filing-ready exports and payment instructions so you file on time and avoid penalties.
                     </p>
 
                     <!-- CTA Buttons — Black -->
@@ -625,7 +625,7 @@ const activeFeature = ref(0);
                                         <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-medium text-amber-700">3 pending</span>
                                     </div>
                                     <div class="space-y-2 mb-4">
-                                        <div v-for="wht in [{vendor:'Adeola & Partners', type:'Consultancy', rate:'10%', amt:'₦125,000', route:'FIRS'}, {vendor:'BuildRight Ltd', type:'Construction', rate:'5%', amt:'₦75,000', route:'FIRS'}, {vendor:'John Doe', type:'Rent', rate:'10%', amt:'₦34,500', route:'Lagos SIRS'}]" :key="wht.vendor"
+                                        <div v-for="wht in [{vendor:'Adeola & Partners', type:'Consultancy', rate:'5%', amt:'₦62,500', route:'FIRS'}, {vendor:'BuildRight Ltd', type:'Construction', rate:'5%', amt:'₦75,000', route:'FIRS'}, {vendor:'John Doe', type:'Rent', rate:'10%', amt:'₦34,500', route:'Lagos SIRS'}]" :key="wht.vendor"
                                             class="rounded-lg bg-gray-50 p-2.5">
                                             <div class="flex items-center justify-between mb-1">
                                                 <p class="text-[10px] font-medium text-gray-900">{{ wht.vendor }}</p>

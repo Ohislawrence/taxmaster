@@ -20,19 +20,52 @@ class VATCalculationService
         $startDate = Carbon::createFromFormat('Y-m', $period)->startOfMonth();
         $endDate = $startDate->copy()->endOfMonth();
 
-        // Get VATable sales (Output VAT)
+        // Check if business is VAT exempt
+        if ($business->is_vat_exempt) {
+            return [
+                'period' => $period,
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $endDate->toDateString(),
+                'vat_sales' => 0,
+                'output_vat' => 0,
+                'vat_expenses' => 0,
+                'input_vat' => 0,
+                'net_vat' => 0,
+                'due_date' => $endDate->copy()->addMonth()->day(21)->toDateString(),
+                'is_exempt' => true,
+                'exempt_reason' => $business->vat_exempt_reason ?? 'Business registered as VAT exempt',
+                'transaction_count' => ['sales' => 0, 'expenses' => 0],
+            ];
+        }
+
+        // Get VATable sales (Output VAT) - exclude VAT exempt transactions
         $vatSales = Transaction::where('business_id', $business->id)
             ->where('category', 'REVENUE')
             ->where('sub_category', 'VAT_OUTPUT')
+            ->where(function($query) {
+                $query->where('vat_exempt', false)
+                      ->orWhereNull('vat_exempt');
+            })
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->sum('amount');
 
         $outputVat = $vatSales * self::VAT_RATE;
 
-        // Get VATable expenses (Input VAT)
+        // Get VAT exempt sales for reporting
+        $exemptSales = Transaction::where('business_id', $business->id)
+            ->where('category', 'REVENUE')
+            ->where('vat_exempt', true)
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('amount');
+
+        // Get VATable expenses (Input VAT) - exclude VAT exempt transactions
         $vatExpenses = Transaction::where('business_id', $business->id)
             ->where('category', 'EXPENSES')
             ->where('sub_category', 'VAT_INPUT')
+            ->where(function($query) {
+                $query->where('vat_exempt', false)
+                      ->orWhereNull('vat_exempt');
+            })
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->sum('amount');
 
@@ -47,9 +80,12 @@ class VATCalculationService
             'end_date' => $endDate->toDateString(),
             'vat_sales' => (float) $vatSales,
             'output_vat' => (float) $outputVat,
+            'exempt_sales' => (float) $exemptSales,
             'vat_expenses' => (float) $vatExpenses,
             'input_vat' => (float) $inputVat,
             'net_vat' => (float) $netVat,
+            'is_exempt' => false,
+            'due_date' => $endDate->copy()->addMonth()->day(21)->toDateString(),
             'due_date' => $endDate->copy()->addMonth()->day(21)->toDateString(),
             'transaction_count' => [
                 'sales' => Transaction::where('business_id', $business->id)

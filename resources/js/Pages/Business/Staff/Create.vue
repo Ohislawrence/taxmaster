@@ -131,7 +131,7 @@
                                     <ul class="space-y-1">
                                         <li><strong>Full Time:</strong> Standard employment with full benefits, pension, and PAYE deductions.</li>
                                         <li><strong>Part Time:</strong> Reduced hours. Tax pro-rated based on actual earnings.</li>
-                                        <li><strong>Contract:</strong> Fixed-term engagement. May be subject to WHT (5-10%) instead of PAYE depending on terms.</li>
+                                        <li><strong>Contract:</strong> Fixed-term engagement. May be subject to WHT (5% for professional services, 2-5% for construction) instead of PAYE depending on terms.</li>
                                     </ul>
                                     <div class="absolute -top-1.5 left-2 w-3 h-3 bg-gray-900 rotate-45"></div>
                                 </div>

@@ -62,9 +62,19 @@ Route::get('/for-businesses', function () {
         'title' => 'TaxMaster for Businesses',
     ]);
 })->name('business.features');
+
+// E-Invoicing feature page
+Route::get('/e-invoicing', function () {
+    return Inertia::render('Public/EInvoicing', [
+        'title' => 'FIRS E-Invoicing - Nigerian Compliant Electronic Invoicing',
+        'description' => 'Generate FIRS-compliant e-invoices with digital signatures, automated submission, and TIN validation. UBL 2.1 standard with manual export options.',
+    ]);
+})->name('einvoicing');
+
 Route::get('/about', fn () => Inertia::render('Public/About', ['title' => 'About']))->name('about');
 Route::get('/contact', fn () => Inertia::render('Public/Contact', ['title' => 'Contact']))->name('contact');
 Route::post('/contact', [App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send');
+Route::get('/help', fn () => Inertia::render('Public/HelpCenter', ['title' => 'Help Center']))->name('help');
 
 // Legal & compliance pages (serve markdown from resources/markdown)
 use Illuminate\Support\Facades\File as FileFacade;

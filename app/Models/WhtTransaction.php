@@ -16,8 +16,11 @@ class WhtTransaction extends Model
         'transaction_type',
         'vendor_name',
         'vendor_tin',
+        'tin_validated',
         'gross_amount',
         'wht_rate',
+        'original_rate',
+        'is_double_rate',
         'wht_amount',
         'net_amount',
         'description',
@@ -26,8 +29,11 @@ class WhtTransaction extends Model
 
     protected $casts = [
         'transaction_date' => 'date',
+        'tin_validated' => 'boolean',
         'gross_amount' => 'decimal:2',
         'wht_rate' => 'decimal:2',
+        'original_rate' => 'decimal:2',
+        'is_double_rate' => 'boolean',
         'wht_amount' => 'decimal:2',
         'net_amount' => 'decimal:2',
     ];

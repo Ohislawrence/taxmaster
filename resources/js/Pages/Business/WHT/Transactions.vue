@@ -45,6 +45,24 @@
                 </div>
             </div>
 
+            <!-- Double Rate Warning Banner (if any exist) -->
+            <div v-if="stats.double_rate_count > 0" class="mb-6 bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <h3 class="text-sm font-semibold text-orange-900">
+                            {{ stats.double_rate_count }} transaction{{ stats.double_rate_count > 1 ? 's' : '' }} subject to double WHT rate
+                        </h3>
+                        <p class="text-xs text-orange-800 mt-1">
+                            Per WHT Regulations 2024, suppliers without valid TIN are subject to double the standard rate.
+                            Ensure vendors provide their TIN to avoid higher deductions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Filters -->
             <div class="bg-white rounded-lg shadow p-4 mb-6">
                 <div class="grid md:grid-cols-4 gap-4">
@@ -118,7 +136,15 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div>
                                         <p class="text-sm font-medium text-gray-900">{{ transaction.vendor_name }}</p>
-                                        <p class="text-xs text-gray-500">{{ transaction.vendor_tin || 'No TIN' }}</p>
+                                        <div class="flex items-center gap-1 mt-1">
+                                            <p class="text-xs text-gray-500">{{ transaction.vendor_tin || 'No TIN' }}</p>
+                                            <span v-if="transaction.is_double_rate"
+                                                class="px-2 py-0.5 bg-orange-100 text-orange-800 text-xs font-medium rounded"
+                                                title="Double rate applied per WHT Regulations 2024 (no valid TIN)"
+                                            >
+                                                2x Rate
+                                            </span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -129,8 +155,15 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
                                     ₦{{ formatCurrency(transaction.gross_amount) }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-600">
-                                    {{ transaction.wht_rate }}%
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                    <div class="flex flex-col items-end">
+                                        <span :class="transaction.is_double_rate ? 'text-orange-600 font-semibold' : 'text-gray-600'">
+                                            {{ transaction.wht_rate }}%
+                                        </span>
+                                        <span v-if="transaction.is_double_rate && transaction.original_rate" class="text-xs text-gray-500">
+                                            ({{ transaction.original_rate }}% × 2)
+                                        </span>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-green-600">
                                     ₦{{ formatCurrency(transaction.wht_amount) }}

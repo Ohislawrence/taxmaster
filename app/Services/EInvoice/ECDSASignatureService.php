@@ -13,7 +13,7 @@ class ECDSASignatureService
      */
     public static function sign(string $data, string $privateKeyPem): string
     {
-        $private = PublicKeyLoader::loadPrivateKey($privateKeyPem)->withHash('sha256');
+        $private = PublicKeyLoader::load($privateKeyPem)->withHash('sha256');
         $signature = $private->sign($data);
         return base64_encode($signature);
     }

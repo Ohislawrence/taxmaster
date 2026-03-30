@@ -70,4 +70,17 @@ return [
         'api_key' => env('NRS_API_KEY'),
     ],
 
+    'firs' => [
+        'api_url' => env('FIRS_API_URL', 'https://einvoice.firs.gov.ng/api/v1'),
+        'api_key' => env('FIRS_API_KEY'),
+        'taxpayer_id' => env('FIRS_TAXPAYER_ID'),
+        'environment' => env('FIRS_ENVIRONMENT', 'sandbox'), // 'sandbox' or 'production'
+        'timeout' => env('FIRS_TIMEOUT', 30),
+        'enabled' => env('FIRS_EINVOICING_ENABLED', true),
+        'auto_submit' => env('FIRS_AUTO_SUBMIT', true), // Auto-submit invoices to FIRS
+        'batch_submit' => env('FIRS_BATCH_SUBMIT', false), // Use batch submission
+        'batch_size' => env('FIRS_BATCH_SIZE', 50),
+        'vat_rate' => env('FIRS_VAT_RATE', 7.5), // Standard VAT rate percentage
+    ],
+
 ];

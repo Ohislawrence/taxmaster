@@ -40,6 +40,9 @@ class WhtController extends Controller
             'pending_returns' => WhtReturn::where('business_id', $business->id)
                 ->whereIn('status', ['draft'])
                 ->count(),
+            'double_rate_count' => WhtTransaction::where('business_id', $business->id)
+                ->where('is_double_rate', true)
+                ->count(),
         ];
 
         return Inertia::render('Business/WHT/Transactions', [
@@ -71,18 +74,22 @@ class WhtController extends Controller
             'transaction_type' => 'required|in:' . implode(',', array_keys($this->whtService->getAllWHTRates())),
             'beneficiary_type' => 'required|in:company,individual',
             'vendor_name' => 'required|string|max:255',
-            'vendor_tin' => 'nullable|string|max:50',
+            'vendor_tin' => 'nullable|string|regex:/^[\d\-\s]{11,16}$/',
             'gross_amount' => 'required|numeric|min:0',
             'wht_rate' => 'nullable|numeric|min:0|max:100',
             'description' => 'nullable|string|max:500',
             'payment_reference' => 'nullable|string|max:100',
+        ], [
+            'vendor_tin.regex' => 'TIN must be 11-14 digits (may include spaces or hyphens)',
         ]);
 
-        // Calculate WHT
+        // Calculate WHT with TIN validation (double rate if TIN missing/invalid per WHT Regulations 2024)
         $calculation = $this->whtService->calculateWHT(
             $validated['gross_amount'],
             $validated['transaction_type'],
-            $validated['wht_rate'] ?? null
+            $validated['wht_rate'] ?? null,
+            $validated['beneficiary_type'],
+            $validated['vendor_tin'] ?? null
         );
 
         // Create transaction
@@ -93,8 +100,11 @@ class WhtController extends Controller
             'beneficiary_type' => $validated['beneficiary_type'],
             'vendor_name' => $validated['vendor_name'],
             'vendor_tin' => $validated['vendor_tin'],
+            'tin_validated' => $calculation['tin_validated'],
             'gross_amount' => $calculation['gross_amount'],
             'wht_rate' => $calculation['wht_rate'],
+            'original_rate' => $calculation['original_rate'],
+            'is_double_rate' => $calculation['is_double_rate'],
             'wht_amount' => $calculation['wht_amount'],
             'net_amount' => $calculation['net_amount'],
             'description' => $validated['description'],
@@ -128,18 +138,22 @@ class WhtController extends Controller
             'transaction_date' => 'required|date',
             'transaction_type' => 'required|in:' . implode(',', array_keys($this->whtService->getAllWHTRates())),
             'vendor_name' => 'required|string|max:255',
-            'vendor_tin' => 'nullable|string|max:50',
+            'vendor_tin' => 'nullable|string|regex:/^[\d\-\s]{11,16}$/',
             'gross_amount' => 'required|numeric|min:0',
             'wht_rate' => 'nullable|numeric|min:0|max:100',
             'description' => 'nullable|string|max:500',
             'payment_reference' => 'nullable|string|max:100',
+        ], [
+            'vendor_tin.regex' => 'TIN must be 11-14 digits (may include spaces or hyphens)',
         ]);
 
-        // Recalculate WHT
+        // Calculate WHT with TIN validation (double rate if TIN missing/invalid per WHT Regulations 2024)
         $calculation = $this->whtService->calculateWHT(
             $validated['gross_amount'],
             $validated['transaction_type'],
-            $validated['wht_rate'] ?? null
+            $validated['wht_rate'] ?? null,
+            $whtTransaction->beneficiary_type ?? 'company',
+            $validated['vendor_tin'] ?? null
         );
 
         $whtTransaction->update([
@@ -147,8 +161,11 @@ class WhtController extends Controller
             'transaction_type' => $validated['transaction_type'],
             'vendor_name' => $validated['vendor_name'],
             'vendor_tin' => $validated['vendor_tin'],
+            'tin_validated' => $calculation['tin_validated'],
             'gross_amount' => $calculation['gross_amount'],
             'wht_rate' => $calculation['wht_rate'],
+            'original_rate' => $calculation['original_rate'],
+            'is_double_rate' => $calculation['is_double_rate'],
             'wht_amount' => $calculation['wht_amount'],
             'net_amount' => $calculation['net_amount'],
             'description' => $validated['description'],
@@ -344,19 +361,24 @@ class WhtController extends Controller
 
     /**
      * Calculate WHT for preview (AJAX)
+     * Includes double rate logic per WHT Regulations 2024
      */
     public function calculatePreview(Request $request)
     {
         $validated = $request->validate([
             'gross_amount' => 'required|numeric|min:0',
             'transaction_type' => 'required|string',
+            'beneficiary_type' => 'nullable|in:company,individual',
+            'vendor_tin' => 'nullable|string|regex:/^[\d\-\s]{11,16}$/',
             'wht_rate' => 'nullable|numeric',
         ]);
 
         $calculation = $this->whtService->calculateWHT(
             $validated['gross_amount'],
             $validated['transaction_type'],
-            $validated['wht_rate'] ?? null
+            $validated['wht_rate'] ?? null,
+            $validated['beneficiary_type'] ?? 'company',
+            $validated['vendor_tin'] ?? null
         );
 
         return response()->json($calculation);

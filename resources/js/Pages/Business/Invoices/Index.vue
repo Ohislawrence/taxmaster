@@ -176,7 +176,7 @@
                                     <div class="flex items-center justify-center gap-2">
                                         <select
                                             :value="invoice.status"
-                                            @change="changeStatus(invoice.id, $event)"
+                                            @change="changeStatus(invoice, $event)"
                                             :disabled="savingStatus[invoice.id]"
                                             class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                         >
@@ -467,17 +467,21 @@ const resetFilters = () => {
 // Status update
 const savingStatus = ref({});
 
-const changeStatus = (invoiceId, event) => {
+const changeStatus = (invoice, event) => {
     const status = event.target.value;
-    savingStatus.value[invoiceId] = true;
+    savingStatus.value[invoice.id] = true;
 
-    router.patch(route('business.invoices.update-status', { invoice: invoiceId }), { status }, {
+    router.patch(route('business.invoices.update-status', { invoice: invoice.id }), { status }, {
         preserveState: true,
+        onSuccess: () => {
+            // update local invoice status for immediate UI feedback
+            invoice.status = status;
+        },
         onFinish: () => {
-            savingStatus.value[invoiceId] = false;
+            savingStatus.value[invoice.id] = false;
         },
         onError: () => {
-            savingStatus.value[invoiceId] = false;
+            savingStatus.value[invoice.id] = false;
         },
     });
 };

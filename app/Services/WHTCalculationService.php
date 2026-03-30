@@ -10,24 +10,30 @@ use Carbon\Carbon;
 class WHTCalculationService
 {
     /**
-     * WHT rates by transaction type for COMPANIES (Nigerian FIRS rates)
+     * WHT rates by transaction type for COMPANIES - Resident (Nigerian FIRS rates)
+     * Source: PwC Tax Summaries - Nigeria (Last reviewed: 29 September 2025)
      */
     private const COMPANY_RATES = [
         'dividends' => 10.0,
         'interest' => 10.0,
         'rent' => 10.0,
         'royalties' => 10.0,
-        'commissions' => 10.0,
-        'consultancy' => 10.0,
-        'contracts' => 5.0,
-        'management_fees' => 10.0,
-        'directors_fees' => 10.0,
-        'professional_fees' => 10.0,
-        'technical_fees' => 10.0,
+        'commissions' => 5.0,           // Commission, consultancy, technical, management, professional fees
+        'consultancy' => 5.0,
+        'contracts' => 5.0,             // Other construction and related activities
+        'construction_major' => 2.0,    // Construction (roads, bridges, building, power plants)
+        'management_fees' => 5.0,
+        'directors_fees' => 0.0,        // N/A for companies (only applicable to individuals @ 15%)
+        'professional_fees' => 5.0,
+        'technical_fees' => 5.0,
+        'brokerage' => 5.0,
+        'goods_supply' => 2.0,          // Supply of goods or materials (not manufacturer)
+        'other_services' => 2.0,        // Services not specifically listed
     ];
 
     /**
-     * WHT rates by transaction type for INDIVIDUALS (Nigerian FIRS rates)
+     * WHT rates by transaction type for INDIVIDUALS - Resident (Nigerian FIRS rates)
+     * Source: PwC Tax Summaries - Nigeria (Last reviewed: 29 September 2025)
      */
     private const INDIVIDUAL_RATES = [
         'dividends' => 10.0,
@@ -36,11 +42,15 @@ class WHTCalculationService
         'royalties' => 5.0,
         'commissions' => 5.0,
         'consultancy' => 5.0,
-        'contracts' => 5.0,
+        'contracts' => 5.0,             // Other construction and related activities
+        'construction_major' => 2.0,    // Construction (roads, bridges, building, power plants)
         'management_fees' => 5.0,
-        'directors_fees' => 10.0,
+        'directors_fees' => 15.0,       // Directors' fees for individuals
         'professional_fees' => 5.0,
         'technical_fees' => 5.0,
+        'brokerage' => 5.0,
+        'goods_supply' => 2.0,
+        'other_services' => 2.0,
     ];
 
     /**
@@ -50,22 +60,67 @@ class WHTCalculationService
      * @param string $transactionType
      * @param float|null $customRate Optional custom rate to override default
      * @param string $entityType 'company' or 'individual'
+     * @param string|null $vendorTin Vendor's Tax Identification Number
      * @return array
      */
-    public function calculateWHT(float $grossAmount, string $transactionType, ?float $customRate = null, string $entityType = 'company'): array
+    public function calculateWHT(float $grossAmount, string $transactionType, ?float $customRate = null, string $entityType = 'company', ?string $vendorTin = null): array
     {
-        $rate = $customRate ?? $this->getWHTRate($transactionType, $entityType);
+        $baseRate = $customRate ?? $this->getWHTRate($transactionType, $entityType);
+        $originalRate = $baseRate;
+
+        // Per WHT Regulations 2024: Apply double rate if TIN is missing or invalid
+        $isDoubleRate = false;
+        $tinValidated = false;
+
+        if ($vendorTin && $this->isValidTinFormat($vendorTin)) {
+            $tinValidated = true;
+            $rate = $baseRate;
+        } else {
+            // No TIN or invalid format - apply double rate as per regulations
+            $isDoubleRate = true;
+            $rate = $baseRate * 2;
+        }
+
         $whtAmount = round(($grossAmount * $rate) / 100, 2);
         $netAmount = round($grossAmount - $whtAmount, 2);
 
         return [
             'gross_amount' => $grossAmount,
             'wht_rate' => $rate,
+            'original_rate' => $isDoubleRate ? $originalRate : null,
+            'is_double_rate' => $isDoubleRate,
+            'tin_validated' => $tinValidated,
             'wht_amount' => $whtAmount,
             'net_amount' => $netAmount,
             'transaction_type' => $transactionType,
             'entity_type' => $entityType,
         ];
+    }
+
+    /**
+     * Validate Nigerian TIN format
+     *
+     * Nigerian TIN is typically 11-14 digits
+     * Format: XXXXXXXXX-XXXX (9 digits, hyphen, 4 digits) or 11-14 continuous digits
+     *
+     * @param string|null $tin
+     * @return bool
+     */
+    private function isValidTinFormat(?string $tin): bool
+    {
+        if (!$tin) {
+            return false;
+        }
+
+        // Remove spaces and hyphens for validation
+        $cleanTin = preg_replace('/[\s\-]/', '', $tin);
+
+        // Must be 11-14 digits
+        if (!preg_match('/^\d{11,14}$/', $cleanTin)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -99,11 +154,27 @@ class WHTCalculationService
      * @param string $transactionType
      * @param float|null $customRate
      * @param string $entityType 'company' or 'individual'
+     * @param string|null $vendorTin Vendor's Tax Identification Number
      * @return array
      */
-    public function reverseCalculateGross(float $netAmount, string $transactionType, ?float $customRate = null, string $entityType = 'company'): array
+    public function reverseCalculateGross(float $netAmount, string $transactionType, ?float $customRate = null, string $entityType = 'company', ?string $vendorTin = null): array
     {
-        $rate = $customRate ?? $this->getWHTRate($transactionType, $entityType);
+        $baseRate = $customRate ?? $this->getWHTRate($transactionType, $entityType);
+        $originalRate = $baseRate;
+
+        // Per WHT Regulations 2024: Apply double rate if TIN is missing or invalid
+        $isDoubleRate = false;
+        $tinValidated = false;
+
+        if ($vendorTin && $this->isValidTinFormat($vendorTin)) {
+            $tinValidated = true;
+            $rate = $baseRate;
+        } else {
+            // No TIN or invalid format - apply double rate as per regulations
+            $isDoubleRate = true;
+            $rate = $baseRate * 2;
+        }
+
         $grossAmount = round($netAmount / (1 - ($rate / 100)), 2);
         $whtAmount = round($grossAmount - $netAmount, 2);
 
@@ -111,6 +182,9 @@ class WHTCalculationService
             'net_amount' => $netAmount,
             'gross_amount' => $grossAmount,
             'wht_rate' => $rate,
+            'original_rate' => $isDoubleRate ? $originalRate : null,
+            'is_double_rate' => $isDoubleRate,
+            'tin_validated' => $tinValidated,
             'wht_amount' => $whtAmount,
             'transaction_type' => $transactionType,
             'entity_type' => $entityType,

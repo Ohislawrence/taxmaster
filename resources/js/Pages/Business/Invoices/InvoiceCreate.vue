@@ -47,13 +47,107 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">
                                         Buyer TIN
+                                        <span class="text-xs text-gray-400">(Optional - FIRS Compliance)</span>
+                                    </label>
+                                    <div class="relative">
+                                        <input
+                                            v-model="form.buyer_tin"
+                                            type="text"
+                                            @blur="validateTin"
+                                            class="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                            :class="{ 'border-red-500': tinError, 'border-green-500': tinValid }"
+                                            placeholder="Tax Identification Number"
+                                        />
+                                        <span v-if="validatingTin" class="absolute right-3 top-3 text-blue-500">
+                                            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </span>
+                                        <span v-if="tinValid && !validatingTin" class="absolute right-3 top-3 text-green-500">✓</span>
+                                    </div>
+                                    <p v-if="tinError" class="mt-1 text-xs text-red-500">{{ tinError }}</p>
+                                    <p v-if="tinValid && !validatingTin" class="mt-1 text-xs text-green-600">Valid TIN</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Buyer Email
                                         <span class="text-xs text-gray-400">(Optional)</span>
                                     </label>
                                     <input
-                                        v-model="form.buyer_tin"
+                                        v-model="form.buyer_email"
+                                        type="email"
+                                        class="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        placeholder="buyer@example.com"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Buyer Phone
+                                        <span class="text-xs text-gray-400">(Optional)</span>
+                                    </label>
+                                    <input
+                                        v-model="form.buyer_phone"
                                         type="text"
                                         class="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                        placeholder="Tax Identification Number"
+                                        placeholder="+234 xxx xxx xxxx"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-6 mt-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Buyer Address
+                                        <span class="text-xs text-gray-400">(Optional - FIRS Compliance)</span>
+                                    </label>
+                                    <input
+                                        v-model="form.buyer_address"
+                                        type="text"
+                                        class="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        placeholder="Street address"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        City
+                                        <span class="text-xs text-gray-400">(Optional)</span>
+                                    </label>
+                                    <input
+                                        v-model="form.buyer_city"
+                                        type="text"
+                                        class="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        State
+                                        <span class="text-xs text-gray-400">(Optional)</span>
+                                    </label>
+                                    <input
+                                        v-model="form.buyer_state"
+                                        type="text"
+                                        class="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Postal Code
+                                        <span class="text-xs text-gray-400">(Optional)</span>
+                                    </label>
+                                    <input
+                                        v-model="form.buyer_postal_code"
+                                        type="text"
+                                        class="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     />
                                 </div>
                             </div>
@@ -84,6 +178,21 @@
                                             {{ acct.bank_name }} - {{ acct.account_number }}
                                         </option>
                                     </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-6 mt-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Payment Terms
+                                        <span class="text-xs text-gray-400">(Optional)</span>
+                                    </label>
+                                    <textarea
+                                        v-model="form.payment_terms"
+                                        rows="2"
+                                        class="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        placeholder="e.g., Net 30 days, payment due within 30 days of invoice date"
+                                    ></textarea>
                                 </div>
                             </div>
                         </div>
@@ -224,14 +333,24 @@ export default {
             form: {
                 buyer_name: '',
                 buyer_tin: '',
+                buyer_email: '',
+                buyer_phone: '',
+                buyer_address: '',
+                buyer_city: '',
+                buyer_state: '',
+                buyer_postal_code: '',
+                payment_terms: '',
                 due_date: '',
                 bank_account_id: null,
             },
             items: [
-                { description: '', quantity: 1, unit_price: 0, tax_rate: 0 }
+                { description: '', quantity: 1, unit_price: 0, tax_rate: 7.5 }
             ],
             errors: {},
-            isSubmitting: false
+            isSubmitting: false,
+            validatingTin: false,
+            tinValid: false,
+            tinError: null,
         };
     },
     computed: {
@@ -297,13 +416,20 @@ export default {
                 const payload = {
                     buyer_name: this.form.buyer_name,
                     buyer_tin: this.form.buyer_tin || null,
+                    buyer_email: this.form.buyer_email || null,
+                    buyer_phone: this.form.buyer_phone || null,
+                    buyer_address: this.form.buyer_address || null,
+                    buyer_city: this.form.buyer_city || null,
+                    buyer_state: this.form.buyer_state || null,
+                    buyer_postal_code: this.form.buyer_postal_code || null,
+                    payment_terms: this.form.payment_terms || null,
                     due_date: this.form.due_date || null,
                     bank_account_id: this.form.bank_account_id,
                     items: this.items.map(item => ({
                         description: item.description,
                         quantity: Number(item.quantity),
                         unit_price: Number(item.unit_price),
-                        tax_rate: Number(item.tax_rate || 0),
+                        tax_rate: Number(item.tax_rate || 7.5),
                     }))
                 };
 
@@ -337,13 +463,53 @@ export default {
                 description: '',
                 quantity: 1,
                 unit_price: 0,
-                tax_rate: 0
+                tax_rate: 7.5
             });
         },
 
         removeItem(index) {
             if (this.items.length > 1) {
                 this.items.splice(index, 1);
+            }
+        },
+
+        async validateTin() {
+            if (!this.form.buyer_tin || this.form.buyer_tin.trim() === '') {
+                this.tinError = null;
+                this.tinValid = false;
+                return;
+            }
+
+            this.validatingTin = true;
+            this.tinError = null;
+            this.tinValid = false;
+
+            try {
+                const response = await fetch('/business/validate-tin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({
+                        tin: this.form.buyer_tin,
+                    }),
+                });
+
+                const result = await response.json();
+
+                if (result.valid) {
+                    this.tinValid = true;
+                    this.tinError = null;
+                } else {
+                    this.tinValid = false;
+                    this.tinError = result.error || 'Invalid TIN';
+                }
+            } catch (error) {
+                console.error('TIN validation error:', error);
+                this.tinError = 'Unable to validate TIN at this time';
+            } finally {
+                this.validatingTin = false;
             }
         },
 

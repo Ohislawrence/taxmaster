@@ -2,6 +2,7 @@
 import { ref, onMounted, nextTick, computed } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import SeoMeta from '@/Components/SeoMeta.vue';
 import axios from 'axios';
 
 defineOptions({ layout: PublicLayout });
@@ -54,6 +55,14 @@ onMounted(async () => {
 </script>
 
 <template>
+    <!-- Dynamic SEO: use post data when available so title isn't the slug and cover image is used -->
+    <SeoMeta
+        v-if="post"
+        :title="post.title"
+        :description="post.excerpt"
+        :og-image="assetPath(post.cover_image)"
+        :canonicalUrl="`https://taxmaster.ng/blog/${page.props.slug}`"
+    />
     <section class="relative overflow-hidden bg-white pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-36 lg:pb-24">
         <!-- Subtle grid background - Mono.co style -->
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:3rem_3rem] sm:bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>

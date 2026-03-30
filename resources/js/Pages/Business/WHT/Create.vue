@@ -90,12 +90,38 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Vendor TIN (Tax Identification Number)
                             </label>
-                            <input
-                                type="text"
-                                v-model="form.vendor_tin"
-                                class="w-full border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="Enter vendor TIN (optional)"
-                            >
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    v-model="form.vendor_tin"
+                                    @input="onTinChange"
+                                    maxlength="16"
+                                    class="w-full border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                                    :class="{
+                                        'border-green-500': tinValidationStatus === 'valid',
+                                        'border-red-500': tinValidationStatus === 'invalid'
+                                    }"
+                                    placeholder="e.g., 12345678901 (11-14 digits)"
+                                >
+                                <div v-if="tinValidationStatus === 'valid'" class="absolute right-3 top-2.5 text-green-500">
+                                    ✓
+                                </div>
+                                <div v-else-if="tinValidationStatus === 'invalid'" class="absolute right-3 top-2.5 text-red-500">
+                                    ✗
+                                </div>
+                            </div>
+                            <p v-if="!form.vendor_tin" class="text-xs text-orange-600 mt-1 flex items-start gap-1">
+                                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                <span><strong>Warning:</strong> Per WHT Regulations 2024, double rate will apply if vendor TIN is missing or invalid.</span>
+                            </p>
+                            <p v-else-if="tinValidationStatus === 'valid'" class="text-xs text-green-600 mt-1">
+                                ✓ Valid TIN format - Standard rate will apply
+                            </p>
+                            <p v-else-if="tinValidationStatus === 'invalid'" class="text-xs text-red-600 mt-1">
+                                ✗ Invalid TIN format - Double rate will apply (WHT Regulations 2024)
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -125,13 +151,32 @@
                         </div>
 
                         <div v-if="calculation" class="p-4 bg-blue-50 rounded-lg space-y-3">
+                            <!-- Double Rate Warning -->
+                            <div v-if="calculation.is_double_rate" class="mb-3 p-3 bg-orange-100 border border-orange-300 rounded-lg">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-orange-900">Double Rate Applied</p>
+                                        <p class="text-xs text-orange-800 mt-1">
+                                            Per WHT Regulations 2024, suppliers without a valid TIN are subject to double the standard WHT rate.
+                                            <span class="font-medium">Standard rate: {{ calculation.original_rate }}% → Applied rate: {{ calculation.wht_rate }}%</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="flex justify-between items-center">
                                 <span class="text-sm text-gray-700">Gross Amount:</span>
                                 <span class="text-lg font-bold text-gray-900">₦{{ formatCurrency(calculation.gross_amount) }}</span>
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-sm text-gray-700">WHT Rate:</span>
-                                <span class="text-lg font-bold text-blue-600">{{ calculation.wht_rate }}%</span>
+                                <span class="text-lg font-bold" :class="calculation.is_double_rate ? 'text-orange-600' : 'text-blue-600'">
+                                    {{ calculation.wht_rate }}%
+                                    <span v-if="calculation.is_double_rate" class="text-xs">(doubled)</span>
+                                </span>
                             </div>
                             <div class="flex justify-between items-center border-t border-blue-200 pt-3">
                                 <span class="text-sm font-medium text-gray-700">WHT Amount:</span>
@@ -213,6 +258,28 @@ const form = ref({
 
 const calculation = ref(null);
 const processing = ref(false);
+const tinValidationStatus = ref(null); // null, 'valid', or 'invalid'
+
+const validateTinFormat = (tin) => {
+    if (!tin) {
+        return null;
+    }
+
+    // Remove spaces and hyphens
+    const cleanTin = tin.replace(/[\s\-]/g, '');
+
+    // Must be 11-14 digits
+    if (/^\d{11,14}$/.test(cleanTin)) {
+        return 'valid';
+    }
+
+    return 'invalid';
+};
+
+const onTinChange = () => {
+    tinValidationStatus.value = validateTinFormat(form.value.vendor_tin);
+    calculateWHT();
+};
 
 const onTypeChange = () => {
     if (form.value.gross_amount && form.value.transaction_type) {

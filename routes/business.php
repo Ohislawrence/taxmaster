@@ -57,6 +57,15 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
     // Signed PDF (public business route) - provide direct access without transactions middleware
     Route::get('invoices/{invoice}/pdf/signed', [App\Http\Controllers\Business\FileController::class, 'invoicePdfSigned'])->name('invoices.pdf.signed.business');
 
+    // FIRS E-Invoicing Integration
+    Route::post('invoices/{invoice}/submit-to-firs', [App\Http\Controllers\Business\SalesInvoiceController::class, 'submitToFirs'])->name('invoices.submit-to-firs');
+    Route::get('invoices/{invoice}/firs-status', [App\Http\Controllers\Business\SalesInvoiceController::class, 'firsStatus'])->name('invoices.firs-status');
+    Route::post('validate-tin', [App\Http\Controllers\Business\SalesInvoiceController::class, 'validateTin'])->name('validate-tin');
+
+    // Manual FIRS Export (for when API keys are not configured)
+    Route::get('invoices/{invoice}/export/ubl-xml', [App\Http\Controllers\Business\SalesInvoiceController::class, 'exportUblXml'])->name('invoices.export.ubl-xml');
+    Route::get('invoices/{invoice}/export/ubl-json', [App\Http\Controllers\Business\SalesInvoiceController::class, 'exportUblJson'])->name('invoices.export.ubl-json');
+
     // Get Started Guide
     Route::prefix('get-started')->name('get-started.')->group(function () {
         Route::get('/', [GetStartedController::class, 'index'])->name('index');
@@ -92,6 +101,7 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
     // Settings
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::post('settings/vat-exempt', [SettingsController::class, 'updateVatExemptStatus'])->name('settings.update-vat-exempt');
     Route::get('settings/activity', [SettingsController::class, 'activityLog'])->name('settings.activity');
 
     // NDPA Data Portability (Article 25)

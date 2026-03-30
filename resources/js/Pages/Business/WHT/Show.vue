@@ -25,13 +25,43 @@
                     <p class="text-gray-500 text-xs font-medium uppercase tracking-wide">Gross Amount</p>
                     <p class="text-xl font-bold text-gray-900 mt-2">₦{{ formatCurrency(transaction.gross_amount) }}</p>
                 </div>
-                <div class="bg-green-50 shadow rounded-lg p-5 border border-green-200">
-                    <p class="text-green-600 text-xs font-medium uppercase tracking-wide">WHT Deducted ({{ transaction.wht_rate }}%)</p>
-                    <p class="text-xl font-bold text-green-700 mt-2">₦{{ formatCurrency(transaction.wht_amount) }}</p>
+                <div :class="transaction.is_double_rate ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'"
+                     class="shadow rounded-lg p-5 border">
+                    <p :class="transaction.is_double_rate ? 'text-orange-600' : 'text-green-600'"
+                       class="text-xs font-medium uppercase tracking-wide flex items-center gap-1">
+                        WHT Deducted ({{ transaction.wht_rate }}%)
+                        <span v-if="transaction.is_double_rate"
+                              class="px-1.5 py-0.5 bg-orange-200 text-orange-900 rounded text-xs font-bold"
+                              title="Double rate applied per WHT Regulations 2024"
+                        >
+                            2x
+                        </span>
+                    </p>
+                    <p :class="transaction.is_double_rate ? 'text-orange-700' : 'text-green-700'"
+                       class="text-xl font-bold mt-2">₦{{ formatCurrency(transaction.wht_amount) }}</p>
                 </div>
                 <div class="bg-white shadow rounded-lg p-5">
                     <p class="text-gray-500 text-xs font-medium uppercase tracking-wide">Net Amount</p>
                     <p class="text-xl font-bold text-gray-900 mt-2">₦{{ formatCurrency(transaction.net_amount) }}</p>
+                </div>
+            </div>
+
+            <!-- Double Rate Warning Banner -->
+            <div v-if="transaction.is_double_rate" class="mb-6 bg-orange-100 border-l-4 border-orange-500 p-4 rounded">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-orange-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <h3 class="text-orange-900 font-semibold text-sm">Double Rate Applied</h3>
+                        <p class="text-orange-800 text-sm mt-1">
+                            Per <strong>WHT Regulations 2024</strong>, this transaction was subject to double the standard WHT rate
+                            because the supplier did not provide a valid Tax Identification Number (TIN).
+                        </p>
+                        <p class="text-orange-800 text-xs mt-2">
+                            Standard rate: <strong>{{ transaction.original_rate }}%</strong> → Applied rate: <strong>{{ transaction.wht_rate }}%</strong> (doubled)
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -62,7 +92,19 @@
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Vendor TIN</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ transaction.vendor_tin || 'Not provided' }}</dd>
+                            <dd class="mt-1 text-sm">
+                                <span class="text-gray-900">{{ transaction.vendor_tin || 'Not provided' }}</span>
+                                <span v-if="!transaction.vendor_tin || !transaction.tin_validated"
+                                      class="ml-2 px-2 py-0.5 bg-orange-100 text-orange-800 text-xs rounded font-medium"
+                                >
+                                    Missing/Invalid
+                                </span>
+                                <span v-else-if="transaction.tin_validated"
+                                      class="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded font-medium"
+                                >
+                                    ✓ Valid
+                                </span>
+                            </dd>
                         </div>
                         <div v-if="transaction.payment_reference">
                             <dt class="text-sm font-medium text-gray-500">Payment Reference</dt>
@@ -89,12 +131,24 @@
                         <span class="text-gray-900 font-medium">₦{{ formatCurrency(transaction.gross_amount) }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">WHT Rate</span>
-                        <span class="text-gray-900 font-medium">{{ transaction.wht_rate }}%</span>
+                        <span class="text-gray-600">
+                            WHT Rate
+                            <span v-if="transaction.is_double_rate" class="text-orange-600 font-semibold">
+                                (Double Rate Applied)
+                            </span>
+                        </span>
+                        <div class="text-right">
+                            <span :class="transaction.is_double_rate ? 'text-orange-600' : 'text-gray-900'"
+                                  class="font-medium">{{ transaction.wht_rate }}%</span>
+                            <div v-if="transaction.is_double_rate && transaction.original_rate" class="text-xs text-gray-500 mt-1">
+                                Standard: {{ transaction.original_rate }}% × 2 = {{ transaction.wht_rate }}%
+                            </div>
+                        </div>
                     </div>
                     <div class="flex justify-between text-sm border-t pt-3">
                         <span class="text-gray-600">WHT Amount ({{ transaction.wht_rate }}% × ₦{{ formatCurrency(transaction.gross_amount) }})</span>
-                        <span class="font-bold text-green-600">₦{{ formatCurrency(transaction.wht_amount) }}</span>
+                        <span :class="transaction.is_double_rate ? 'text-orange-600' : 'text-green-600'"
+                              class="font-bold">₦{{ formatCurrency(transaction.wht_amount) }}</span>
                     </div>
                     <div class="flex justify-between text-sm border-t pt-3">
                         <span class="font-medium text-gray-900">Net Amount Payable to Vendor</span>
