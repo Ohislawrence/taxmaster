@@ -14,7 +14,9 @@ class BlogPost extends Model
         'title', 'slug', 'excerpt', 'body', 'cover_image', 'user_id', 'published_at'
     ];
 
-    protected $dates = ['published_at'];
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];
 
     public function user()
     {

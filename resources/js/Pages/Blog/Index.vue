@@ -1,11 +1,12 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, Head, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import axios from 'axios';
 
 defineOptions({ layout: PublicLayout });
 
+const page = usePage();
 const posts = ref([]);
 
 function assetPath(path) {
@@ -39,6 +40,32 @@ onMounted(async () => {
 </script>
 
 <template>
+    <Head :title="page.props.title">
+        <meta name="description" :content="page.props.meta?.description" />
+        <meta name="keywords" :content="page.props.meta?.keywords" />
+        <meta name="author" :content="page.props.meta?.author" />
+        <meta name="robots" :content="page.props.meta?.robots" />
+
+        <!-- Open Graph -->
+        <meta property="og:site_name" :content="page.props.meta?.['og:site_name']" />
+        <meta property="og:locale" :content="page.props.meta?.['og:locale']" />
+        <meta property="og:title" :content="page.props.meta?.['og:title']" />
+        <meta property="og:description" :content="page.props.meta?.['og:description']" />
+        <meta property="og:image" :content="page.props.meta?.['og:image']" />
+        <meta property="og:image:width" :content="page.props.meta?.['og:image:width']" />
+        <meta property="og:image:height" :content="page.props.meta?.['og:image:height']" />
+        <meta property="og:url" :content="page.props.meta?.['og:url']" />
+        <meta property="og:type" :content="page.props.meta?.['og:type']" />
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" :content="page.props.meta?.['twitter:card']" />
+        <meta name="twitter:title" :content="page.props.meta?.['twitter:title']" />
+        <meta name="twitter:description" :content="page.props.meta?.['twitter:description']" />
+        <meta name="twitter:image" :content="page.props.meta?.['twitter:image']" />
+        <meta name="twitter:site" :content="page.props.meta?.['twitter:site']" />
+        <meta name="twitter:creator" :content="page.props.meta?.['twitter:creator']" />
+    </Head>
+
     <section class="relative overflow-hidden bg-white pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-36 lg:pb-24">
         <!-- Subtle grid background - Mono.co style -->
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:3rem_3rem] sm:bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
@@ -48,11 +75,11 @@ onMounted(async () => {
             <div class="pt-12 sm:pt-16 pb-8 sm:pb-12 text-center sm:text-left">
                 <h1 class="reveal text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 text-slate-900 tracking-tight">Blog</h1>
                 <p class="reveal text-slate-500 mb-6 text-base sm:text-lg max-w-2xl mx-auto sm:mx-0">News, product updates, and tax guidance for Nigerian businesses.</p>
-                
+
                 <!-- CTA - Mono pill style -->
                 <div class="reveal flex flex-col sm:flex-row items-center sm:items-start gap-4">
-                    <Link 
-                        :href="route('register')" 
+                    <Link
+                        :href="route('register')"
                         class="group inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-slate-900/20 active:scale-95"
                     >
                         Get started — it's free
@@ -60,9 +87,9 @@ onMounted(async () => {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </Link>
-                    
+
                     <!-- Secondary CTA for desktop -->
-                    <Link 
+                    <Link
                         href="/features"
                         class="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                     >
@@ -79,12 +106,12 @@ onMounted(async () => {
                 <p class="text-lg">No posts yet.</p>
                 <p class="text-sm mt-2">Check back soon for updates.</p>
             </div>
-            
+
             <div v-else class="grid grid-cols-1 gap-4 sm:gap-6">
-                <div 
-                    v-for="(post, i) in posts" 
-                    :key="post.id" 
-                    class="reveal" 
+                <div
+                    v-for="(post, i) in posts"
+                    :key="post.id"
+                    class="reveal"
                     :style="{ transitionDelay: `${i * 75}ms` }"
                 >
                     <div class="group bg-white rounded-2xl sm:rounded-3xl border border-slate-100 p-6 sm:p-8 transition-all duration-300 hover:border-slate-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
@@ -94,8 +121,8 @@ onMounted(async () => {
                                 <!-- Featured image (optional) -->
                                 <div v-if="post.featured_image" class="sm:w-32 lg:w-40 flex-shrink-0">
                                     <div class="aspect-[16/9] sm:aspect-square rounded-xl sm:rounded-2xl bg-slate-50 overflow-hidden">
-                                        <img 
-                                            :src="assetPath(post.featured_image)" 
+                                        <img
+                                            :src="assetPath(post.featured_image)"
                                             :alt="post.title"
                                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                             loading="lazy"
@@ -160,10 +187,10 @@ onMounted(async () => {
                         <p class="text-slate-600 text-sm">Want to stay updated on new posts?</p>
                         <p class="text-xs text-slate-400 mt-1">Get the latest articles delivered to your inbox.</p>
                     </div>
-                    
+
                     <div class="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
-                        <Link 
-                            :href="route('register')" 
+                        <Link
+                            :href="route('register')"
                             class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-slate-900/20 active:scale-95 w-full xs:w-auto"
                         >
                             Create an account
@@ -171,9 +198,9 @@ onMounted(async () => {
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </Link>
-                        
+
                         <!-- RSS feed link (optional) -->
-                        <a 
+                        <a
                             href="/blog/feed"
                             class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50 w-full xs:w-auto"
                         >

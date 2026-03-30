@@ -1,14 +1,14 @@
 <script setup>
 import { ref, onMounted, nextTick, computed } from 'vue';
-import { usePage, Link } from '@inertiajs/vue3';
+import { usePage, Link, Head } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
-import SeoMeta from '@/Components/SeoMeta.vue';
-import axios from 'axios';
 
 defineOptions({ layout: PublicLayout });
 
 const page = usePage();
-const post = ref(null);
+
+// Get post data from props (passed from controller)
+const post = computed(() => page.props.post);
 
 // Computed property to safely check if post has related posts
 const hasRelatedPosts = computed(() => {
@@ -21,8 +21,8 @@ function assetPath(path) {
     return `/storage/${path.replace(/^\/+/, '')}`;
 }
 
-function formatDateFor(post, longMonth = false) {
-    const d = post?.published_at ?? post?.posted_at;
+function formatDateFor(postData, longMonth = false) {
+    const d = postData?.published_at ?? postData?.posted_at;
     if (!d) return '';
     return new Date(d).toLocaleDateString('en-US', longMonth ? { month: 'long', day: 'numeric', year: 'numeric' } : { month: 'short', day: 'numeric', year: 'numeric' });
 }
@@ -33,36 +33,49 @@ function authorInitials(name) {
 }
 
 onMounted(async () => {
-    try {
-        const res = await axios.get(`/api/blog-posts/${page.props.slug}`);
-        post.value = res.data;
+    await nextTick();
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
-        await nextTick();
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-        document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
-    } catch (error) {
-        console.error('Failed to load post:', error);
-    }
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 });
 </script>
 
 <template>
-    <!-- Dynamic SEO: use post data when available so title isn't the slug and cover image is used -->
-    <SeoMeta
-        v-if="post"
-        :title="post.title"
-        :description="post.excerpt"
-        :og-image="assetPath(post.cover_image)"
-        :canonicalUrl="`https://taxmaster.ng/blog/${page.props.slug}`"
-    />
+    <!-- Dynamic SEO meta tags from controller -->
+    <Head :title="page.props.title">
+        <meta name="description" :content="page.props.meta?.description" />
+        <meta name="keywords" :content="page.props.meta?.keywords" />
+        <meta name="author" :content="page.props.meta?.author" />
+        <meta name="robots" :content="page.props.meta?.robots" />
+
+        <!-- Open Graph -->
+        <meta property="og:site_name" :content="page.props.meta?.['og:site_name']" />
+        <meta property="og:locale" :content="page.props.meta?.['og:locale']" />
+        <meta property="og:title" :content="page.props.meta?.['og:title']" />
+        <meta property="og:description" :content="page.props.meta?.['og:description']" />
+        <meta property="og:image" :content="page.props.meta?.['og:image']" />
+        <meta property="og:image:width" :content="page.props.meta?.['og:image:width']" />
+        <meta property="og:image:height" :content="page.props.meta?.['og:image:height']" />
+        <meta property="og:url" :content="page.props.meta?.['og:url']" />
+        <meta property="og:type" :content="page.props.meta?.['og:type']" />
+        <meta v-if="page.props.meta?.['article:published_time']" property="article:published_time" :content="page.props.meta?.['article:published_time']" />
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" :content="page.props.meta?.['twitter:card']" />
+        <meta name="twitter:title" :content="page.props.meta?.['twitter:title']" />
+        <meta name="twitter:description" :content="page.props.meta?.['twitter:description']" />
+        <meta name="twitter:image" :content="page.props.meta?.['twitter:image']" />
+        <meta name="twitter:site" :content="page.props.meta?.['twitter:site']" />
+        <meta name="twitter:creator" :content="page.props.meta?.['twitter:creator']" />
+    </Head>
+
     <section class="relative overflow-hidden bg-white pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-36 lg:pb-24">
         <!-- Subtle grid background - Mono.co style -->
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:3rem_3rem] sm:bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
@@ -81,14 +94,8 @@ onMounted(async () => {
                 </Link>
             </div>
 
-            <!-- Loading state -->
-            <div v-if="!post" class="reveal text-slate-400 text-center py-16 sm:py-20">
-                <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-slate-200 border-t-slate-900"></div>
-                <p class="mt-4 text-sm">Loading article...</p>
-            </div>
-
             <!-- Article Content -->
-            <article v-else class="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 p-6 sm:p-8 lg:p-12 shadow-sm">
+            <article v-if="post" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 p-6 sm:p-8 lg:p-12 shadow-sm">
                 <!-- Article Header -->
                 <header class="reveal">
                     <!-- Meta info - Responsive layout -->
@@ -99,11 +106,11 @@ onMounted(async () => {
                         </span>
 
                         <!-- Author with avatar on desktop -->
-                        <div class="flex items-center gap-2">
+                        <div v-if="post.author" class="flex items-center gap-2">
                             <div class="hidden sm:flex h-6 w-6 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 items-center justify-center text-xs font-medium text-slate-600">
-                                {{ authorInitials(post.user?.name) }}
+                                {{ authorInitials(post.author?.name) }}
                             </div>
-                            <span class="font-medium text-slate-700">{{ post.user?.name }}</span>
+                            <span class="font-medium text-slate-700">{{ post.author?.name }}</span>
                         </div>
 
                         <span class="w-1 h-1 rounded-full bg-slate-300"></span>
@@ -188,12 +195,12 @@ onMounted(async () => {
                 </div>
 
                 <!-- Author Box - Enhanced with more details -->
-                <footer class="reveal mt-12 sm:mt-16 pt-8 sm:pt-10 border-t border-slate-100">
+                <footer v-if="post.author" class="reveal mt-12 sm:mt-16 pt-8 sm:pt-10 border-t border-slate-100">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                         <!-- Author avatar - larger -->
                         <div class="flex-shrink-0">
                             <div class="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-xl sm:text-2xl font-bold text-slate-600 shadow-inner">
-                                {{ authorInitials(post.user?.name) }}
+                                {{ authorInitials(post.author?.name) }}
                             </div>
                         </div>
 
@@ -201,20 +208,20 @@ onMounted(async () => {
                         <div class="flex-1">
                             <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
                                 <h3 class="text-lg sm:text-xl font-semibold text-slate-900">
-                                    {{ post.user?.name }}
+                                    {{ post.author?.name }}
                                 </h3>
                                 <span class="text-sm text-slate-400">·</span>
-                                <span class="text-sm text-slate-500">{{ post.user?.role || 'Contributor' }}</span>
+                                <span class="text-sm text-slate-500">{{ post.author?.role || 'Contributor' }}</span>
                             </div>
 
                             <p class="text-sm sm:text-base text-slate-500 leading-relaxed max-w-2xl">
-                                {{ post.user?.bio || 'Sharing insights on tax technology and business growth in Nigeria.' }}
+                                {{ post.author?.bio || 'Sharing insights on tax technology and business growth in Nigeria.' }}
                             </p>
 
                             <!-- Author social links (if available) -->
-                            <div v-if="post.user?.social" class="flex gap-3 mt-4">
+                            <div v-if="post.author?.social" class="flex gap-3 mt-4">
                                 <a
-                                    v-for="(url, platform) in post.user.social"
+                                    v-for="(url, platform) in post.author.social"
                                     :key="platform"
                                     :href="url"
                                     target="_blank"

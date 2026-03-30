@@ -3,6 +3,7 @@
 use App\Http\Controllers\BusinessSetupController;
 use App\Http\Controllers\Webhooks\MonoWebhookController;
 use App\Http\Controllers\TestMonoController;
+use App\Http\Controllers\Public\BlogController;
 use App\Models\SubscriptionPlan;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -13,13 +14,8 @@ use App\Http\Controllers\PublicApi\PublicAiController;
 use App\Http\Controllers\PublicApi\VisitorChatController;
 
 // Blog public routes
-Route::get('/blog', fn () => Inertia::render('Blog/Index', [
-    'title' => 'Blog',
-]))->name('blog.index');
-Route::get('/blog/{slug}', fn ($slug) => Inertia::render('Blog/Show', [
-    'slug' => $slug,
-    'title' => $slug,
-]))->name('blog.show');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/', function () {
     return Inertia::render('Home', [
