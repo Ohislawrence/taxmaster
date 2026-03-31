@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Models\Team;
 use App\Models\User;
+use App\Jobs\SendWelcomeEmail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -39,6 +40,9 @@ class CreateNewUser implements CreatesNewUsers
                 $this->createTeam($user);
                 // Assign business role to new user
                 $user->assignRole('business');
+
+                // Dispatch welcome email with 24-hour delay
+                SendWelcomeEmail::dispatch($user)->delay(now()->addHours(24));
 
                 // If the registration contains an invite token, verify it and assign business ownership
                 if (!empty($input['invite'])) {

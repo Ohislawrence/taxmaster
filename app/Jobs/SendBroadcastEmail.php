@@ -38,7 +38,7 @@ class SendBroadcastEmail implements ShouldQueue
 
     protected function renderForUser(string $template, User $user): string
     {
-        // tokens: {first_name}, {last_name}, {name}, {email}, {business_name}
+        // Tokens: {first_name}, {last_name}, {name}, {email}, {business_name}, {role}, {plan}
         $name = $user->name ?? '';
         $first = '';
         $last = '';
@@ -56,12 +56,39 @@ class SendBroadcastEmail implements ShouldQueue
             $business = '';
         }
 
+        // Get user's primary role
+        $role = '';
+        try {
+            $userRole = $user->roles->first();
+            $role = $userRole ? ucfirst($userRole->name) : 'User';
+        } catch (\Throwable $e) {
+            $role = 'User';
+        }
+
+        // Get user's current plan
+        $plan = 'Free';
+        try {
+            $subscription = $user->subscriptions()
+                ->where('status', 'active')
+                ->whereDate('ends_at', '>=', now())
+                ->with('plan')
+                ->first();
+
+            if ($subscription && $subscription->plan) {
+                $plan = $subscription->plan->name;
+            }
+        } catch (\Throwable $e) {
+            $plan = 'Free';
+        }
+
         $map = [
             '{first_name}' => $first,
             '{last_name}' => $last,
             '{name}' => $name,
             '{email}' => $user->email,
             '{business_name}' => $business,
+            '{role}' => $role,
+            '{plan}' => $plan,
         ];
 
         return strtr($template, $map);

@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'welcome_email_sent_at',
         'affiliate_code',
         'affiliate_commission_percent',
         'affiliate_bank_name',

@@ -64,6 +64,9 @@ class UserController
         // Assign role using Spatie
         $user->assignRole($validated['role']);
 
+        // Dispatch welcome email with 24-hour delay
+        \App\Jobs\SendWelcomeEmail::dispatch($user)->delay(now()->addHours(24));
+
         return redirect()->route('admin.users.show', $user)
             ->with('message', 'User created successfully');
     }

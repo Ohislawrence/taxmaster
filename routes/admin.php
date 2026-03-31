@@ -171,4 +171,15 @@ Route::middleware(['auth:sanctum', 'verified', 'admin'])->prefix('admin')->name(
     // Broadcast emails
     Route::get('broadcast', [BroadcastEmailController::class, 'create'])->name('broadcast.create');
     Route::post('broadcast', [BroadcastEmailController::class, 'send'])->name('broadcast.send');
+
+    // Error Logs
+    Route::prefix('error-logs')->name('error-logs.')->controller(\App\Http\Controllers\Admin\ErrorLogController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{errorLog}', 'show')->name('show');
+        Route::post('/{errorLog}/resolve', 'resolve')->name('resolve');
+        Route::post('/bulk-resolve', 'bulkResolve')->name('bulk-resolve');
+        Route::delete('/{errorLog}', 'destroy')->name('destroy');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        Route::post('/clear-resolved', 'clearResolved')->name('clear-resolved');
+    });
 });
