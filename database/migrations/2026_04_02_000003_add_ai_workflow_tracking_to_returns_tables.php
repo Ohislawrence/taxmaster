@@ -29,7 +29,7 @@ return new class extends Migration
                         ->after('ai_workflow_id')
                         ->comment('Flag indicating this return was AI-generated');
 
-                    $blueprint->index('ai_workflow_id');
+                    // Note: foreignId()->constrained() already creates an index automatically
                     $blueprint->index('is_ai_generated');
                 });
             }
@@ -47,7 +47,6 @@ return new class extends Migration
             if (Schema::hasTable($table)) {
                 Schema::table($table, function (Blueprint $blueprint) {
                     $blueprint->dropForeign(['ai_workflow_id']);
-                    $blueprint->dropIndex(['ai_workflow_id']);
                     $blueprint->dropIndex(['is_ai_generated']);
                     $blueprint->dropColumn(['ai_workflow_id', 'is_ai_generated']);
                 });
