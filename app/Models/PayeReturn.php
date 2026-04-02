@@ -25,6 +25,8 @@ class PayeReturn extends Model
 
     protected $fillable = [
         'business_id',
+        'ai_workflow_id',
+        'is_ai_generated',
         'period',
         'return_type',
         'total_gross_pay',
@@ -66,6 +68,14 @@ class PayeReturn extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    /**
+     * Get the AI workflow that created this return
+     */
+    public function aiWorkflow(): BelongsTo
+    {
+        return $this->belongsTo(AiWorkflow::class, 'ai_workflow_id');
     }
 
     /**

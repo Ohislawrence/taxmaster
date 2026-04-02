@@ -101,20 +101,8 @@ class TransactionController extends Controller
 
         return Inertia::render('Business/Transactions/Index', [
             'transactions' => $transactions,
-            'categories' => [
-                'Sales/Revenue',
-                'Operating Expenses',
-                'Staff Salaries',
-                'Utilities',
-                'Transport/Logistics',
-                'Marketing',
-                'Professional Services',
-                'Equipment Purchase',
-                'Other Expense',
-                'Investment',
-                'Loan Repayment',
-                'Personal Withdrawal',
-            ],
+            'categories' => Transaction::getCategoriesGrouped(),
+            'whtCategories' => Transaction::getWHTApplicableCategories(),
             'stats' => $stats,
             'filters' => $request->only(['category', 'type', 'period', 'uncategorized', 'search']),
         ]);
@@ -140,6 +128,8 @@ class TransactionController extends Controller
                 'current_sub_category' => $transaction->sub_category,
                 'confidence' => $transaction->confidence,
             ],
+            'categories' => Transaction::getCategoriesGrouped(),
+            'whtCategories' => Transaction::getWHTApplicableCategories(),
         ]);
     }
 

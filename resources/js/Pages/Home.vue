@@ -60,21 +60,21 @@ const stats = [
 ];
 
 const capabilities = [
+    { icon: 'robot', title: 'AI Tax Automation', desc: 'Click once, AI does the rest. Automatically calculates VAT, PAYE, WHT & CIT from your transactions. No accountant needed for basic compliance.' },
     { icon: 'shield', title: 'NDPA Compliant', desc: 'Full data protection compliance with encrypted TIN storage and audit trails.' },
     { icon: 'clock', title: 'Real-time Alerts', desc: 'Never miss a deadline. Get notified before due dates with penalty calculators.' },
     { icon: 'bank', title: 'Bank Integration', desc: 'Connect via Mono. Transactions auto-categorised for tax purposes.' },
     { icon: 'chart', title: 'Smart Reports', desc: 'Export PDF/CSV reports. Annual returns prep with all supporting schedules.' },
     { icon: 'users', title: 'Multi-Entity', desc: 'Manage multiple businesses from one dashboard with role-based access.' },
-    { icon: 'zap', title: 'Instant Filing', desc: 'Generate, review, and file returns in under 60 seconds. Not days.' },
 ];
 
 const capabilityIcons = {
+    robot: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z',
     shield: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
     clock: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
     bank: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
     chart: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
     users: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
-    zap: 'M13 10V3L4 14h7v7l9-11h-7z',
 };
 
 const activeFeature = ref(0);
@@ -97,7 +97,7 @@ const activeFeature = ref(0);
 
                     <!-- Sub-headline -->
                     <p class="reveal reveal-up mt-4 text-base leading-relaxed text-gray-500 sm:mt-6 sm:text-lg lg:text-xl">
-                        Automate PAYE, VAT, WHT & CIT calculations. Create FIRS-compliant e-invoices. Connect your bank, calculate taxes instantly, and generate validated, filing-ready exports and payment instructions so you file on time and avoid penalties.
+                        <strong class="text-gray-900">AI-powered tax automation at your fingertips.</strong> Click once and watch AI calculate your VAT, PAYE, WHT & CIT from your transactions. No accountant needed for basic compliance. Create FIRS-compliant e-invoices, connect your bank, and get filing-ready returns in seconds—not weeks.
                     </p>
 
                     <!-- CTA Buttons — Black -->

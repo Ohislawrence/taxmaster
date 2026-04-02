@@ -18,6 +18,8 @@ class CitReturn extends Model
 
     protected $fillable = [
         'business_id',
+        'ai_workflow_id',
+        'is_ai_generated',
         'period',
         'return_type',
         'submitted_at',
@@ -61,6 +63,7 @@ class CitReturn extends Model
     ];
 
     protected $casts = [
+        'is_ai_generated' => 'boolean',
         'gross_profit' => 'decimal:2',
         'revenue' => 'decimal:2',
         'cost_of_goods_sold' => 'decimal:2',
@@ -101,6 +104,14 @@ class CitReturn extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    /**
+     * Get the AI workflow that generated this return
+     */
+    public function aiWorkflow(): BelongsTo
+    {
+        return $this->belongsTo(AiWorkflow::class, 'ai_workflow_id');
     }
 
     /**

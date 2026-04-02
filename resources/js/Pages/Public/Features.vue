@@ -5,9 +5,26 @@ import PublicLayout from '@/Layouts/PublicLayout.vue';
 
 defineOptions({ layout: PublicLayout });
 
-const activeTab = ref('paye');
+const activeTab = ref('ai');
 
 const features = {
+  ai: {
+    label: 'AI Automation',
+    title: 'Your AI tax team—no accountant needed',
+    description: 'Click once, AI analyzes your transactions and generates complete tax returns. VAT, PAYE, WHT, and CIT calculated automatically with 95%+ accuracy. Perfect for basic compliance without hiring expensive accountants.',
+    icon: 'robot',
+    color: 'indigo',
+    capabilities: [
+      { title: 'One-click automation', desc: 'AI does all calculations instantly' },
+      { title: 'Transaction analysis', desc: 'Scans bank data automatically' },
+      { title: 'Multi-tax support', desc: 'VAT, PAYE, WHT, CIT in one click' },
+      { title: 'Confidence scoring', desc: 'Shows calculation certainty' },
+      { title: 'Draft returns', desc: 'Review before submission' },
+      { title: 'No accountant fees', desc: 'Save thousands monthly' },
+    ],
+    stat: '95%+',
+    statLabel: 'Accuracy rate'
+  },
   paye: {
     label: 'PAYE',
     title: 'Payroll taxes, automated',
@@ -126,8 +143,8 @@ onMounted(() => {
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
       <div class="mx-auto max-w-2xl text-center">
         <h1 class="reveal reveal-up text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-[3.5rem] lg:leading-[1.1]">Features</h1>
-        <p class="reveal reveal-up mt-4 text-base leading-relaxed text-gray-500 sm:mt-6 sm:text-lg">Clear, practical tax features for Nigerian businesses. Below we explain which steps TaxMaster automates today and which steps produce filing-ready exports your team can use to complete remittance.</p>
-        <p class="reveal reveal-up mt-4 text-sm text-gray-400">Note: TaxMaster generates filing-ready returns and exportable payment instructions. Manual remittance of government payments is required today; programmatic remittance integrations are planned.</p>
+        <p class="reveal reveal-up mt-4 text-base leading-relaxed text-gray-500 sm:mt-6 sm:text-lg">AI-powered tax automation plus practical tools for Nigerian businesses. Click once to calculate taxes, or use individual features for full control. Your choice—automated or manual.</p>
+        <p class="reveal reveal-up mt-4 text-sm text-gray-400">Note: AI generates filing-ready returns automatically. Manual remittance is required; programmatic remittance integrations are planned.</p>
       </div>
     </div>
   </section>
@@ -171,7 +188,8 @@ onMounted(() => {
                 :class="`bg-${features[activeTab].color}-100 text-${features[activeTab].color}-700`"
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path v-if="features[activeTab].icon === 'users'" stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path v-if="features[activeTab].icon === 'robot'" stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                  <path v-else-if="features[activeTab].icon === 'users'" stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path v-else-if="features[activeTab].icon === 'calculator'" stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   <path v-else-if="features[activeTab].icon === 'document'" stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   <path v-else stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />

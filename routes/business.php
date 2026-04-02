@@ -75,6 +75,20 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
         Route::post('/undismiss', [GetStartedController::class, 'undismiss'])->name('undismiss');
     });
 
+    // AI Tax Workflows
+    Route::prefix('ai-workflows')->name('ai-workflows.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Business\AiWorkflowController::class, 'index'])->name('index');
+        Route::get('/types', [App\Http\Controllers\Business\AiWorkflowController::class, 'types'])->name('types');
+        Route::get('/statistics', [App\Http\Controllers\Business\AiWorkflowController::class, 'statistics'])->name('statistics');
+        Route::post('/check-availability', [App\Http\Controllers\Business\AiWorkflowController::class, 'checkAvailability'])->name('check-availability');
+        Route::post('/', [App\Http\Controllers\Business\AiWorkflowController::class, 'store'])->name('store');
+        Route::get('/{workflow}', [App\Http\Controllers\Business\AiWorkflowController::class, 'show'])->name('show');
+        Route::post('/{workflow}/retry', [App\Http\Controllers\Business\AiWorkflowController::class, 'retry'])->name('retry');
+        Route::post('/{workflow}/cancel', [App\Http\Controllers\Business\AiWorkflowController::class, 'cancel'])->name('cancel');
+        Route::post('/{workflow}/review', [App\Http\Controllers\Business\AiWorkflowController::class, 'review'])->name('review');
+        Route::delete('/{workflow}', [App\Http\Controllers\Business\AiWorkflowController::class, 'destroy'])->name('destroy');
+    });
+
     // Tax Returns
     Route::resource('tax-returns', TaxReturnController::class);
     Route::post('tax-returns/{taxReturn}/submit', [TaxReturnController::class, 'submit'])->name('tax-returns.submit');

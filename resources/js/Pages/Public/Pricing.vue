@@ -67,7 +67,7 @@ const getHighlights = (plan) => {
     const returns = plan.max_returns_per_year >= 9999 ? 'Unlimited returns' : `${plan.max_returns_per_year} returns/year`;
     const storage = `${plan.storage_gb} GB storage`;
     const highlights = [staff, returns, storage];
-    if (plan.ai_analysis_included) highlights.push('AI tax analysis');
+    if (plan.ai_analysis_included) highlights.push('AI automation');
     if (plan.payment_automation) highlights.push('Payment automation');
     if (plan.priority_support) highlights.push('Priority support');
     if (plan.custom_branding) highlights.push('Custom branding');
@@ -90,10 +90,8 @@ const comparisonFeatures = [
         { name: 'Storage', free: '1 GB', basic: '5 GB', professional: '50 GB', enterprise: '500 GB' },
     ]},
     { category: 'Automation & AI', features: [
-        { name: 'AI Tax Analysis', free: false, basic: true, professional: true, enterprise: true },
-        { name: 'Payment Automation (planned)', free: false, basic: false, professional: false, enterprise: false },
-        { name: 'Programmatic payment (RRR generation) — planned', free: false, basic: false, professional: false, enterprise: false },
-        { name: 'Auto-categorisation', free: false, basic: true, professional: true, enterprise: true },
+        { name: 'AI One-Click Tax Returns (VAT, PAYE, WHT, CIT)', free: false, basic: true, professional: true, enterprise: true },
+        { name: 'AI Transaction Categorization', free: false, basic: true, professional: true, enterprise: true },
     ]},
     { category: 'Reporting', features: [
         { name: 'Basic Reports', free: true, basic: true, professional: true, enterprise: true },
@@ -115,6 +113,14 @@ const comparisonFeatures = [
 
 // FAQs
 const faqs = [
+    {
+        q: 'What does "AI One-Click Tax Returns" mean?',
+        a: 'Click once, and our AI analyzes your transaction history to automatically calculate and generate complete VAT, PAYE, WHT, and CIT returns. The AI categorizes transactions, applies correct tax rates, and produces draft returns for your review. You don\'t need to hire an accountant for basic compliance—just review the AI-generated return and file. Perfect for small to medium businesses.',
+    },
+    {
+        q: 'Do I still need an accountant if I use TaxMaster?',
+        a: 'For basic tax compliance (monthly VAT, PAYE, WHT), most businesses won\'t need an accountant—our AI handles it automatically. However, for complex situations like CIT with multiple adjustments, tax planning, audits, or strategic advice, we recommend consulting a professional. You can also invite an accountant to review AI-generated returns through our platform.',
+    },
     {
         q: 'Is the Free plan really free forever?',
         a: 'Yes. The Free plan has no time limit and no credit card required. You can use it for as long as you need. Upgrade only when you outgrow it.',

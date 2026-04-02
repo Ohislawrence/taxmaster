@@ -9,24 +9,72 @@ const searchQuery = ref('');
 const activeSection = ref('');
 
 const quickLinks = [
-    { id: 'getting-started', title: 'Getting Started', description: 'New to TaxMaster?' },
-    { id: 'tax-modules', title: 'Tax Modules', description: 'VAT, PAYE, CIT, WHT' },
-    { id: 'subscription-plans', title: 'Pricing', description: 'Plans & features' },
+    { id: 'prerequisites', title: 'Prerequisites & Setup', description: 'What you need to start' },
+    { id: 'how-to-file', title: 'How to File Returns', description: 'Step-by-step filing guides' },
+    { id: 'government-portals', title: 'Government Portals', description: 'Where to submit & pay' },
 ];
 
 const sections = [
+    { id: 'prerequisites', title: 'Prerequisites & Setup' },
     { id: 'getting-started', title: 'Getting Started' },
     { id: 'tax-modules', title: 'Tax Modules' },
     { id: 'financial-management', title: 'Financial Management' },
     { id: 'compliance-filing', title: 'Compliance & Filing' },
+    { id: 'ai-features', title: 'AI Features' },
+    { id: 'how-to-file', title: 'How to File Returns' },
+    { id: 'government-portals', title: 'Government Portals & Payment' },
     { id: 'subscription-plans', title: 'Subscription Plans' },
     { id: 'team-settings', title: 'Team & Settings' },
-    { id: 'ai-features', title: 'AI Features' },
     { id: 'faqs', title: 'FAQs' },
     { id: 'contact-support', title: 'Contact Support' }
 ];
 
 const faqs = ref([
+    {
+        question: 'How do I get my TIN if I don\'t have one?',
+        answer: 'Visit https://taxpromax.firs.gov.ng and click "Register". Select "Corporate Body" for companies or "Individual" for sole proprietors. Complete registration with your CAC certificate (for companies) or valid ID (for individuals). Your TIN will be generated immediately (11-14 digits). You can also register at any FIRS office nationwide.',
+        open: false
+    },
+    {
+        question: 'Where do I submit my VAT return after generating it in TaxMaster?',
+        answer: 'After generating your VAT return in TaxMaster, export the VAT Form 002 schedule, then login to FIRS TaxPro-Max portal (https://taxpromax.firs.gov.ng), navigate to "File Returns" → "VAT", upload your schedule, generate an assessment, get your Remita RRR, and make payment via online banking, bank branch, or Remita website.',
+        open: false
+    },
+    {
+        question: 'How do I pay my taxes after filing?',
+        answer: 'After filing on FIRS TaxPro-Max or your State IRS portal, the system generates a Remita RRR (payment reference). Use this RRR to pay via: 1) Online banking (Pay Bills → Remita → Enter RRR), 2) Any bank branch (provide RRR to teller), or 3) Remita website (remita.net → Make Payment). Payment confirmation usually takes 24-48 hours to reflect.',
+        open: false
+    },
+    {
+        question: 'What\'s the difference between AI workflow and manual filing?',
+        answer: 'AI Workflow: Click once, AI analyzes all your transactions and generates complete returns automatically in 5-15 seconds with 95%+ accuracy. Best for standard businesses with regular transactions. Manual Filing: You enter all figures yourself with full control over every detail. Best for complex businesses or when you need specific categorization. Both methods produce the same export files for government submission.',
+        open: false
+    },
+    {
+        question: 'Which portal do I use for PAYE - FIRS or State IRS?',
+        answer: 'PAYE is filed with your State IRS, NOT FIRS. Lagos businesses use LIRS (etax.lirs.net), Oyo uses OIRS, Rivers uses RIRS, etc. Each state has its own portal. Check the "Government Portals & Payment" section in this help center for links to major state portals.',
+        open: false
+    },
+    {
+        question: 'Do I need Remita for all tax payments?',
+        answer: 'For FIRS taxes (VAT, WHT, CIT), you use Remita RRR generated from TaxPro-Max. For State IRS taxes (PAYE), it depends on your state - most use Remita, but some states accept direct bank transfers to designated accounts. Check your state\'s IRS portal for specific payment methods.',
+        open: false
+    },
+    {
+        question: 'What happens after I export my return from TaxMaster?',
+        answer: 'TaxMaster generates your return calculations and exports a schedule file (CSV/Excel). You then: 1) Login to the appropriate government portal (FIRS TaxPro-Max for VAT/WHT/CIT, or your State IRS for PAYE), 2) Upload the exported schedule, 3) Portal generates assessment, 4) Get Remita RRR or payment reference, 5) Make payment. TaxMaster prepares the return; government portals handle submission and payment.',
+        open: false
+    },
+    {
+        question: 'Can I file my returns directly from TaxMaster without visiting government portals?',
+        answer: 'No. TaxMaster generates and calculates your tax returns, but you must submit them to FIRS TaxPro-Max (for VAT/WHT/CIT) or your State IRS portal (for PAYE) yourself. This is because FIRS and State IRS systems require direct submission and payment through their official portals for compliance and record-keeping.',
+        open: false
+    },
+    {
+        question: 'How long does the complete tax filing process take?',
+        answer: 'In TaxMaster: AI workflow takes 1-2 minutes, manual takes 10-15 minutes. On government portals: Upload and RRR generation takes 5-10 minutes. Payment via online banking takes 2-5 minutes. Total: 10-30 minutes end-to-end depending on your method. Payment confirmation appears on the portal within 24-48 hours.',
+        open: false
+    },
     {
         question: 'How do I enable VAT exempt status?',
         answer: 'Go to Settings in the sidebar, scroll to the VAT Exempt Status section, toggle it on, select your category, and provide a reason. Your business must either have turnover below ₦25M or deal exclusively in FIRS-approved exempt goods/services.',
@@ -217,6 +265,141 @@ onUnmounted(() => {
 
                 <!-- Content - Mono style: Clean sections with subtle dividers -->
                 <div class="lg:col-span-9 space-y-16">
+
+                    <!-- Prerequisites & Setup -->
+                    <section v-if="shouldShowSection('prerequisites')" id="prerequisites" class="scroll-mt-24">
+                        <div class="border-b border-slate-200 pb-4 mb-8">
+                            <h2 class="text-2xl font-bold tracking-tight text-slate-900">Prerequisites & Setup</h2>
+                            <p class="text-slate-500 text-sm mt-2">What you need before using TaxMaster</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <!-- TIN Registration -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold flex items-center justify-center">1</span>
+                                    Tax Identification Number (TIN)
+                                </h3>
+                                <p class="text-slate-600 mb-4">Your TIN is required to file any tax returns in Nigeria. If you don't have one yet:</p>
+
+                                <div class="bg-slate-50 border border-slate-200 rounded-lg p-5 space-y-3">
+                                    <h4 class="font-semibold text-slate-900 text-sm">How to get your TIN:</h4>
+                                    <ol class="space-y-2 text-sm text-slate-700">
+                                        <li class="flex gap-3"><span class="font-medium text-slate-500">a.</span> <span>Visit <a href="https://taxpromax.firs.gov.ng" target="_blank" class="text-slate-900 underline hover:no-underline font-medium">FIRS TaxPro-Max portal</a></span></li>
+                                        <li class="flex gap-3"><span class="font-medium text-slate-500">b.</span> <span>Click "Register" → Select "Corporate Body" or "Individual"</span></li>
+                                        <li class="flex gap-3"><span class="font-medium text-slate-500">c.</span> <span>Complete registration with CAC documents (for companies) or valid ID (for individuals)</span></li>
+                                        <li class="flex gap-3"><span class="font-medium text-slate-500">d.</span> <span>Your TIN will be generated immediately (11-14 digits)</span></li>
+                                        <li class="flex gap-3"><span class="font-medium text-slate-500">e.</span> <span>Download your TIN certificate for reference</span></li>
+                                    </ol>
+                                    <p class="text-xs text-slate-500 pt-2 border-t border-slate-200 mt-3">
+                                        <strong>Note:</strong> You can also register at any FIRS office nationwide with your CAC certificate and valid means of ID.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Business Registration -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold flex items-center justify-center">2</span>
+                                    Business Registration Documents
+                                </h3>
+                                <p class="text-slate-600 mb-4">Have these documents ready:</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div v-for="doc in [
+                                        { name: 'CAC Certificate', desc: 'Certificate of Incorporation from CAC', required: true },
+                                        { name: 'TIN Certificate', desc: 'From FIRS registration', required: true },
+                                        { name: 'Business Address', desc: 'Registered office address', required: true },
+                                        { name: 'Bank Account Details', desc: 'For connecting transactions', required: true },
+                                        { name: 'VAT Registration', desc: 'If turnover > ₦25M/year', required: false },
+                                        { name: 'Director/Shareholder Info', desc: 'Names, emails, phone numbers', required: true }
+                                    ]" :key="doc.name" class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-lg">
+                                        <svg v-if="doc.required" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9 9a1 1 0 112 0v4a1 1 0 11-2 0V9zm1-5a1 1 0 100 2 1 1 0 000-2z"/>
+                                        </svg>
+                                        <svg v-else class="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <div>
+                                            <p class="font-medium text-slate-900 text-sm">{{ doc.name }}</p>
+                                            <p class="text-slate-600 text-xs">{{ doc.desc }}</p>
+                                            <span v-if="doc.required" class="text-xs text-red-600 font-medium">Required</span>
+                                            <span v-else class="text-xs text-slate-500">Optional</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bank Account -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold flex items-center justify-center">3</span>
+                                    Bank Account Setup
+                                </h3>
+                                <p class="text-slate-600 mb-4">For automatic transaction syncing via Mono, you need:</p>
+                                <ul class="space-y-3">
+                                    <li v-for="item in [
+                                        'A business bank account with any Nigerian bank',
+                                        'Internet banking enabled on your account',
+                                        'Your internet banking username and password',
+                                        'Phone number registered with your bank (for OTP verification)'
+                                    ]" :key="item" class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="text-slate-700">{{ item }}</span>
+                                    </li>
+                                </ul>
+                                <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                                    <p class="text-green-700 text-sm">
+                                        <strong>Supported Banks:</strong> Access, GTBank, Zenith, First Bank, UBA, Fidelity, Union Bank, Sterling, Wema, Stanbic IBTC, and 30+ more.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tax Registrations -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold flex items-center justify-center">4</span>
+                                    Specific Tax Registrations
+                                </h3>
+                                <p class="text-slate-600 mb-4">Depending on your business activities, register for:</p>
+                                <div class="space-y-4">
+                                    <div class="border-l-4 border-slate-300 pl-4">
+                                        <h4 class="font-semibold text-slate-900 text-sm mb-1">VAT Registration</h4>
+                                        <p class="text-slate-600 text-sm mb-2">Required if annual turnover exceeds ₦25 million</p>
+                                        <p class="text-xs text-slate-500">Register at FIRS TaxPro-Max or any FIRS office</p>
+                                    </div>
+                                    <div class="border-l-4 border-slate-300 pl-4">
+                                        <h4 class="font-semibold text-slate-900 text-sm mb-1">PAYE Registration</h4>
+                                        <p class="text-slate-600 text-sm mb-2">Required if you have employees</p>
+                                        <p class="text-xs text-slate-500">Register with your State Internal Revenue Service (e.g., LIRS for Lagos)</p>
+                                    </div>
+                                    <div class="border-l-4 border-slate-300 pl-4">
+                                        <h4 class="font-semibold text-slate-900 text-sm mb-1">WHT Registration</h4>
+                                        <p class="text-slate-600 text-sm mb-2">Required if you make payments to contractors/suppliers</p>
+                                        <p class="text-xs text-slate-500">Automatically covered under your TIN - no separate registration needed</p>
+                                    </div>
+                                    <div class="border-l-4 border-slate-300 pl-4">
+                                        <h4 class="font-semibold text-slate-900 text-sm mb-1">CIT Registration</h4>
+                                        <p class="text-slate-600 text-sm mb-2">Required for all incorporated companies</p>
+                                        <p class="text-xs text-slate-500">Automatically covered under your TIN - file annually</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-5 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex gap-3">
+                                    <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="font-semibold text-blue-900 mb-2">Ready to Start?</p>
+                                        <p class="text-blue-800 text-sm">Once you have your TIN and business documents, you can create your TaxMaster account and start managing your tax compliance in minutes.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
                     <!-- Getting Started -->
                     <section v-if="shouldShowSection('getting-started')" id="getting-started" class="scroll-mt-24">
@@ -496,6 +679,320 @@ onUnmounted(() => {
                         </div>
                     </section>
 
+                    <!-- Government Portals & Payment -->
+                    <section v-if="shouldShowSection('government-portals')" id="government-portals" class="scroll-mt-24">
+                        <div class="border-b border-slate-200 pb-4 mb-8">
+                            <h2 class="text-2xl font-bold tracking-tight text-slate-900">Government Portals & Payment</h2>
+                            <p class="text-slate-500 text-sm mt-2">Where to submit returns and pay taxes after TaxMaster</p>
+                        </div>
+
+                        <div class="space-y-12">
+
+                            <!-- FIRS TaxPro-Max -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-12 h-12 rounded-xl bg-green-600 text-white font-bold flex items-center justify-center shadow-lg">
+                                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">FIRS TaxPro-Max Portal</h3>
+                                        <p class="text-sm text-slate-500">For VAT, WHT, and CIT returns</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div class="p-5 border-2 border-green-200 rounded-xl bg-green-50">
+                                            <div class="flex items-center gap-2 mb-3">
+                                                <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                                </svg>
+                                                <span class="font-semibold text-green-900">Portal Link</span>
+                                            </div>
+                                            <a href="https://taxpromax.firs.gov.ng" target="_blank" class="text-green-700 hover:text-green-900 underline font-medium text-sm break-all">
+                                                https://taxpromax.firs.gov.ng
+                                            </a>
+                                        </div>
+
+                                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                            <p class="font-semibold text-slate-900 text-sm mb-3">What to file here:</p>
+                                            <ul class="space-y-2 text-sm text-slate-700">
+                                                <li class="flex items-start gap-2">
+                                                    <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    <span>VAT Returns (monthly)</span>
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    <span>WHT Returns (monthly)</span>
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    <span>CIT Returns (annual)</span>
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    <span>TIN Registration</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 class="font-semibold text-slate-900 mb-3 text-sm">How to submit your return:</h4>
+                                        <ol class="space-y-3 text-sm text-slate-700">
+                                            <li class="flex gap-3">
+                                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-semibold flex items-center justify-center">1</span>
+                                                <div>
+                                                    <p class="font-medium">Login to TaxPro-Max</p>
+                                                    <p class="text-slate-600 text-xs mt-1">Use your TIN as username and your registered password</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex gap-3">
+                                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-semibold flex items-center justify-center">2</span>
+                                                <div>
+                                                    <p class="font-medium">Navigate to Returns</p>
+                                                    <p class="text-slate-600 text-xs mt-1">Click "File Returns" → Select tax type (VAT/WHT/CIT)</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex gap-3">
+                                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-semibold flex items-center justify-center">3</span>
+                                                <div>
+                                                    <p class="font-medium">Upload schedule from TaxMaster</p>
+                                                    <p class="text-slate-600 text-xs mt-1">Upload the CSV/Excel file exported from TaxMaster</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex gap-3">
+                                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-semibold flex items-center justify-center">4</span>
+                                                <div>
+                                                    <p class="font-medium">Generate Assessment</p>
+                                                    <p class="text-slate-600 text-xs mt-1">System generates assessment notice with amount due</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex gap-3">
+                                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-semibold flex items-center justify-center">5</span>
+                                                <div>
+                                                    <p class="font-medium">Generate Remita RRR</p>
+                                                    <p class="text-slate-600 text-xs mt-1">Click "Generate RRR" to get payment reference</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex gap-3">
+                                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-semibold flex items-center justify-center">6</span>
+                                                <div>
+                                                    <p class="font-medium">Make payment (see Payment section below)</p>
+                                                    <p class="text-slate-600 text-xs mt-1">Use RRR to pay via Remita</p>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-100"></div>
+
+                            <!-- State IRS Portals (PAYE) -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-12 h-12 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center shadow-lg">
+                                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">State IRS Portals (PAYE)</h3>
+                                        <p class="text-sm text-slate-500">File PAYE with your State Internal Revenue Service</p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 bg-blue-50 border-2 border-blue-200 rounded-xl mb-6">
+                                    <div class="flex gap-3">
+                                        <svg class="w-6 h-6 text-blue-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <div>
+                                            <p class="font-semibold text-blue-900 mb-2">Important: PAYE is State-specific</p>
+                                            <p class="text-blue-800 text-sm">PAYE is filed with your <strong>State IRS</strong>, not FIRS. Use the portal for the state where your business is registered or where your employees reside.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div v-for="statePortal in [
+                                        { state: 'Lagos', agency: 'LIRS', url: 'https://etax.lirs.net', color: 'rose' },
+                                        { state: 'Oyo', agency: 'OIRS', url: 'https://oirs.oyo.gov.ng', color: 'amber' },
+                                        { state: 'Rivers', agency: 'RIRS', url: 'https://rirs.rg.gov.ng', color: 'emerald' },
+                                        { state: 'Kano', agency: 'KIRS', url: 'https://kirs.kg.gov.ng', color: 'blue' },
+                                        { state: 'Kaduna', agency: 'KDIRS', url: 'https://kdirs.kdsg.gov.ng', color: 'purple' },
+                                        { state: 'Federal Capital', agency: 'FCT-IRS', url: 'https://fctirs.gov.ng', color: 'slate' }
+                                    ]" :key="statePortal.state"
+                                    class="p-4 bg-white border-2 border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <div>
+                                                <h4 class="font-semibold text-slate-900 text-sm">{{ statePortal.state }} State</h4>
+                                                <p class="text-xs text-slate-500">{{ statePortal.agency }}</p>
+                                            </div>
+                                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </div>
+                                        <a :href="statePortal.url" target="_blank" class="text-xs text-slate-600 hover:text-slate-900 underline hover:no-underline break-all">
+                                            {{ statePortal.url }}
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                    <p class="text-slate-700 text-sm">
+                                        <strong>Other States:</strong> If your state is not listed, search for "[Your State] IRS portal" or visit your state's official IRS office. Most states now have online portals for PAYE filing.
+                                    </p>
+                                </div>
+
+                                <div class="mt-6">
+                                    <h4 class="font-semibold text-slate-900 mb-3 text-sm">General steps for State IRS PAYE filing:</h4>
+                                    <ol class="space-y-2 text-sm text-slate-700 list-decimal list-inside">
+                                        <li>Login to your state's IRS portal with your state TIN</li>
+                                        <li>Navigate to PAYE → File Monthly Return</li>
+                                        <li>Upload PAYE schedule exported from TaxMaster (employee breakdown)</li>
+                                        <li>System generates assessment with total PAYE due</li>
+                                        <li>Generate payment reference (varies by state - some use Remita, others bank transfer)</li>
+                                        <li>Make payment using provided reference</li>
+                                        <li>Download receipt for your records</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-100"></div>
+
+                            <!-- Remita Payment -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-12 h-12 rounded-xl bg-yellow-500 text-white font-bold flex items-center justify-center shadow-lg">
+                                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                                            <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">Making Tax Payments (Remita)</h3>
+                                        <p class="text-sm text-slate-500">How to pay your tax liabilities</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-6">
+                                    <div class="p-5 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+                                        <p class="font-semibold text-yellow-900 mb-2">What is Remita RRR?</p>
+                                        <p class="text-yellow-800 text-sm">
+                                            <strong>RRR (Remita Retrieval Reference)</strong> is a unique payment reference number generated by FIRS TaxPro-Max or State IRS portals. You use this RRR to make payments through various channels.
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <h4 class="font-semibold text-slate-900 mb-4">Payment Methods with RRR:</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div class="p-4 border-2 border-slate-200 rounded-xl bg-white">
+                                                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center mb-3">
+                                                    <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                                <h5 class="font-semibold text-slate-900 text-sm mb-2">Online Banking</h5>
+                                                <ol class="space-y-1 text-xs text-slate-600">
+                                                    <li>1. Login to internet banking</li>
+                                                    <li>2. Select "Pay Bills" → "Remita"</li>
+                                                    <li>3. Enter your RRR</li>
+                                                    <li>4. Confirm amount and pay</li>
+                                                </ol>
+                                            </div>
+
+                                            <div class="p-4 border-2 border-slate-200 rounded-xl bg-white">
+                                                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center mb-3">
+                                                    <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                    </svg>
+                                                </div>
+                                                <h5 class="font-semibold text-slate-900 text-sm mb-2">Bank Branch</h5>
+                                                <ol class="space-y-1 text-xs text-slate-600">
+                                                    <li>1. Visit any bank branch</li>
+                                                    <li>2. Request Remita payment</li>
+                                                    <li>3. Provide your RRR</li>
+                                                    <li>4. Make cash/transfer payment</li>
+                                                </ol>
+                                            </div>
+
+                                            <div class="p-4 border-2 border-slate-200 rounded-xl bg-white">
+                                                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center mb-3">
+                                                    <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                                                    </svg>
+                                                </div>
+                                                <h5 class="font-semibold text-slate-900 text-sm mb-2">Remita Website</h5>
+                                                <ol class="space-y-1 text-xs text-slate-600">
+                                                    <li>1. Visit <a href="https://remita.net" class="underline" target="_blank">remita.net</a></li>
+                                                    <li>2. Click "Make Payment"</li>
+                                                    <li>3. Enter your RRR</li>
+                                                    <li>4. Pay with card/bank transfer</li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-5 bg-red-50 border border-red-200 rounded-lg">
+                                        <div class="flex gap-3">
+                                            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <div>
+                                                <p class="font-semibold text-red-900 text-sm mb-1">Important Payment Notes</p>
+                                                <ul class="space-y-1 text-red-800 text-sm">
+                                                    <li>• Always pay before the deadline to avoid penalties</li>
+                                                    <li>• Payment confirmation may take 24-48 hours to reflect on the portal</li>
+                                                    <li>• Keep your payment receipt/confirmation for your records</li>
+                                                    <li>• Some State IRS portals may use direct bank transfers instead of Remita</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <h4 class="font-semibold text-green-900 text-sm mb-2">Complete Tax Filing Workflow Summary:</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mt-3">
+                                            <div class="text-center">
+                                                <div class="w-8 h-8 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center mx-auto mb-2">1</div>
+                                                <p class="text-xs font-medium text-green-900">Generate return in TaxMaster</p>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="w-8 h-8 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center mx-auto mb-2">2</div>
+                                                <p class="text-xs font-medium text-green-900">Export schedule/CSV</p>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="w-8 h-8 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center mx-auto mb-2">3</div>
+                                                <p class="text-xs font-medium text-green-900">Login to FIRS/State portal</p>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="w-8 h-8 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center mx-auto mb-2">4</div>
+                                                <p class="text-xs font-medium text-green-900">Upload & generate RRR</p>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="w-8 h-8 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center mx-auto mb-2">5</div>
+                                                <p class="text-xs font-medium text-green-900">Pay via Remita/Bank</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+
                     <!-- Subscription Plans -->
                     <section v-if="shouldShowSection('subscription-plans')" id="subscription-plans" class="scroll-mt-24">
                         <div class="border-b border-slate-200 pb-4 mb-8">
@@ -603,57 +1100,333 @@ onUnmounted(() => {
                             <h2 class="text-2xl font-bold tracking-tight text-slate-900">AI Features</h2>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-10">
+                            <!-- AI One-Click Tax Returns -->
                             <div>
-                                <h3 class="text-lg font-semibold text-slate-900 mb-4">AI Chat Assistant</h3>
-                                <p class="text-slate-600 text-sm mb-4">Ask TaxMaster AI any question about Nigerian tax law, regulations, or your tax obligations.</p>
+                                <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    AI One-Click Tax Returns
+                                </h3>
+                                <p class="text-slate-600 mb-4">Let AI analyze your transactions and generate complete tax returns automatically—no manual calculations needed.</p>
 
-                                <div class="space-y-2">
-                                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Example questions</p>
-                                    <div v-for="q in [
-                                        'What is the VAT rate in Nigeria?',
-                                        'When is my next PAYE deadline?',
-                                        'How do I calculate WHT on professional services?',
-                                        'What goods are exempt from VAT?'
-                                    ]" :key="q" class="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 border border-slate-100">
-                                        {{ q }}
+                                <div class="bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 space-y-4">
+                                    <h4 class="font-semibold text-slate-900 text-sm mb-3">How the AI Workflow works:</h4>
+                                    <ol class="space-y-3">
+                                        <li v-for="(step, i) in [
+                                            'Connect your bank account or add transactions manually',
+                                            'Click &quot;Start AI Workflow&quot; for VAT, PAYE, WHT, or CIT',
+                                            'AI analyzes all transactions and categorizes them by tax type',
+                                            'Complete draft return is generated in seconds with 95%+ accuracy',
+                                            'Review the AI-generated return and confidence scores',
+                                            'Approve and export—ready to file with FIRS or State IRS'
+                                        ]" :key="i" class="flex gap-3">
+                                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-semibold flex items-center justify-center">
+                                                {{ i + 1 }}
+                                            </span>
+                                            <span class="text-slate-700 text-sm">{{ step }}</span>
+                                        </li>
+                                    </ol>
+
+                                    <div class="pt-3 border-t border-purple-200">
+                                        <p class="text-xs text-purple-800">
+                                            <strong>Available on:</strong> Basic, Professional, and Enterprise plans | <strong>Processing time:</strong> 5-15 seconds | <strong>Accuracy:</strong> 95%+
+                                        </p>
                                     </div>
                                 </div>
-                                <p class="text-xs text-slate-500 mt-4">The AI is trained on CITA, PITA, VAT Act, WHT Regulations 2024, and Finance Acts 2019/2020.</p>
+
+                                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h5 class="font-semibold text-slate-900 text-sm mb-2">When to use AI</h5>
+                                        <ul class="space-y-1 text-xs text-slate-600">
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-green-600 mt-1">✓</span>
+                                                <span>Standard business with regular transactions</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-green-600 mt-1">✓</span>
+                                                <span>Monthly VAT, PAYE, WHT filings</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-green-600 mt-1">✓</span>
+                                                <span>Want to save time and reduce errors</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-green-600 mt-1">✓</span>
+                                                <span>Bank account connected for auto-sync</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                                        <h5 class="font-semibold text-slate-900 text-sm mb-2">When to use Manual</h5>
+                                        <ul class="space-y-1 text-xs text-slate-600">
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-amber-600 mt-1">→</span>
+                                                <span>Complex business with special tax treatments</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-amber-600 mt-1">→</span>
+                                                <span>Unusual transactions requiring specific categorization</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-amber-600 mt-1">→</span>
+                                                <span>Need complete control over every figure</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-amber-600 mt-1">→</span>
+                                                <span>Accountant preference for manual entry</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div>
-                                <h3 class="text-lg font-semibold text-slate-900 mb-4">Tax Insights</h3>
-                                <p class="text-slate-600 text-sm mb-4">Get AI-powered analysis of your tax trends, liabilities, and optimization opportunities.</p>
-                                <ul class="space-y-3 text-sm text-slate-600">
-                                    <li class="flex items-start gap-2">
-                                        <span class="w-1 h-1 rounded-full bg-slate-400 mt-2"></span>
-                                        <span>Tax liability trends over time</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <span class="w-1 h-1 rounded-full bg-slate-400 mt-2"></span>
-                                        <span>Compliance score and recommendations</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <span class="w-1 h-1 rounded-full bg-slate-400 mt-2"></span>
-                                        <span>VAT refund opportunities</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <span class="w-1 h-1 rounded-full bg-slate-400 mt-2"></span>
-                                        <span>PAYE optimization suggestions</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <span class="w-1 h-1 rounded-full bg-slate-400 mt-2"></span>
-                                        <span>CIT planning for year-end</span>
-                                    </li>
-                                </ul>
+                            <div class="border-t border-slate-100"></div>
 
-                                <div class="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                                    <p class="text-purple-700 text-sm">
-                                        <strong>Premium Feature:</strong> AI analysis available on Basic, Professional, and Enterprise plans.
+                            <!-- AI Chat Assistant -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-4">AI Chat Assistant</h3>
+                                    <p class="text-slate-600 text-sm mb-4">Ask TaxMaster AI any question about Nigerian tax law, regulations, or your tax obligations.</p>
+
+                                    <div class="space-y-2">
+                                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Example questions</p>
+                                        <div v-for="q in [
+                                            'What is the VAT rate in Nigeria?',
+                                            'When is my next PAYE deadline?',
+                                            'How do I calculate WHT on professional services?',
+                                            'What goods are exempt from VAT?'
+                                        ]" :key="q" class="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 border border-slate-100">
+                                            {{ q }}
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-4">The AI is trained on CITA, PITA, VAT Act, WHT Regulations 2024, and Finance Acts 2019/2020.</p>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-lg font-semibold text-slate-900 mb-4">Tax Insights</h3>
+                                    <p class="text-slate-600 text-sm mb-4">Get AI-powered analysis of your tax trends, liabilities, and optimization opportunities.</p>
+                                    <ul class="space-y-3 text-sm text-slate-600">
+                                        <li class="flex items-start gap-2">
+                                            <span class="w-1 h-1 rounded-full bg-slate-400 mt-2"></span>
+                                            <span>Tax liability trends over time</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="w-1 h-1 rounded-full bg-slate-400 mt-2"></span>
+                                            <span>Compliance score and recommendations</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="w-1 h-1 rounded-full bg-slate-400 mt-2"></span>
+                                            <span>VAT refund opportunities</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="w-1 h-1 rounded-full bg-slate-400 mt-2"></span>
+                                            <span>PAYE optimization suggestions</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="w-1 h-1 rounded-full bg-slate-400 mt-2"></span>
+                                            <span>CIT planning for year-end</span>
+                                        </li>
+                                    </ul>
+
+                                    <div class="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                                        <p class="text-purple-700 text-sm">
+                                            <strong>Premium Feature:</strong> AI analysis available on Basic, Professional, and Enterprise plans.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- How to File Tax Returns -->
+                    <section v-if="shouldShowSection('how-to-file')" id="how-to-file" class="scroll-mt-24">
+                        <div class="border-b border-slate-200 pb-4 mb-8">
+                            <h2 class="text-2xl font-bold tracking-tight text-slate-900">How to File Tax Returns</h2>
+                            <p class="text-slate-500 text-sm mt-2">Step-by-step guide to filing each tax type</p>
+                        </div>
+
+                        <div class="space-y-12">
+
+                            <!-- VAT Filing -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 font-bold text-lg flex items-center justify-center">
+                                        VAT
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">Filing VAT Returns (Monthly)</h3>
+                                        <p class="text-sm text-slate-500">Due by 21st of following month | File with FIRS</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <!-- AI Method -->
+                                    <div class="border-2 border-purple-200 rounded-xl p-6 bg-purple-50/30">
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                            <h4 class="font-semibold text-slate-900">AI Method (Recommended)</h4>
+                                        </div>
+                                        <ol class="space-y-3 text-sm text-slate-700">
+                                            <li class="flex gap-2"><span class="font-semibold text-purple-600">1.</span> <span>Go to <strong>AI Workflows</strong> in sidebar</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-purple-600">2.</span> <span>Click <strong>"Start AI Workflow"</strong></span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-purple-600">3.</span> <span>Select <strong>"Monthly VAT"</strong></span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-purple-600">4.</span> <span>Choose tax period (e.g., Jan 2025)</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-purple-600">5.</span> <span>Click <strong>"Start"</strong> → AI analyzes transactions</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-purple-600">6.</span> <span>Review generated VAT return (5-15 seconds)</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-purple-600">7.</span> <span>Check confidence scores and adjust if needed</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-purple-600">8.</span> <span>Click <strong>"Approve"</strong> → Return saved to VAT module</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-purple-600">9.</span> <span>Go to <strong>VAT → Returns</strong> to view/export</span></li>
+                                        </ol>
+                                        <p class="text-xs text-purple-700 mt-4 font-medium">⏱️ Takes 1-2 minutes total</p>
+                                    </div>
+
+                                    <!-- Manual Method -->
+                                    <div class="border-2 border-slate-200 rounded-xl p-6">
+                                        <h4 class="font-semibold text-slate-900 mb-4">Manual Method</h4>
+                                        <ol class="space-y-3 text-sm text-slate-700">
+                                            <li class="flex gap-2"><span class="font-semibold text-slate-500">1.</span> <span>Go to <strong>VAT → Returns</strong></span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-slate-500">2.</span> <span>Click <strong>"Create New Return"</strong></span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-slate-500">3.</span> <span>Select tax period</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-slate-500">4.</span> <span>Enter Input VAT (VAT paid on purchases)</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-slate-500">5.</span> <span>Enter Output VAT (VAT collected from sales)</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-slate-500">6.</span> <span>System calculates VAT payable/refundable</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-slate-500">7.</span> <span>Add notes if needed</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-slate-500">8.</span> <span>Click <strong>"Save Return"</strong></span></li>
+                                            <li class="flex gap-2"><span class="font-semibold text-slate-500">9.</span> <span>Export VAT Form 002 schedule</span></li>
+                                        </ol>
+                                        <p class="text-xs text-slate-500 mt-4">⏱️ Takes 10-15 minutes</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                                    <p class="text-amber-800 text-sm">
+                                        <strong>Next Step:</strong> After generating your VAT return in TaxMaster, see the <a href="#government-portals" class="underline font-semibold hover:no-underline">Government Portals & Payment section</a> to learn how to submit to FIRS and make payment.
                                     </p>
                                 </div>
                             </div>
+
+                            <div class="border-t border-slate-100"></div>
+
+                            <!-- PAYE Filing -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-12 h-12 rounded-xl bg-green-100 text-green-700 font-bold text-lg flex items-center justify-center">
+                                        PAYE
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">Filing PAYE Returns (Monthly)</h3>
+                                        <p class="text-sm text-slate-500">Due by 10th of following month | File with State IRS</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-5">
+                                        <h4 class="font-semibold text-slate-900 mb-3 text-sm">Steps in TaxMaster:</h4>
+                                        <ol class="space-y-2 text-sm text-slate-700">
+                                            <li class="flex gap-2"><span class="font-semibold">1.</span> <span>Go to <strong>PAYE → Staff</strong> and ensure all employees are added with accurate salary details</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold">2.</span> <span>Go to <strong>PAYE → Returns</strong> → Click <strong>"Create New Return"</strong></span></li>
+                                            <li class="flex gap-2"><span class="font-semibold">3.</span> <span>Or use <strong>AI Workflow → Monthly PAYE</strong> for automatic calculation</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold">4.</span> <span>System calculates tax for each employee using progressive rates (7-24%)</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold">5.</span> <span>Consolidated Relief Allowance applied automatically (₦200k + 20% of gross)</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold">6.</span> <span>Review total PAYE liability</span></li>
+                                            <li class="flex gap-2"><span class="font-semibold">7.</span> <span>Export PAYE schedule (shows breakdown per employee)</span></li>
+                                        </ol>
+                                    </div>
+
+                                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                                        <p class="text-amber-800 text-sm">
+                                            <strong>Important:</strong> PAYE is filed with your <strong>State IRS</strong>, not FIRS. Lagos businesses file with LIRS, Oyo with OIRS, etc. See <a href="#government-portals" class="underline font-semibold hover:no-underline">Government Portals section</a> for your state's portal link.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-100"></div>
+
+                            <!-- WHT Filing -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-700 font-bold text-lg flex items-center justify-center">
+                                        WHT
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">Filing WHT Returns (Monthly)</h3>
+                                        <p class="text-sm text-slate-500">Due by 21st of following month | File with FIRS</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-slate-50 border border-slate-200 rounded-lg p-5">
+                                    <h4 class="font-semibold text-slate-900 mb-3 text-sm">Steps in TaxMaster:</h4>
+                                    <ol class="space-y-2 text-sm text-slate-700">
+                                        <li class="flex gap-2"><span class="font-semibold">1.</span> <span>Go to <strong>WHT → Returns</strong> → Click <strong>"Create New Return"</strong></span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">2.</span> <span>Or use <strong>AI Workflow → Monthly WHT</strong></span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">3.</span> <span>Select tax period and add WHT deductions</span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">4.</span> <span>For each payment, enter: Supplier name, TIN, Amount, Transaction type</span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">5.</span> <span>System validates TIN format (11-14 digits)</span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">6.</span> <span><strong>Invalid/missing TIN = Double Rate</strong> applied automatically (WHT Regulations 2024)</span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">7.</span> <span>WHT calculated based on transaction type (2-10%)</span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">8.</span> <span>Export WHT schedule with supplier details</span></li>
+                                    </ol>
+                                </div>
+
+                                <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                    <div class="flex gap-3">
+                                        <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <div>
+                                            <p class="font-semibold text-red-900 text-sm mb-1">Double Rate Warning</p>
+                                            <p class="text-red-800 text-sm">Always collect valid TINs from suppliers. If a supplier's TIN is invalid or missing, you'll pay <strong>double the WHT rate</strong> (e.g., 5% becomes 10%). This is enforced by FIRS as of 2024.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-100"></div>
+
+                            <!-- CIT Filing -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 font-bold text-lg flex items-center justify-center">
+                                        CIT
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">Filing CIT Returns (Annual)</h3>
+                                        <p class="text-sm text-slate-500">Due 6 months after year-end | File with FIRS</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-slate-50 border border-slate-200 rounded-lg p-5">
+                                    <h4 class="font-semibold text-slate-900 mb-3 text-sm">Steps in TaxMaster:</h4>
+                                    <ol class="space-y-2 text-sm text-slate-700">
+                                        <li class="flex gap-2"><span class="font-semibold">1.</span> <span>Prepare your annual financial statements (Profit & Loss, Balance Sheet)</span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">2.</span> <span>Go to <strong>CIT → Returns</strong> → Click <strong>"Create New Return"</strong></span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">3.</span> <span>Or use <strong>AI Workflow → Annual CIT</strong> for automatic calculation</span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">4.</span> <span>Enter: Revenue, Expenses, Taxable Profit</span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">5.</span> <span>System applies Finance Act 2019 rates:</span>
+                                            <ul class="ml-6 mt-1 space-y-1 text-xs">
+                                                <li>→ 0% if turnover &lt; ₦25M</li>
+                                                <li>→ 20% if turnover ₦25M - ₦100M</li>
+                                                <li>→ 30% if turnover &gt; ₦100M</li>
+                                            </ul>
+                                        </li>
+                                        <li class="flex gap-2"><span class="font-semibold">6.</span> <span>Minimum tax calculated (0.5% of gross revenue if in loss)</span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">7.</span> <span>Review total CIT liability</span></li>
+                                        <li class="flex gap-2"><span class="font-semibold">8.</span> <span>Export CIT computation and attach financial statements</span></li>
+                                    </ol>
+                                </div>
+
+                                <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <p class="text-blue-800 text-sm">
+                                        <strong>Pro Tip:</strong> For CIT, you'll need to attach audited financial statements (if turnover &gt; ₦25M). After generating your return in TaxMaster, file via FIRS TaxPro-Max portal. See <a href="#government-portals" class="underline font-semibold hover:no-underline">Government Portals section</a>.
+                                    </p>
+                                </div>
+                            </div>
+
                         </div>
                     </section>
 

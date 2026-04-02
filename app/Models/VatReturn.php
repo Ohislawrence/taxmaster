@@ -7,7 +7,7 @@ use App\Traits\HasStandardStatus;
 use App\Traits\HasTaxAuthority;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class VATReturn extends Model
@@ -18,6 +18,8 @@ class VATReturn extends Model
 
     protected $fillable = [
         'business_id',
+        'ai_workflow_id',
+        'is_ai_generated',
         'period',
         'form_type',
         'reporting_period',
@@ -165,6 +167,14 @@ class VATReturn extends Model
     }
 
     /**
+     * Get the AI workflow that created this return
+     */
+    public function aiWorkflow(): BelongsTo
+    {
+        return $this->belongsTo(AiWorkflow::class, 'ai_workflow_id');
+    }
+
+    /**
      * Get the accountant who reviewed this return
      */
     public function reviewer(): BelongsTo
@@ -175,9 +185,9 @@ class VATReturn extends Model
     /**
      * Get government payments for this VAT return
      */
-    public function governmentPayments(): HasMany
+    public function governmentPayments(): MorphMany
     {
-        return $this->hasMany(GovernmentPayment::class, 'vat_return_id');
+        return $this->morphMany(GovernmentPayment::class, 'return');
     }
 
     /**

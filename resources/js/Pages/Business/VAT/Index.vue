@@ -28,7 +28,7 @@
           New VAT Return
         </button>
       </div>
-      
+
       <!-- Upgrade Prompt (if feature locked) -->
       <UpgradePrompt
         v-if="!can.fileVAT.value"
@@ -140,7 +140,18 @@
             </thead>
             <tbody class="divide-y divide-gray-200">
               <tr v-for="vat in returns.data" :key="vat.id" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ vat.period }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <div class="flex items-center gap-2">
+                    {{ vat.period }}
+                    <span v-if="vat.is_ai_generated" class="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 rounded-full text-xs font-semibold border border-purple-200">
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 7H7v6h6V7z"/>
+                        <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd"/>
+                      </svg>
+                      AI
+                    </span>
+                  </div>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
                     {{ vat.form_type }}
@@ -182,7 +193,16 @@
           >
             <div class="flex items-start justify-between gap-2">
               <div>
-                <p class="font-semibold text-gray-900">{{ vat.period }}</p>
+                <div class="flex items-center gap-2">
+                  <p class="font-semibold text-gray-900">{{ vat.period }}</p>
+                  <span v-if="vat.is_ai_generated" class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 rounded-full text-[10px] font-semibold border border-purple-200">
+                    <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M13 7H7v6h6V7z"/>
+                      <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd"/>
+                    </svg>
+                    AI
+                  </span>
+                </div>
                 <p class="text-xs text-gray-600">{{ formatDate(vat.due_date) }}</p>
               </div>
               <span :class="getStatusClass(vat.status)" class="px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 whitespace-nowrap">

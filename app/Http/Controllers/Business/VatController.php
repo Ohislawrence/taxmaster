@@ -175,7 +175,7 @@ class VatController extends Controller
         $vatReturn->load(['reviewer', 'governmentPayments']);
 
         return Inertia::render('Business/VAT/Show', [
-            'vatReturn' => $vatReturn,
+            'vat' => $vatReturn,
             'calculations' => $vatReturn->getCalculationSummary(),
             'governmentPayments' => $vatReturn->governmentPayments,
         ]);

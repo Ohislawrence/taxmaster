@@ -8,8 +8,13 @@ defineOptions({ layout: PublicLayout });
 // Exhaustive feature list for businesses — used to render highlight cards
 const features = ref([
     {
-        title: 'Automated PAYE, VAT, WHT & CIT',
-        description: 'Compute and prepare statutory PAYE, VAT, Withholding Tax and Corporate Income Tax returns with filing-ready schedules and supporting documents.',
+        title: 'AI Tax Automation (One-Click)',
+        description: 'Click once—AI analyzes your transactions and generates complete VAT, PAYE, WHT & CIT returns automatically. No accountant needed for basic compliance. Review draft returns and file when ready.',
+        icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
+    },
+    {
+        title: 'Manual Tax Calculations (Full Control)',
+        description: 'Prefer control? Manually compute PAYE, VAT, WHT and CIT with our tools. Enter data, get filing-ready schedules and supporting documents without AI.',
         icon: 'M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z'
     },
     {
@@ -83,8 +88,8 @@ const features = ref([
         icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
     },
     {
-        title: 'AI-Assisted Categorisation',
-        description: 'AI suggestions for transaction categorisation, anomaly detection and return pre-filling (where included in plan).',
+        title: 'AI Transaction Categorization',
+        description: 'AI automatically categorizes transactions for tax purposes. Detects VAT, income types, deductible expenses, and WHT categories. One-click approval workflow.',
         icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
     },
     {
@@ -197,7 +202,7 @@ onMounted(() => {
                 </h1>
 
                 <p class="reveal text-base sm:text-lg lg:text-xl text-slate-500 leading-relaxed max-w-3xl mx-auto animate-slide-up animation-delay-200">
-                    All the tax tools you need to automate filings, eliminate surprises, and keep your cashflow healthy — payroll, VAT, remittances, CIT and bank integrations in a single platform.
+                    <strong>AI-powered tax automation meets full manual control.</strong> Click once to let AI calculate VAT, PAYE, WHT & CIT from your transactions—no accountant needed. Or take full control with manual tools. Automate filings, eliminate surprises, and keep cashflow healthy—all in one platform.
                 </p>
 
                 <div class="reveal flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 animate-slide-up animation-delay-400">
@@ -342,7 +347,7 @@ onMounted(() => {
                         <ul class="space-y-3 text-sm text-slate-600">
                             <li v-for="(benefit, idx) in [
                                 'Avoid penalties with automated deadline tracking',
-                                'Save hours through bank sync and AI categorisation',
+                                'Save hours through bank sync and AI automation',
                                 'Collaborate securely with invited accountants',
                                 'Produce audit-ready exports in seconds',
                                 'Scale with flexible plans and seat-based billing'

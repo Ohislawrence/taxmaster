@@ -31,9 +31,11 @@
                     >
                         <option value="">All Categories</option>
                         <option value="uncategorized">Uncategorized</option>
-                        <option v-for="cat in categories" :key="cat" :value="cat">
-                            {{ cat }}
-                        </option>
+                        <optgroup v-for="(group, groupName) in categories" :key="groupName" :label="groupName">
+                            <option v-for="(label, value) in group" :key="value" :value="value">
+                                {{ label }}
+                            </option>
+                        </optgroup>
                     </select>
                 </div>
 
@@ -178,11 +180,17 @@
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                                 >
                                     <option value="">Choose a category...</option>
-                                    <option v-for="cat in categories" :key="cat" :value="cat">
-                                        {{ cat }}
-                                    </option>
+                                    <optgroup v-for="(group, groupName) in categories" :key="groupName" :label="groupName">
+                                        <option v-for="(label, value) in group" :key="value" :value="value">
+                                            {{ label }}
+                                        </option>
+                                    </optgroup>
                                 </select>
                             </label>
+                            <p v-if="selectedCategory && isWHTApplicable(selectedCategory)" class="text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                This transaction is subject to Withholding Tax (WHT)
+                            </p>
                         </div>
 
                         <div class="flex gap-3">
@@ -223,7 +231,8 @@ import BusinessLayout from '@/Layouts/BusinessLayout.vue'
 
 const props = defineProps({
     transactions: Object, // Paginated response from Laravel
-    categories: Array,
+    categories: Object, // Grouped categories from Transaction model
+    whtCategories: Array, // WHT-applicable categories
 })
 
 const filters = ref({
@@ -236,21 +245,6 @@ const editingId = ref(null)
 const selectedCategory = ref('')
 const savingCategory = ref(false)
 const successMessage = ref('')
-
-const categories = computed(() => props.categories || [
-    'Sales/Revenue',
-    'Operating Expenses',
-    'Staff Salaries',
-    'Utilities',
-    'Transport/Logistics',
-    'Marketing',
-    'Professional Services',
-    'Equipment Purchase',
-    'Other Expense',
-    'Investment',
-    'Loan Repayment',
-    'Personal Withdrawal',
-])
 
 const currentTransaction = computed(() => {
     const transactionsData = props.transactions?.data || []
@@ -413,4 +407,9 @@ const confirmDelete = (id) => {
 }
 
 const deletingId = ref(null)
+
+// Helper to check if category is WHT-applicable
+const isWHTApplicable = (category) => {
+    return props.whtCategories?.includes(category) || false
+}
 </script>
