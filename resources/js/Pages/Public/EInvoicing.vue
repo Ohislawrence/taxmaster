@@ -8,14 +8,14 @@ defineOptions({ layout: PublicLayout });
 // Key benefits - Mono style: minimal, monochrome with subtle accents
 const benefits = ref([
     {
-        title: 'FIRS Compliance',
-        description: 'Generate UBL 2.1 standard invoices with digital signatures that meet Nigerian Revenue Service requirements.',
+        title: 'FIRS-Compliant Generation',
+        description: 'Generate UBL 2.1 standard invoices with digital signatures that meet Nigerian Revenue Service requirements. Export ready for manual submission.',
         icon: 'shield-check',
         code: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'
     },
     {
-        title: 'Automated Submission',
-        description: 'Submit invoices directly to FIRS portal automatically when API credentials are configured.',
+        title: 'Export & Submit',
+        description: 'Export UBL XML or JSON files for manual submission to FIRS portal. Direct API submission coming Q3 2026.',
         icon: 'zap',
         code: 'M13 10V3L4 14h7v7l9-11h-7z'
     },

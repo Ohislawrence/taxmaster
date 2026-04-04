@@ -195,14 +195,16 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center justify-end gap-3">
-                    <!-- View - Always visible -->
+                    <!-- View - Always visible with context-aware text -->
                     <Link
                       :href="route('business.ai-workflows.show', workflow.id)"
                       class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900 hover:underline transition-colors"
-                      title="View Details"
+                      :title="workflow.status === 'completed' ? 'View Generated Return' : (workflow.status === 'running' || workflow.status === 'pending' ? 'View Status' : 'View Details')"
                     >
-                      <i class="fas fa-eye text-sm"></i>
-                      <span class="text-xs font-medium">View</span>
+                      <i :class="workflow.status === 'completed' ? 'fas fa-file-invoice' : (workflow.status === 'running' || workflow.status === 'pending' ? 'fas fa-spinner' : 'fas fa-eye')" class="text-sm"></i>
+                      <span class="text-xs font-medium">
+                        {{ workflow.status === 'completed' ? 'View Return' : (workflow.status === 'running' || workflow.status === 'pending' ? 'View Status' : 'View Details') }}
+                      </span>
                     </Link>
 
                     <!-- Retry for failed workflows -->

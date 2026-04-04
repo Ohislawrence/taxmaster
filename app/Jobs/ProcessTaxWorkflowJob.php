@@ -15,7 +15,7 @@ use Exception;
 
 /**
  * Process Tax Workflow Job - Executes AI tax workflows asynchronously
- * 
+ *
  * This job handles long-running AI tax workflow execution in the background,
  * allowing the user to continue working while the AI processes their tax obligations.
  */
@@ -66,6 +66,32 @@ class ProcessTaxWorkflowJob implements ShouldQueue
 
         try {
             $orchestrator = new TaxAiOrchestrator($this->business);
+
+            // Validate data availability before starting workflow
+            $dataCheck = $orchestrator->checkDataAvailability(
+                $this->workflowType,
+                $this->parameters['month'] ?? null,
+                $this->parameters['year'] ?? null
+            );
+
+            if (!$dataCheck['available']) {
+                $errorMessage = 'Workflow cannot run: ';
+
+                if (!empty($dataCheck['missing'])) {
+                    $errorMessage .= implode(' ', $dataCheck['missing']);
+                } else {
+                    $errorMessage .= 'Required data is not available.';
+                }
+
+                Log::warning('Workflow aborted - data not available', [
+                    'business_id' => $this->business->id,
+                    'workflow_type' => $this->workflowType,
+                    'missing_data' => $dataCheck['missing'],
+                    'data_counts' => $dataCheck['data_counts'],
+                ]);
+
+                throw new Exception($errorMessage);
+            }
 
             $workflow = match($this->workflowType) {
                 'monthly_vat' => $orchestrator->executeMonthlyVATWorkflow(

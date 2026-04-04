@@ -180,53 +180,6 @@
                   </div>
                 </div>
 
-                <!-- Processing Mode -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Processing Mode
-                  </label>
-                  <div class="grid grid-cols-2 gap-3">
-                    <div
-                      @click="form.async = true"
-                      :class="[
-                        'border-2 rounded-lg p-3 cursor-pointer transition',
-                        form.async === true
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
-                      ]"
-                    >
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <h5 class="text-sm font-medium text-gray-900">Background</h5>
-                          <p class="text-xs text-gray-500 mt-1">Process in queue</p>
-                        </div>
-                        <i class="fas fa-clock text-blue-600"></i>
-                      </div>
-                    </div>
-                    <div
-                      @click="form.async = false"
-                      :class="[
-                        'border-2 rounded-lg p-3 cursor-pointer transition',
-                        form.async === false
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
-                      ]"
-                    >
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <h5 class="text-sm font-medium text-gray-900">Immediate</h5>
-                          <p class="text-xs text-gray-500 mt-1">Wait for result</p>
-                        </div>
-                        <i class="fas fa-bolt text-amber-600"></i>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-xs text-gray-500 mt-2">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Background processing is recommended for complex workflows
-                  </p>
-                </div>
-
                 <!-- Info Box -->
                 <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
                   <div class="flex">
@@ -234,10 +187,11 @@
                     <div class="text-xs text-blue-700">
                       <p class="font-medium">What happens next?</p>
                       <ul class="list-disc list-inside mt-1 space-y-1">
+                        <li>Workflow will be queued for background processing</li>
                         <li>AI agents will analyze your {{ getSelectedTypeLabel() }} data</li>
                         <li>Each step will be validated with confidence scores</li>
                         <li>You'll receive recommendations and warnings</li>
-                        <li>Review and approve before final submission</li>
+                        <li>Review and approve when processing is complete</li>
                       </ul>
                     </div>
                   </div>
@@ -292,7 +246,6 @@ const emit = defineEmits(['close', 'created']);
 const form = reactive({
   workflow_type: '',
   tax_period: getCurrentPeriod(),
-  async: true,
   processing: false,
   errors: {},
 });
@@ -408,7 +361,6 @@ function close() {
 function resetForm() {
   form.workflow_type = '';
   form.tax_period = getCurrentPeriod();
-  form.async = true;
   form.errors = {};
   availability.result = null;
   availability.checking = false;
@@ -427,7 +379,6 @@ function submit() {
   router.post(route('business.ai-workflows.store'), {
     workflow_type: form.workflow_type,
     tax_period: form.tax_period,
-    async: form.async,
   }, {
     preserveScroll: true,
     onSuccess: () => {

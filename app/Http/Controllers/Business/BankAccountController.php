@@ -74,6 +74,7 @@ class BankAccountController extends Controller
 
         return Inertia::render('Business/BankAccounts/Index', [
             'accounts' => $accounts,
+            'monoEnabled' => config('services.mono.enabled', false),
             'monoPublicKey' => config('services.mono.public_key'),
             'customerName' => $business->name ?? $user->name,
             'customerEmail' => $business->email ?? $user->email,

@@ -88,16 +88,16 @@ const features = {
   einvoice: {
     label: 'E-Invoicing',
     title: 'FIRS-compliant invoicing',
-    description: 'Create UBL 2.1 invoices with digital signatures. Automated FIRS submission or manual export for offline filing.',
+    description: 'Create UBL 2.1 invoices with digital signatures. Export for manual submission now; automated FIRS API submission coming Q3 2026.',
     icon: 'document-text',
     color: 'indigo',
     capabilities: [
       { title: 'UBL 2.1 format', desc: 'FIRS-compliant invoices' },
       { title: 'TIN validation', desc: 'Live buyer TIN check' },
       { title: 'Digital signatures', desc: 'ECDSA cryptographic signing' },
-      { title: 'Auto submission', desc: 'Direct to FIRS portal' },
-      { title: 'Manual export', desc: 'UBL XML/JSON download' },
+      { title: 'Export ready', desc: 'UBL XML/JSON download' },
       { title: 'Professional PDFs', desc: 'Client-ready invoices' },
+      { title: 'API submission', desc: 'Coming Q3 2026' },
     ],
     stat: '100%',
     statLabel: 'FIRS compliance'
@@ -106,8 +106,8 @@ const features = {
 
 const integrations = [
   { name: 'Mono', category: 'Banking', status: 'Live', description: 'Transaction import & categorization' },
-  { name: 'FIRS E-Invoicing', category: 'Invoicing', status: 'Live', description: 'UBL 2.1 invoice submission & validation' },
-  { name: 'FIRS TaxPro-Max', category: 'Filing', status: 'Export', description: 'Schedule uploads & compliance' },
+  { name: 'FIRS E-Invoicing', category: 'Invoicing', status: 'Q3 2026', description: 'UBL 2.1 invoice API submission (export available now)' },
+  { name: 'FIRS TaxPro-Max', category: 'Filing', status: 'Export', description: 'Generate schedules for manual upload' },
   { name: 'State IRS', category: 'Filing', status: 'Export', description: 'LIRS, OIRS, multi-state support' },
 ];
 

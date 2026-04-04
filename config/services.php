@@ -36,6 +36,7 @@ return [
     ],
 
     'mono' => [
+        'enabled' => env('MONO_ENABLED', false),
         'secret_key' => env('MONO_SECRET_KEY'),
         'public_key' => env('MONO_PUBLIC_KEY'),
         'redirect_url' => env('MONO_REDIRECT_URL', env('APP_URL') . '/business/banks/callback'),

@@ -134,7 +134,7 @@ const features = ref([
     },
     {
         title: 'FIRS E-Invoicing Compliance',
-        description: 'Generate FIRS-compliant UBL 2.1 invoices with digital signatures. Automated submission to FIRS e-invoicing portal or manual export for offline filing.',
+        description: 'Generate FIRS-compliant UBL 2.1 invoices with digital signatures. Export for manual submission now; direct FIRS API submission coming Q3 2026.',
         icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
     },
     {

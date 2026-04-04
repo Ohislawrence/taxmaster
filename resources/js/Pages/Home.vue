@@ -35,14 +35,14 @@ const features = [
     {
         label: 'PAYE Filing',
         title: 'Payroll taxes, on autopilot',
-        desc: 'Auto-calculate employee taxes using up-to-date PITA bands. Multi-state SIRS routing built in. Generate and file monthly schedules in seconds — not hours.',
+        desc: 'Auto-calculate employee taxes using up-to-date PITA bands. Multi-state SIRS routing built in. Generate filing-ready schedules and export for submission in seconds — not hours.',
         items: ['PITA-compliant tax bands', 'Multi-state SIRS routing', 'Monthly schedule generation', 'Bulk staff import via CSV'],
     },
     {
         label: 'VAT Returns',
-        title: 'VAT that files itself',
-        desc: 'Track input and output VAT across all transactions. Auto-generate returns with full breakdowns and export payment instructions for manual remittance.',
-        items: ['Input/output VAT tracking', 'Auto-generated returns', 'Export payment instructions', 'Transaction categorisation'],
+        title: 'VAT returns, calculated instantly',
+        desc: 'Track input and output VAT across all transactions. Auto-generate FIRS-compliant returns with full breakdowns and export for submission or payment.',
+        items: ['Input/output VAT tracking', 'FIRS-compliant return generation', 'Export for manual submission', 'Transaction categorisation'],
     },
     {
         label: 'WHT Remittance',
@@ -128,10 +128,6 @@ const activeFeature = ref(0);
                     <!-- Trust line -->
                     <p class="reveal reveal-up mt-8 text-sm text-gray-400">
                         Free for small businesses · No credit card · 2 min setup
-                    </p>
-                    <!-- Clarification about remittance -->
-                    <p class="reveal reveal-up mt-2 text-xs text-gray-400">
-                        Note: TaxMaster generates filing-ready returns and exportable payment instructions. Manual remittance is required today; scheduled programmatic remittance (card & bank) is available on higher plans.
                     </p>
                 </div>
 
@@ -742,14 +738,15 @@ const activeFeature = ref(0);
                         Built for Nigeria, from the ground up
                     </h2>
                     <p class="mt-3 text-base leading-relaxed text-gray-500 sm:mt-4 sm:text-lg">
-                        Most tax software is built for US or UK markets. TaxMaster understands PITA tax bands, FIRS regulations, State IRS differences, and local government filing/payment processes — and generates the reports and payment instructions your team needs to complete remittance.
+                        Most tax software is built for US or UK markets. TaxMaster understands PITA tax bands, FIRS regulations, State IRS differences, and local government filing/payment processes — and generates FIRS-compliant returns and payment instructions your team needs to complete filing and remittance.
                     </p>
                     <ul class="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
                         <li v-for="item in [
                             'Multi-state PAYE — routes to the correct SIRS automatically',
-                            'Payment instruction exports for manual remittance',
+                            'FIRS-compliant return generation with export capabilities',
                             'NDPA-compliant data protection and TIN encryption',
                             'Real-time compliance monitoring with penalty calculators',
+                            'Direct FIRS API integration (coming Q3 2026)',
                         ]" :key="item" class="flex items-start gap-3">
                             <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />

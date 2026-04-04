@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Business;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
+use App\Models\FinancialPosition;
 use App\Services\FinancialStatementPdfGenerator;
+use App\Services\EnhancedFinancialAnalysisService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,7 +14,8 @@ use Inertia\Inertia;
 class FinancialStatementController extends Controller
 {
     public function __construct(
-        protected FinancialStatementPdfGenerator $pdfGenerator
+        protected FinancialStatementPdfGenerator $pdfGenerator,
+        protected EnhancedFinancialAnalysisService $analysisService
     ) {}
 
     /**
@@ -27,7 +30,12 @@ class FinancialStatementController extends Controller
         }
 
         $year = $request->input('year', now()->format('Y'));
-        $defaults = $this->buildDefaults($business->id, $year);
+
+        // Use enhanced AI service for better automation
+        $enhanced = $this->analysisService->generateStatements($business, $year);
+
+        // Fallback to simple defaults if needed
+        $defaults = $enhanced['balance_sheet'] ?? $this->buildDefaults($business->id, $year);
         $priorDefaults = $this->buildDefaults($business->id, (string) ((int) $year - 1));
 
         return Inertia::render('Business/Reports/FinancialStatements', [
@@ -39,8 +47,14 @@ class FinancialStatementController extends Controller
                 'state' => $business->state,
             ],
             'year' => $year,
-            'defaults' => $defaults,
+            'defaults' => [
+                'balance_sheet' => $defaults,
+                'profit_loss' => $enhanced['profit_loss'] ?? $this->buildDefaults($business->id, $year)['profit_loss'],
+                'cash_flow' => $enhanced['cash_flow'] ?? [],
+            ],
             'priorDefaults' => $priorDefaults,
+            'aiInsights' => $enhanced['ai_insights'] ?? [],
+            'aiDetectionMeta' => $defaults['_ai_detected'] ?? null,
         ]);
     }
 
@@ -105,6 +119,9 @@ class FinancialStatementController extends Controller
             'prior_year' => 'nullable|array',
         ]);
 
+        // Save financial position snapshot for future reference
+        $this->saveFinancialPosition($business, $validated);
+
         $pdf = $this->pdfGenerator->generate($business, $validated['year'], $validated);
         $filename = 'financial-statements-' . $validated['year'] . '.pdf';
 
@@ -112,6 +129,74 @@ class FinancialStatementController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
             ->header('Cache-Control', 'public, must-revalidate, max-age=0');
+    }
+
+    /**
+     * Save financial position snapshot (API endpoint)
+     */
+    public function saveSnapshot(Request $request)
+    {
+        $business = $request->user()?->defaultBusiness();
+        if (!$business) {
+            return response()->json(['message' => 'No active business'], 403);
+        }
+
+        $validated = $request->validate([
+            'year' => 'required|digits:4',
+            'balance_sheet' => 'required|array',
+            'profit_loss' => 'required|array',
+            'notes' => 'nullable|string',
+        ]);
+
+        $position = $this->saveFinancialPosition($business, $validated);
+
+        return response()->json([
+            'message' => 'Financial position saved successfully',
+            'position' => $position,
+        ]);
+    }
+
+    /**
+     * Save or update financial position
+     */
+    protected function saveFinancialPosition($business, array $data): FinancialPosition
+    {
+        $year = $data['year'];
+        $positionDate = Carbon::createFromFormat('Y', $year)->endOfYear();
+        $bs = $data['balance_sheet'];
+
+        return FinancialPosition::updateOrCreate(
+            [
+                'business_id' => $business->id,
+                'position_date' => $positionDate,
+            ],
+            [
+                'period_type' => 'year-end',
+                // Assets
+                'cash_and_bank' => $bs['cash_and_bank'] ?? 0,
+                'trade_receivables' => $bs['trade_receivables'] ?? 0,
+                'inventory' => $bs['inventory'] ?? 0,
+                'other_current_assets' => $bs['other_current_assets'] ?? 0,
+                'property_plant_equipment' => $bs['property_plant_equipment'] ?? 0,
+                'accumulated_depreciation' => $bs['accumulated_depreciation'] ?? 0,
+                'intangible_assets' => $bs['intangible_assets'] ?? 0,
+                'other_non_current_assets' => $bs['other_non_current_assets'] ?? 0,
+                // Liabilities
+                'trade_payables' => $bs['trade_payables'] ?? 0,
+                'tax_payable' => $bs['tax_payable'] ?? 0,
+                'other_current_liabilities' => $bs['other_current_liabilities'] ?? 0,
+                'long_term_borrowings' => $bs['long_term_borrowings'] ?? 0,
+                'other_non_current_liabilities' => $bs['other_non_current_liabilities'] ?? 0,
+                // Equity
+                'share_capital' => $bs['share_capital'] ?? 0,
+                'retained_earnings' => $bs['retained_earnings'] ?? 0,
+                'other_reserves' => $bs['other_reserves'] ?? 0,
+                // Metadata
+                'is_ai_generated' => isset($bs['_ai_detected']),
+                'ai_confidence' => $bs['_ai_detected'] ?? null,
+                'notes' => $data['notes'] ?? null,
+            ]
+        );
     }
 
     /**

@@ -91,16 +91,22 @@ class AiWorkflowController extends Controller
     }
 
     /**
-     * Show individual workflow details
+     * Show individual workflow details (admin only) or redirect to created return (regular users)
      */
     public function show(Request $request, int $workflowId)
     {
         $business = $request->user()->defaultBusiness();
 
         $workflow = AiWorkflow::where('business_id', $business->id)
-            ->with(['user', 'steps', 'reviewer'])
+            ->with(['user', 'steps', 'reviewer', 'vatReturn', 'payeReturn', 'whtReturn', 'citReturn'])
             ->findOrFail($workflowId);
 
+        // For non-admin users, redirect directly to the created return
+        if (!$request->user()->isAdmin() && $workflow->status === 'completed') {
+            return $this->redirectToCreatedReturn($workflow);
+        }
+
+        // Admins see detailed workflow information
         return Inertia::render('Business/AiWorkflows/Show', [
             'workflow' => [
                 ...$workflow->toArray(),
@@ -114,6 +120,60 @@ class AiWorkflowController extends Controller
     }
 
     /**
+     * Redirect user to the actual return created by the workflow
+     */
+    private function redirectToCreatedReturn(AiWorkflow $workflow)
+    {
+        $message = 'Workflow completed successfully. Viewing the generated return.';
+
+        // Determine which return was created based on workflow type
+        switch ($workflow->workflow_type) {
+            case 'monthly_vat':
+                if ($workflow->vatReturn) {
+                    return redirect()->route('business.vat.show', $workflow->vatReturn->id)
+                        ->with('success', $message);
+                }
+                break;
+
+            case 'monthly_paye':
+                if ($workflow->payeReturn) {
+                    return redirect()->route('business.paye.show', $workflow->payeReturn->id)
+                        ->with('success', $message);
+                }
+                break;
+
+            case 'monthly_wht':
+                if ($workflow->whtReturn) {
+                    return redirect()->route('business.wht.return.show', $workflow->whtReturn->id)
+                        ->with('success', $message);
+                }
+                break;
+
+            case 'monthly_cit':
+            case 'annual_cit':
+                if ($workflow->citReturn) {
+                    return redirect()->route('business.cit.show', $workflow->citReturn->id)
+                        ->with('success', $message);
+                }
+                break;
+
+            case 'compliance_assessment':
+                // Compliance assessment doesn't create a return, show workflow details
+                return Inertia::render('Business/AiWorkflows/Show', [
+                    'workflow' => [
+                        ...$workflow->toArray(),
+                        'summary' => $workflow->getSummary(),
+                        'is_simplified' => true, // Flag for simplified view
+                    ],
+                ]);
+        }
+
+        // Fallback: if no return found, show simplified workflow view
+        return redirect()->route('business.ai-workflows.index')
+            ->with('info', 'Return not yet generated. Please check back shortly.');
+    }
+
+    /**
      * Start a new workflow
      */
     public function store(Request $request)
@@ -123,7 +183,6 @@ class AiWorkflowController extends Controller
         $validated = $request->validate([
             'workflow_type' => 'required|string|in:monthly_vat,monthly_paye,monthly_wht,monthly_cit,annual_cit,compliance_assessment',
             'tax_period' => 'required_unless:workflow_type,compliance_assessment|date_format:Y-m',
-            'async' => 'boolean',
         ]);
 
         // Extract month and year from tax_period (format: YYYY-MM)
@@ -137,51 +196,45 @@ class AiWorkflowController extends Controller
 
         $orchestrator = new TaxAiOrchestrator($business);
 
-        // Check if async execution is requested
-        if ($validated['async'] ?? true) {
-            // Queue the workflow
-            ProcessTaxWorkflowJob::dispatch(
-                $business,
-                $validated['workflow_type'],
-                [
-                    'month' => $month,
-                    'year' => $year,
-                ],
-                $request->user()->id
-            );
+        // Validate data availability before starting workflow
+        $dataCheck = $orchestrator->checkDataAvailability(
+            $validated['workflow_type'],
+            $month,
+            $year
+        );
+
+        if (!$dataCheck['available']) {
+            $errorMessage = 'Cannot start workflow: ';
+
+            if (!empty($dataCheck['missing'])) {
+                $errorMessage .= implode(' ', $dataCheck['missing']);
+            } else {
+                $errorMessage .= 'Required data is not available.';
+            }
+
+            // Add helpful context if available
+            if (isset($dataCheck['period_formatted'])) {
+                $errorMessage .= " (Period: {$dataCheck['period_formatted']})";
+            }
 
             return redirect()->route('business.ai-workflows.index')
-                ->with('success', 'Workflow queued for processing. You will be notified when complete.');
+                ->with('error', $errorMessage)
+                ->with('data_check', $dataCheck); // Pass full details for frontend display
         }
 
-        // Execute synchronously
-        try {
-            $workflow = match($validated['workflow_type']) {
-                'monthly_vat' => $orchestrator->executeMonthlyVATWorkflow(
-                    $month,
-                    $year,
-                    $request->user()->id
-                ),
-                'monthly_paye' => $orchestrator->executeMonthlyPAYEWorkflow(
-                    $month,
-                    $year,
-                    $request->user()->id
-                ),
-                'monthly_wht' => $orchestrator->executeMonthlyWHTWorkflow(
-                    $month,
-                    $year,
-                    $request->user()->id
-                ),
-                'compliance_assessment' => $orchestrator->executeComplianceAssessment($request->user()->id),
-            };
+        // Queue the workflow for background processing
+        ProcessTaxWorkflowJob::dispatch(
+            $business,
+            $validated['workflow_type'],
+            [
+                'month' => $month,
+                'year' => $year,
+            ],
+            $request->user()->id
+        );
 
-            return redirect()->route('business.ai-workflows.show', $workflow->id)
-                ->with('success', 'Workflow completed successfully');
-
-        } catch (\Exception $e) {
-            return redirect()->route('business.ai-workflows.index')
-                ->with('error', 'Workflow failed: ' . $e->getMessage());
-        }
+        return redirect()->route('business.ai-workflows.index')
+            ->with('success', 'Workflow queued for processing. You will be notified when complete.');
     }
 
     /**

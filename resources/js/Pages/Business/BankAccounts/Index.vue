@@ -6,13 +6,16 @@
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div class="flex-1">
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Bank Accounts</h1>
-                    <p class="text-sm sm:text-base text-gray-600 mt-1">Connect your bank accounts to auto-import transactions</p>
-                    <p class="text-xs text-gray-500 mt-1">
+                    <p class="text-sm sm:text-base text-gray-600 mt-1">
+                        {{ monoEnabled ? 'Connect your bank accounts to auto-import transactions' : 'Manage your bank account connections' }}
+                    </p>
+                    <p v-if="monoEnabled" class="text-xs text-gray-500 mt-1">
                         <span class="font-medium">{{ bankAccountsCount }}</span> of <span class="font-medium">{{ bankAccountsLimit >= 999 ? 'Unlimited' : bankAccountsLimit }}</span> accounts linked
                     </p>
                 </div>
                 <div v-if="canLinkMore" class="flex gap-2">
                     <button
+                        v-if="monoEnabled"
                         @click="showConnectModal = true"
                         class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center sm:justify-start space-x-2"
                     >
@@ -21,27 +24,11 @@
                         </svg>
                         <span>Connect Bank</span>
                     </button>
-
-                    <a href="/business/transactions/import" class="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 px-4 sm:px-6 py-2 rounded-lg font-medium text-sm hover:bg-gray-50 flex items-center justify-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M12 3v14" />
-                        </svg>
-                        <span>Import</span>
-                    </a>
                 </div>
                 <div v-else class="w-full sm:w-auto text-center">
                     <p class="text-sm text-amber-600 font-medium">Account limit reached</p>
                     <a href="/business/subscription" class="text-xs text-blue-600 hover:underline">Upgrade plan</a>
                 </div>
-            </div>
-
-            <!-- Import card (opens full import page) -->
-            <div class="bg-white rounded-lg shadow p-4 sm:p-6 flex items-center justify-between">
-                <div>
-                    <h2 class="text-lg font-semibold">Import Transactions</h2>
-                    <p class="text-sm text-gray-600">Upload CSV or Excel files and use AI to map columns to transaction fields.</p>
-                </div>
-                <a href="/business/transactions/import" class="ml-4 w-36 sm:w-auto bg-white border border-gray-200 px-4 py-2 rounded text-sm hover:bg-gray-50 text-gray-700">Open Import</a>
             </div>
 
             <!-- Connected Accounts -->
@@ -125,15 +112,29 @@
                 <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">No bank accounts connected</h3>
-                <p class="text-gray-600 mb-6">Connect your first bank account to start syncing transactions automatically</p>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                    {{ monoEnabled ? 'No bank accounts connected' : 'Bank connection not available' }}
+                </h3>
+                <p class="text-gray-600 mb-6">
+                    {{ monoEnabled
+                        ? 'Connect your first bank account to start syncing transactions automatically'
+                        : 'Mono API is not configured. To import transactions, go to the Transactions page.'
+                    }}
+                </p>
                 <button
-                    v-if="canLinkMore"
+                    v-if="canLinkMore && monoEnabled"
                     @click="showConnectModal = true"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition"
                 >
                     Connect Your Bank
                 </button>
+                <a
+                    v-else-if="!monoEnabled"
+                    href="/business/transactions"
+                    class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition"
+                >
+                    Go to Transactions
+                </a>
                 <p v-else class="text-sm text-amber-600 font-medium">
                     Your plan doesn't include bank account linking.
                     <a href="/business/subscription" class="text-blue-600 hover:underline">Upgrade</a>
@@ -229,6 +230,7 @@ import MonoConnect from '@mono.co/connect.js'
 
 const props = defineProps({
     accounts: Array,
+    monoEnabled: { type: Boolean, default: false },
     monoPublicKey: String,
     customerName: String,
     customerEmail: String,

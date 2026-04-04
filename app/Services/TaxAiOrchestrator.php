@@ -618,6 +618,10 @@ class TaxAiOrchestrator
             case 'monthly_wht':
                 return $this->checkWHTDataAvailability($month, $year);
 
+            case 'monthly_cit':
+            case 'annual_cit':
+                return $this->checkCITDataAvailability($month, $year);
+
             case 'compliance_assessment':
                 return $this->checkComplianceDataAvailability();
 
@@ -705,6 +709,44 @@ class TaxAiOrchestrator
                     'Previous WHT returns',
                 ],
                 'time_range' => 'Specific month and year',
+            ],
+            'monthly_cit' => [
+                'name' => 'Monthly CIT Self-Assessment',
+                'description' => 'Calculate taxable income, apply Finance Act 2019 rates, and generate CIT return',
+                'required_data' => [
+                    [
+                        'type' => 'transactions',
+                        'description' => 'Revenue and expense transactions to calculate taxable income',
+                        'minimum' => 1,
+                        'note' => 'At least one transaction is needed to calculate profit/loss',
+                    ],
+                ],
+                'optional_data' => [
+                    'Revenue transactions (sales, services)',
+                    'Expense transactions (operating costs)',
+                    'Previous CIT returns',
+                    'Financial statements',
+                ],
+                'time_range' => 'Specific month and year',
+            ],
+            'annual_cit' => [
+                'name' => 'Annual CIT Return',
+                'description' => 'Calculate annual taxable income and generate CIT return for year-end filing',
+                'required_data' => [
+                    [
+                        'type' => 'transactions',
+                        'description' => 'Full year revenue and expense transactions',
+                        'minimum' => 1,
+                        'note' => 'Annual financial data required for CIT calculation',
+                    ],
+                ],
+                'optional_data' => [
+                    'Audited financial statements',
+                    'Capital allowances',
+                    'Tax losses carried forward',
+                    'Previous year CIT returns',
+                ],
+                'time_range' => 'Specific year (12-month period)',
             ],
             'compliance_assessment' => [
                 'name' => 'Compliance Assessment',
@@ -967,6 +1009,81 @@ class TaxAiOrchestrator
             'data_counts' => $dataCounts,
             'period' => 'Current assessment',
             'period_formatted' => now()->format('F d, Y'),
+        ];
+    }
+
+    /**
+     * Check CIT data availability
+     */
+    protected function checkCITDataAvailability(?string $month, ?string $year): array
+    {
+        $missing = [];
+        $dataCounts = [];
+
+        if (!$month || !$year) {
+            $missing[] = 'Tax period (month and year) is required';
+            return [
+                'available' => false,
+                'missing' => $missing,
+                'requirements' => $this->getWorkflowDataRequirements('monthly_cit'),
+                'data_counts' => [],
+            ];
+        }
+
+        $startDate = "{$year}-" . str_pad($month, 2, '0', STR_PAD_LEFT) . "-01";
+        $endDate = date('Y-m-t', strtotime($startDate));
+
+        // Check for transactions in the period
+        $transactionsCount = $this->business->transactions()
+            ->whereDate('transaction_date', '>=', $startDate)
+            ->whereDate('transaction_date', '<=', $endDate)
+            ->count();
+
+        $dataCounts['transactions'] = $transactionsCount;
+
+        // Get total transactions for reference
+        $allTransactionsCount = $this->business->transactions()->count();
+        $dataCounts['all_transactions'] = $allTransactionsCount;
+
+        if ($transactionsCount === 0) {
+            $missing[] = "No transactions found for {$month}/{$year}";
+            if ($allTransactionsCount > 0) {
+                $missing[] = "You have {$allTransactionsCount} total transactions, but none match the selected period ({$startDate} to {$endDate}).";
+            } else {
+                $missing[] = "Add transactions to calculate CIT. CIT is based on taxable income from business activities.";
+            }
+        }
+
+        // Check for revenue transactions (income)
+        $revenueCount = $this->business->transactions()
+            ->whereDate('transaction_date', '>=', $startDate)
+            ->whereDate('transaction_date', '<=', $endDate)
+            ->where('type', 'credit')
+            ->count();
+
+        $dataCounts['revenue_transactions'] = $revenueCount;
+
+        // Check for expense transactions
+        $expenseCount = $this->business->transactions()
+            ->whereDate('transaction_date', '>=', $startDate)
+            ->whereDate('transaction_date', '<=', $endDate)
+            ->where('type', 'debit')
+            ->count();
+
+        $dataCounts['expense_transactions'] = $expenseCount;
+
+        // Note: CIT can be calculated even with minimal data
+        if ($transactionsCount > 0 && $revenueCount === 0) {
+            $dataCounts['note'] = "No revenue transactions found. CIT is calculated on taxable income (revenue - expenses).";
+        }
+
+        return [
+            'available' => count($missing) === 0,
+            'missing' => $missing,
+            'requirements' => $this->getWorkflowDataRequirements('monthly_cit'),
+            'data_counts' => $dataCounts,
+            'period' => "{$month}/{$year}",
+            'period_formatted' => date('F Y', strtotime($startDate)),
         ];
     }
 

@@ -179,6 +179,14 @@ class Business extends Model
     }
 
     /**
+     * Get financial positions (balance sheet snapshots)
+     */
+    public function financialPositions(): HasMany
+    {
+        return $this->hasMany(FinancialPosition::class);
+    }
+
+    /**
      * Get compliance deadlines
      */
     public function complianceDeadlines(): HasMany

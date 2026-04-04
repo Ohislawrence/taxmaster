@@ -382,7 +382,7 @@ watch(filteredInvoices, () => {
 const totalValue = computed(() => {
     return filteredInvoices.value.reduce((sum, invoice) => {
         if (invoice.status !== 'cancelled') {
-            return sum + (invoice.total || 0);
+            return sum + (parseFloat(invoice.total) || 0);
         }
         return sum;
     }, 0);
@@ -428,10 +428,11 @@ const formatStatus = (status) => {
 };
 
 const formatCurrency = (amount) => {
+    const numericAmount = parseFloat(amount) || 0;
     return new Intl.NumberFormat('en-NG', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-    }).format(amount || 0);
+    }).format(numericAmount);
 };
 
 const formatDate = (d) => {
