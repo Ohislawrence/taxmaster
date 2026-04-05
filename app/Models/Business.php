@@ -187,6 +187,14 @@ class Business extends Model
     }
 
     /**
+     * Get QuickBooks connection
+     */
+    public function quickBooksConnection()
+    {
+        return $this->hasOne(QuickBooksConnection::class);
+    }
+
+    /**
      * Get compliance deadlines
      */
     public function complianceDeadlines(): HasMany

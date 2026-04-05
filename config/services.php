@@ -44,6 +44,17 @@ return [
         'base_url' => env('MONO_BASE_URL', 'https://api.withmono.com'),
     ],
 
+    'quickbooks' => [
+        'enabled' => env('QUICKBOOKS_ENABLED', false),
+        'client_id' => env('QUICKBOOKS_CLIENT_ID'),
+        'client_secret' => env('QUICKBOOKS_CLIENT_SECRET'),
+        'redirect_uri' => env('QUICKBOOKS_REDIRECT_URI', env('APP_URL') . '/business/integrations/quickbooks/callback'),
+        'environment' => env('QUICKBOOKS_ENVIRONMENT', 'sandbox'), // 'sandbox' or 'production'
+        'base_url' => env('QUICKBOOKS_ENVIRONMENT', 'sandbox') === 'production'
+            ? 'https://quickbooks.api.intuit.com'
+            : 'https://sandbox-quickbooks.api.intuit.com',
+    ],
+
     'remita' => [
         'merchant_id' => env('REMITA_MERCHANT_ID'),
         'api_key' => env('REMITA_API_KEY'),

@@ -63,7 +63,7 @@ const capabilities = [
     { icon: 'robot', title: 'AI Tax Automation', desc: 'Click once, AI does the rest. Automatically calculates VAT, PAYE, WHT & CIT from your transactions. No accountant needed for basic compliance.' },
     { icon: 'shield', title: 'NDPA Compliant', desc: 'Full data protection compliance with encrypted TIN storage and audit trails.' },
     { icon: 'clock', title: 'Real-time Alerts', desc: 'Never miss a deadline. Get notified before due dates with penalty calculators.' },
-    { icon: 'bank', title: 'Bank Integration', desc: 'Connect via Mono. Transactions auto-categorised for tax purposes.' },
+    { icon: 'bank', title: 'Bank & Accounting Integrations', desc: 'Connect your bank via Mono and sync with QuickBooks, Sage, or Xero. Transactions auto-categorised for tax purposes.' },
     { icon: 'chart', title: 'Smart Reports', desc: 'Export PDF/CSV reports. Annual returns prep with all supporting schedules.' },
     { icon: 'users', title: 'Multi-Entity', desc: 'Manage multiple businesses from one dashboard with role-based access.' },
 ];

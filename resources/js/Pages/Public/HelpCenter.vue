@@ -19,6 +19,7 @@ const sections = [
     { id: 'getting-started', title: 'Getting Started' },
     { id: 'tax-modules', title: 'Tax Modules' },
     { id: 'financial-management', title: 'Financial Management' },
+    { id: 'integrations', title: 'Accounting Software Integrations' },
     { id: 'compliance-filing', title: 'Compliance & Filing' },
     { id: 'ai-features', title: 'AI Features' },
     { id: 'how-to-file', title: 'How to File Returns' },
@@ -611,6 +612,149 @@ onUnmounted(() => {
 
                                 <h3 class="text-lg font-semibold text-slate-900 pt-4">Invoicing</h3>
                                 <p class="text-slate-600 text-sm">Create professional invoices with automatic VAT calculation and tax compliance.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Accounting Software Integrations -->
+                    <section v-if="shouldShowSection('integrations')" id="integrations" class="scroll-mt-24">
+                        <div class="border-b border-slate-200 pb-4 mb-8">
+                            <h2 class="text-2xl font-bold tracking-tight text-slate-900">Accounting Software Integrations</h2>
+                            <p class="text-slate-500 text-sm mt-2">Connect TaxMaster with your accounting software</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <div class="p-5 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex gap-3">
+                                    <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="font-semibold text-blue-900 mb-1">Sync Your Accounting Data</p>
+                                        <p class="text-blue-800 text-sm">TaxMaster integrates with popular accounting software to automatically sync invoices, bills, customers, and vendors. No more manual data entry!</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QuickBooks Integration -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2v-4h2v4z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">QuickBooks Online</h3>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Available Now</span>
+                                    </div>
+                                </div>
+                                <p class="text-slate-600 mb-4">Sync your QuickBooks data with TaxMaster for seamless tax compliance.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-900 mb-3 text-sm">What syncs:</h4>
+                                        <ul class="space-y-2 text-sm text-slate-600">
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Invoices (sales invoices for VAT tracking)</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Bills (vendor bills for expense tracking)</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Customers (for invoice matching)</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Vendors (for WHT compliance)</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-slate-900 mb-3 text-sm">How to connect:</h4>
+                                        <ol class="space-y-2 text-sm text-slate-700">
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">1.</span>
+                                                <span>Go to Integrations in Account menu</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">2.</span>
+                                                <span>Click "Connect" on QuickBooks card</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">3.</span>
+                                                <span>Enter your QuickBooks app credentials</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">4.</span>
+                                                <span>Authorize TaxMaster to access your data</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">5.</span>
+                                                <span>Configure sync settings and schedule</span>
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                    <p class="text-xs text-slate-600">
+                                        <strong>Security:</strong> Each business uses their own QuickBooks API credentials. Your data is encrypted and synced securely. You can disconnect at any time.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Sage Integration -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">Sage Business Cloud</h3>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Coming Soon</span>
+                                    </div>
+                                </div>
+                                <p class="text-slate-600">Integration with Sage Business Cloud Accounting is currently in development and will be available soon.</p>
+                            </div>
+
+                            <!-- Xero Integration -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 rounded-lg bg-sky-100 flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">Xero</h3>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Coming Soon</span>
+                                    </div>
+                                </div>
+                                <p class="text-slate-600">Integration with Xero accounting software is currently in development and will be available soon.</p>
+                            </div>
+
+                            <div class="p-5 bg-amber-50 border border-amber-200 rounded-lg">
+                                <div class="flex gap-3">
+                                    <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="font-semibold text-amber-900 text-sm mb-1">Need a different integration?</p>
+                                        <p class="text-amber-700 text-sm">Contact our support team if you use different accounting software. We're always looking to add new integrations based on customer needs.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </section>

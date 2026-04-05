@@ -22,11 +22,13 @@
         "vue": "^3.3.13"
     },
     "dependencies": {
+        "@headlessui/vue": "^1.7.23",
         "@inertiajs/inertia": "^0.11.1",
         "@mono.co/connect.js": "^2.1.0",
         "@tinymce/tinymce-vue": "^6.3.0",
         "@vueup/vue-quill": "^1.2.0",
         "apexcharts": "^4.7.0",
+        "date-fns": "^4.1.0",
         "mono-node": "^1.0.3",
         "papaparse": "^5.5.3",
         "quill": "^2.0.3",

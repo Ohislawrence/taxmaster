@@ -106,6 +106,9 @@ const features = {
 
 const integrations = [
   { name: 'Mono', category: 'Banking', status: 'Live', description: 'Transaction import & categorization' },
+  { name: 'QuickBooks Online', category: 'Accounting', status: 'Live', description: 'Sync invoices, bills, customers & vendors' },
+  { name: 'Sage Business Cloud', category: 'Accounting', status: 'Coming Soon', description: 'Full accounting data sync' },
+  { name: 'Xero', category: 'Accounting', status: 'Coming Soon', description: 'Complete accounting integration' },
   { name: 'FIRS E-Invoicing', category: 'Invoicing', status: 'Q3 2026', description: 'UBL 2.1 invoice API submission (export available now)' },
   { name: 'FIRS TaxPro-Max', category: 'Filing', status: 'Export', description: 'Generate schedules for manual upload' },
   { name: 'State IRS', category: 'Filing', status: 'Export', description: 'LIRS, OIRS, multi-state support' },

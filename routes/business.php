@@ -19,6 +19,7 @@ use App\Http\Controllers\Business\FinancialStatementController;
 use App\Http\Controllers\Business\CacFormController;
 use App\Http\Controllers\BusinessSetupController;
 use App\Http\Controllers\Business\GetStartedController;
+use App\Http\Controllers\Business\IntegrationsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Business\TaxInsightsController;
@@ -168,6 +169,21 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
             Route::post('/{bankAccount}/sync', [BankAccountController::class, 'sync'])->name('sync');
             Route::post('/{bankAccount}/toggle-auto-sync', [BankAccountController::class, 'toggleAutoSync'])->name('toggle-auto-sync');
             Route::delete('/{bankAccount}', [BankAccountController::class, 'destroy'])->name('destroy');
+        });
+
+        // Integrations Hub
+        Route::get('integrations', [App\Http\Controllers\Business\IntegrationsController::class, 'index'])->name('integrations.index');
+
+        // QuickBooks Integration (Accounting Software)
+        Route::prefix('integrations/quickbooks')->name('integrations.quickbooks.')->middleware('subscription.features:link_bank_account')->group(function () {
+            Route::get('/', [App\Http\Controllers\Business\QuickBooksController::class, 'index'])->name('index');
+            Route::post('/credentials', [App\Http\Controllers\Business\QuickBooksController::class, 'saveCredentials'])->name('save-credentials');
+            Route::get('/connect', [App\Http\Controllers\Business\QuickBooksController::class, 'connect'])->name('connect');
+            Route::get('/callback', [App\Http\Controllers\Business\QuickBooksController::class, 'callback'])->name('callback');
+            Route::post('/disconnect', [App\Http\Controllers\Business\QuickBooksController::class, 'disconnect'])->name('disconnect');
+            Route::post('/sync', [App\Http\Controllers\Business\QuickBooksController::class, 'sync'])->name('sync');
+            Route::patch('/settings', [App\Http\Controllers\Business\QuickBooksController::class, 'updateSettings'])->name('update-settings');
+            Route::get('/logs/{log}', [App\Http\Controllers\Business\QuickBooksController::class, 'getSyncLog'])->name('sync-log');
         });
 
         // Transactions
