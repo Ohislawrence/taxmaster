@@ -21,7 +21,7 @@
             $seoTitle = $page['props']['title'] ?? null;
             $seoTitle = $seoTitle ? ($seoTitle . ' - ' . config('app.name')) : ('Nigerian Tax Compliance & E-Invoicing Software - ' . config('app.name'));
             $seoDescription = $page['props']['description'] ?? 'Automate Nigerian tax compliance with PAYE, VAT, WHT, CIT calculations and FIRS e-invoicing. Generate UBL 2.1 compliant invoices, connect your bank via Mono, and file ready-to-submit returns with automated TIN validation. Built for Nigerian businesses, accountants and tax consultants.';
-            $seoImage = $page['props']['ogImage'] ?? '/company-Income-Tax.jpg';
+            $seoImage = $page['props']['ogImage'] ?? '/taxmaster-home.PNG';
             $seoImage = url($seoImage);
             $seoUrl = url()->current();
             $seoKeywords = 'Nigerian tax software, PAYE calculator Nigeria, VAT filing Nigeria, WHT remittance, CIT computation, FIRS e-invoicing, UBL invoice Nigeria, tax compliance software, TaxMaster NG, Mono bank integration, automated tax filing Nigeria';

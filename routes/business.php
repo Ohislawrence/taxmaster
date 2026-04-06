@@ -186,6 +186,17 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
             Route::get('/logs/{log}', [App\Http\Controllers\Business\QuickBooksController::class, 'getSyncLog'])->name('sync-log');
         });
 
+        // Zoho Books Integration (Accounting Software)
+        Route::prefix('integrations/zoho')->name('integrations.zoho.')->middleware('subscription.features:link_bank_account')->group(function () {
+            Route::get('/', [App\Http\Controllers\Business\ZohoController::class, 'index'])->name('index');
+            Route::post('/credentials', [App\Http\Controllers\Business\ZohoController::class, 'saveCredentials'])->name('save-credentials');
+            Route::get('/connect', [App\Http\Controllers\Business\ZohoController::class, 'connect'])->name('connect');
+            Route::get('/callback', [App\Http\Controllers\Business\ZohoController::class, 'callback'])->name('callback');
+            Route::post('/disconnect', [App\Http\Controllers\Business\ZohoController::class, 'disconnect'])->name('disconnect');
+            Route::post('/sync', [App\Http\Controllers\Business\ZohoController::class, 'sync'])->name('sync');
+            Route::patch('/settings', [App\Http\Controllers\Business\ZohoController::class, 'updateSettings'])->name('update-settings');
+        });
+
         // Transactions
         Route::prefix('transactions')->name('transactions.')->middleware('subscription.features:link_bank_account')->group(function () {
             // Transaction import (CSV/Excel) with AI mapping

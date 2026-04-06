@@ -195,6 +195,14 @@ class Business extends Model
     }
 
     /**
+     * Get Zoho connection
+     */
+    public function zohoConnection()
+    {
+        return $this->hasOne(ZohoConnection::class);
+    }
+
+    /**
      * Get compliance deadlines
      */
     public function complianceDeadlines(): HasMany

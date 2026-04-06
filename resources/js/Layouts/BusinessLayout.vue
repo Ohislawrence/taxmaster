@@ -272,7 +272,7 @@
                             <span v-if="isActive('/business/staff')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
 
-                        <!-- Bank Accounts -->
+                        <!-- Bank Accounts
                         <Link
                             href="/business/banks"
                             :class="[
@@ -288,7 +288,7 @@
                             <span class="flex-1">Bank Accounts</span>
                             <span v-if="isActive('/business/banks')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
-
+                        -->
                         <!-- Transactions -->
                         <Link
                             href="/business/transactions"

@@ -22,6 +22,9 @@ class IntegrationsController extends Controller
         // Check QuickBooks connection status
         $qbConnection = $business->quickBooksConnection;
 
+        // Check Zoho connection status
+        $zohoConnection = $business->zohoConnection;
+
         $integrations = [
             [
                 'name' => 'QuickBooks',
@@ -32,6 +35,17 @@ class IntegrationsController extends Controller
                 'connected_at' => $qbConnection?->created_at,
                 'last_synced_at' => $qbConnection?->last_synced_at,
                 'route' => '/business/integrations/quickbooks',
+                'available' => true,
+            ],
+            [
+                'name' => 'Zoho Books',
+                'slug' => 'zoho',
+                'description' => 'Connect with Zoho Books for seamless accounting integration',
+                'icon' => 'zoho',
+                'status' => $zohoConnection && $zohoConnection->isActive() ? 'connected' : 'available',
+                'connected_at' => $zohoConnection?->created_at,
+                'last_synced_at' => $zohoConnection?->last_synced_at,
+                'route' => '/business/integrations/zoho',
                 'available' => true,
             ],
             [

@@ -34,7 +34,7 @@ const features = ref([
     },
     {
         title: 'Bank & Accounting Integrations',
-        description: 'Connect your bank via Mono and sync with QuickBooks, Sage, or Xero. Import transactions, reconcile receipts and expenses, and auto-categorize for tax purposes.',
+        description: 'Connect your bank via Mono and sync with QuickBooks, Zoho Books, Sage, or Xero. Import transactions, reconcile receipts and expenses, and auto-categorize for tax purposes.',
         icon: 'M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4m-9 4v10'
     },
     {
@@ -94,7 +94,7 @@ const features = ref([
     },
     {
         title: 'Integrations & API',
-        description: 'Open API for integrations, webhooks for events, and built-in connectors for QuickBooks, Sage, Xero, banks and payment processors.',
+        description: 'Open API for integrations, webhooks for events, and built-in connectors for QuickBooks, Zoho Books, Sage, Xero, banks and payment processors.',
         icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4'
     },
     {

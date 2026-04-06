@@ -713,6 +713,83 @@ onUnmounted(() => {
                                 </div>
                             </div>
 
+                            <!-- Zoho Books Integration -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2v-4h2v4z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">Zoho Books</h3>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Available Now</span>
+                                    </div>
+                                </div>
+                                <p class="text-slate-600 mb-4">Connect with Zoho Books for seamless accounting data synchronization with multi-datacenter support.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-900 mb-3 text-sm">What syncs:</h4>
+                                        <ul class="space-y-2 text-sm text-slate-600">
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Invoices (sales data for VAT)</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Bills (expense tracking)</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Customers (invoice records)</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Vendors (WHT tracking)</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-slate-900 mb-3 text-sm">How to connect:</h4>
+                                        <ol class="space-y-2 text-sm text-slate-700">
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">1.</span>
+                                                <span>Go to Integrations in Account menu</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">2.</span>
+                                                <span>Click "Connect" on Zoho Books card</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">3.</span>
+                                                <span>Enter your Zoho app credentials and data center</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">4.</span>
+                                                <span>Authorize TaxMaster to access your data</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">5.</span>
+                                                <span>Configure sync settings and schedule</span>
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                    <p class="text-xs text-slate-600">
+                                        <strong>Multi-Datacenter Support:</strong> Works with Zoho data centers worldwide (.com, .eu, .in, .com.au, .com.cn, .jp). Each business uses their own API credentials with encrypted storage.
+                                    </p>
+                                </div>
+                            </div>
+
                             <!-- Sage Integration -->
                             <div>
                                 <div class="flex items-center gap-3 mb-4">
