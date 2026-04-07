@@ -7,6 +7,7 @@ use App\Models\Business;
 use App\Models\SubscriptionPlan;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class SubscribeController extends Controller
@@ -119,6 +120,7 @@ class SubscribeController extends Controller
         $reference = $request->query('reference');
 
         if (!$reference) {
+            Log::warning('Payment callback received without reference');
             return redirect(route('business.plans.index'))->with('error', 'Invalid payment reference.');
         }
 
@@ -128,21 +130,75 @@ class SubscribeController extends Controller
             ->first();
 
         if (!$subscription) {
+            Log::warning('Subscription not found for reference', ['reference' => $reference]);
             return redirect(route('business.plans.index'))->with('error', 'Subscription not found.');
         }
 
         // Verify payment with Paystack
         $paymentStatus = $this->verifyPaystackPayment($reference);
 
-        if ($paymentStatus['status'] && $paymentStatus['data']['status'] === 'success') {
+        // Check if verification was successful and payment is complete
+        if (!$paymentStatus || !isset($paymentStatus['status']) || !$paymentStatus['status']) {
+            Log::error('Payment verification API call failed', [
+                'reference' => $reference,
+                'subscription_id' => $subscription->id,
+                'response' => $paymentStatus
+            ]);
+            return redirect(route('business.plans.index'))
+                ->with('error', 'Unable to verify payment. Please contact support.');
+        }
+
+        if (!isset($paymentStatus['data']) || !isset($paymentStatus['data']['status'])) {
+            Log::error('Payment verification returned invalid structure', [
+                'reference' => $reference,
+                'subscription_id' => $subscription->id,
+                'response' => $paymentStatus
+            ]);
+            return redirect(route('business.plans.index'))
+                ->with('error', 'Payment verification failed. Please contact support.');
+        }
+
+        $actualPaymentStatus = $paymentStatus['data']['status'];
+
+        // Only activate if payment was successful
+        if ($actualPaymentStatus === 'success') {
+            Log::info('Payment successful, activating subscription', [
+                'reference' => $reference,
+                'subscription_id' => $subscription->id,
+                'amount' => $paymentStatus['data']['amount'] ?? null,
+            ]);
+
             $this->subscriptionService->activateSubscription($subscription);
 
             return redirect('/business/dashboard')
                 ->with('success', 'Payment successful! Your subscription is now active.');
         }
 
+        // Payment was not successful (failed, abandoned, etc.)
+        Log::warning('Payment not successful', [
+            'reference' => $reference,
+            'subscription_id' => $subscription->id,
+            'status' => $actualPaymentStatus,
+            'gateway_response' => $paymentStatus['data']['gateway_response'] ?? null,
+        ]);
+
+        // Update subscription to indicate payment failed
+        $subscription->update([
+            'payment_status' => 'failed',
+            'payment_failures' => $subscription->payment_failures + 1,
+        ]);
+
+        $errorMessage = 'Payment failed. ';
+        if ($actualPaymentStatus === 'failed') {
+            $errorMessage .= 'Your payment was declined. Please check your card details and try again.';
+        } elseif ($actualPaymentStatus === 'abandoned') {
+            $errorMessage .= 'Payment was not completed. Please try again.';
+        } else {
+            $errorMessage .= 'Please try again or contact support.';
+        }
+
         return redirect(route('business.plans.index'))
-            ->with('error', 'Payment verification failed. Please try again.');
+            ->with('error', $errorMessage);
     }
 
     /**

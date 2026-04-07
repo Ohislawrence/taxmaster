@@ -97,11 +97,11 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
     Route::post('tax-returns/{taxReturn}/analyze', [TaxReturnController::class, 'analyze'])->name('tax-returns.analyze');
     Route::get('tax-returns/{taxReturn}/export-pdf', [TaxReturnController::class, 'exportPdf'])->name('tax-returns.export-pdf');
 
-    // Payments
-    Route::resource('payments', PaymentController::class)->only(['index', 'show', 'create']);
-    Route::post('payments/{payment}/initialize', [PaymentController::class, 'initialize'])->name('payments.initialize');
-    Route::get('payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
-    Route::post('payments/webhook/paystack', [PaymentController::class, 'webhookPaystack'])->name('payments.webhook.paystack');
+    // Payments - Hidden until tax payment functionality is available
+    // Route::resource('payments', PaymentController::class)->only(['index', 'show', 'create']);
+    // Route::post('payments/{payment}/initialize', [PaymentController::class, 'initialize'])->name('payments.initialize');
+    // Route::get('payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
+    // Route::post('payments/webhook/paystack', [PaymentController::class, 'webhookPaystack'])->name('payments.webhook.paystack');
 
     // Staff Management
     Route::get('staff/bulk-upload', [StaffController::class, 'bulkUploadForm'])->name('staff.bulk-upload');
@@ -122,8 +122,9 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
     // NDPA Data Portability (Article 25)
     Route::get('settings/export-data', [DataExportController::class, 'export'])->name('settings.export-data');
 
-    // Subscription & Plans
-    Route::get('plans', [SubscribeController::class, 'showPlans'])->name('plans.index')->withoutMiddleware(['ensure.business.setup', 'ensure.subscription']);
+    //   & Plans
+    // Redirect /business/plans to public /pricing page
+    Route::redirect('plans', '/pricing')->name('plans.index')->withoutMiddleware(['ensure.business.setup', 'ensure.subscription']);
     Route::get('plans/{plan}', [SubscribeController::class, 'selectPlan'])->name('plans.select')->withoutMiddleware('ensure.subscription');
     Route::post('plans/{plan}/checkout', [SubscribeController::class, 'processCheckout'])->name('plans.checkout')->withoutMiddleware('ensure.subscription');
     Route::get('plans/payment/callback', [SubscribeController::class, 'paymentCallback'])->name('plans.payment-callback')->withoutMiddleware(['ensure.business.setup', 'ensure.subscription']);
@@ -133,11 +134,8 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
     Route::post('subscription/upgrade-plan', [SettingsController::class, 'upgradePlan'])->name('subscription.upgrade-plan')->withoutMiddleware('ensure.subscription');
     Route::get('subscription/payment/callback', [SettingsController::class, 'paymentCallback'])->name('subscription.payment-callback')->withoutMiddleware(['ensure.business.setup', 'ensure.subscription']);
 
-    // AI Module
-    Route::middleware('subscription.features:use_ai_analysis')->group(function () {
-        Route::get('ai/insights', [AiController::class, 'insights'])->name('ai.insights');
-    });
-    // AI chat - open to all business users (no subscription restriction)
+    // AI Module - open to all business users (no subscription restriction)
+    Route::get('ai/insights', [AiController::class, 'insights'])->name('ai.insights');
     Route::get('ai/chat', [AiController::class, 'chat'])->name('ai.chat');
     Route::post('ai/chat/send', [AiController::class, 'sendMessage'])->name('ai.chat.send');
     Route::get('ai/history', [AiController::class, 'getHistory'])->name('ai.history');

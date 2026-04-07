@@ -131,6 +131,12 @@
                                         </svg>
                                         Settings
                                     </Link>
+                                    <Link href="/business/subscription" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                        </svg>
+                                        Subscription
+                                    </Link>
                                     <form @submit.prevent="logout">
                                         <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,8 +244,8 @@
                             <span v-if="isActive('/business/tax-returns')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
 
-                        <!-- Payments -->
-                        <Link
+                        <!-- Payments - Hidden until tax payment functionality is available -->
+                        <!-- <Link
                             href="/business/payments"
                             :class="[
                                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
@@ -253,7 +259,7 @@
                             </svg>
                             <span class="flex-1">Payments</span>
                             <span v-if="isActive('/business/payments')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
-                        </Link>
+                        </Link> -->
 
                         <!-- Staff Management -->
                         <Link

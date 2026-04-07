@@ -8,6 +8,7 @@ use App\Models\SubscriptionPlan;
 use App\Models\BusinessSubscription;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 class SubscriptionService
 {
@@ -216,12 +217,18 @@ class SubscriptionService
 
     /**
      * Get the active subscription for a business
+     * Enforces hard cutoff - expired subscriptions are not returned
      */
     public function getActiveSubscription(Business $business): ?BusinessSubscription
     {
         return $business->subscriptions()
             ->with('plan')
             ->whereIn('status', ['active', 'pending_payment', 'pending'])
+            ->where(function ($query) {
+                // Hard cutoff: Only return subscriptions that haven't expired
+                $query->where('renews_at', '>', now())
+                      ->orWhereNull('renews_at');
+            })
             ->latest('created_at')
             ->first();
     }
@@ -346,8 +353,8 @@ class SubscriptionService
             'file_wht' => true, // All plans
 
             // AI features
-            'use_ai_analysis' => $subscription->ai_analysis_included,
-            'use_ai_chat' => in_array($planSlug, ['professional', 'enterprise']),
+            'use_ai_analysis' => true, // AI insights available for all plans
+            'use_ai_chat' => true, // AI chat available for all plans
             'use_ai_optimization' => in_array($planSlug, ['professional', 'enterprise']),
 
             // Payment automation
@@ -471,24 +478,112 @@ class SubscriptionService
 
     /**
      * Check and process subscription renewals
+     * Automatically downgrades paid plans to Free plan on expiration
      */
     public function processRenewals(): void
     {
         $expiredSubscriptions = BusinessSubscription::where('status', 'active')
             ->where('renews_at', '<=', now())
+            ->with(['plan', 'business.owner'])
             ->get();
 
         foreach ($expiredSubscriptions as $subscription) {
-            // Generate invoice if not free plan
-            if (!$subscription->plan->isFree()) {
-                $this->generateInvoice($subscription);
-                // Queue payment collection
-                // This would integrate with Paystack to auto-charge
-            } else {
-                // Renew free subscriptions automatically
+            // Free subscriptions renew automatically
+            if ($subscription->plan->isFree()) {
                 $subscription->update([
                     'renews_at' => now()->addMonth(),
                 ]);
+                continue;
+            }
+
+            // Paid subscriptions: Auto-downgrade to Free plan
+            $freePlan = $this->getPlanBySlug('free');
+
+            if (!$freePlan) {
+                Log::error('Free plan not found for auto-downgrade', [
+                    'subscription_id' => $subscription->id,
+                    'business_id' => $subscription->business_id,
+                ]);
+                continue;
+            }
+
+            // Store old subscription for notification
+            $oldSubscription = clone $subscription;
+
+            // Cancel the expired subscription
+            $subscription->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+            ]);
+
+            // Create new Free plan subscription
+            $newSubscription = $this->createSubscription(
+                $subscription->business,
+                $freePlan,
+                'monthly'
+            );
+
+            // Activate the free subscription immediately
+            $this->activateSubscription($newSubscription);
+
+            // Send notification to business owner
+            if ($subscription->business->owner) {
+                $subscription->business->owner->notify(
+                    new \App\Notifications\SubscriptionDowngradedNotification($oldSubscription, $newSubscription)
+                );
+            }
+
+            Log::info('Subscription auto-downgraded to Free plan', [
+                'old_subscription_id' => $subscription->id,
+                'new_subscription_id' => $newSubscription->id,
+                'business_id' => $subscription->business_id,
+                'old_plan' => $subscription->plan->slug,
+            ]);
+        }
+    }
+
+    /**
+     * Send expiration reminder emails to businesses with subscriptions expiring soon
+     */
+    public function sendExpirationReminders(): void
+    {
+        $reminderThresholds = [7, 3, 1]; // Days before expiration
+
+        foreach ($reminderThresholds as $days) {
+            $expiringSubscriptions = BusinessSubscription::where('status', 'active')
+                ->with(['plan', 'business.owner'])
+                ->whereNotNull('renews_at')
+                ->whereDate('renews_at', '=', now()->addDays($days)->toDateString())
+                ->get();
+
+            foreach ($expiringSubscriptions as $subscription) {
+                // Skip free plans - they auto-renew
+                if ($subscription->plan && $subscription->plan->isFree()) {
+                    continue;
+                }
+
+                // Send reminder to business owner
+                if ($subscription->business->owner) {
+                    // Check if we already sent this reminder today
+                    $alreadySent = $subscription->business->owner->notifications()
+                        ->where('type', 'App\\Notifications\\SubscriptionExpiringNotification')
+                        ->whereDate('created_at', now()->toDateString())
+                        ->where('data->days_remaining', $days)
+                        ->exists();
+
+                    if (!$alreadySent) {
+                        $subscription->business->owner->notify(
+                            new \App\Notifications\SubscriptionExpiringNotification($subscription, $days)
+                        );
+
+                        Log::info('Subscription expiration reminder sent', [
+                            'subscription_id' => $subscription->id,
+                            'business_id' => $subscription->business_id,
+                            'days_remaining' => $days,
+                            'expires_at' => $subscription->renews_at,
+                        ]);
+                    }
+                }
             }
         }
     }

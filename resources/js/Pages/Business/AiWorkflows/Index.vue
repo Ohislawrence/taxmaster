@@ -30,20 +30,7 @@
               Our AI agents automatically analyze transactions, calculate taxes, generate returns, and assess compliance.
               Each workflow provides confidence scores and recommendations for review.
             </p>
-            <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-blue-600">
-              <span class="flex items-center gap-1">
-                <i class="fas fa-robot"></i>
-                AI Provider: {{ statistics.ai_provider || 'DeepSeek' }}
-              </span>
-              <span class="flex items-center gap-1">
-                <i :class="statistics.ai_configured ? 'fas fa-check-circle text-green-600' : 'fas fa-exclamation-triangle text-amber-600'"></i>
-                {{ statistics.ai_configured ? 'AI Configured' : 'AI Not Configured - Using Mock Data' }}
-              </span>
-              <span v-if="!statistics.ai_configured" class="flex items-center gap-1 text-amber-700 font-medium">
-                <i class="fas fa-info-circle"></i>
-                Set DEEPSEEK_API_KEY or GEMINI_API_KEY in .env to enable real AI processing
-              </span>
-            </div>
+
           </div>
         </div>
       </div>

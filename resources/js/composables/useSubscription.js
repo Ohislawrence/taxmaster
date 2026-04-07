@@ -54,8 +54,8 @@ export function useSubscription() {
         fileCGT: computed(() => hasPlan('professional')),
 
         // AI features
-        useAiAnalysis: computed(() => hasPlan('professional') && canUseFeature('use_ai_analysis')),
-        useAiChat: computed(() => true), // AI chat is now open to all users
+        useAiAnalysis: computed(() => true), // AI insights available for all plans
+        useAiChat: computed(() => true), // AI chat available for all plans
         useAiOptimization: computed(() => hasPlan('professional') && canUseFeature('use_ai_optimization')),
 
         // Banking
@@ -152,8 +152,9 @@ export function useSubscription() {
             'file_cit': 'Upgrade to Basic or higher to file CIT returns',
             'file_vat': 'Upgrade to Basic or higher to file VAT returns',
             'file_cgt': 'Upgrade to Professional or higher to file CGT returns',
-            'use_ai_chat': 'Upgrade to Professional or higher to use AI Tax Advisor',
-            'use_ai_optimization': 'Upgrade to Professional or higher to use AI optimization',
+            'use_ai_analysis': 'AI insights are available on all plans',
+            'use_ai_chat': 'AI chat is available on all plans',
+            'use_ai_optimization': 'Upgrade to Professional or higher to use advanced AI optimization',
             'link_bank_account': 'Upgrade to Basic or higher to link bank accounts',
             'generate_financial_statements': 'Upgrade to Professional or higher to generate financial statements',
             'use_api': 'Upgrade to Professional or higher to use API access',
@@ -171,13 +172,13 @@ export function useSubscription() {
         const featurePlans = {
             'file_paye': 'free',
             'file_wht': 'free',
+            'use_ai_analysis': 'free',
+            'use_ai_chat': 'free',
             'file_cit': 'basic',
             'file_vat': 'basic',
             'link_bank_account': 'basic',
             'export_pdf': 'basic',
             'file_cgt': 'professional',
-            'use_ai_analysis': 'professional',
-            'use_ai_chat': 'professional',
             'use_ai_optimization': 'professional',
             'generate_financial_statements': 'professional',
             'generate_cac_forms': 'professional',

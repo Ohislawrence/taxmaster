@@ -28,6 +28,11 @@ class Kernel extends ConsoleKernel
             app(\App\Services\SubscriptionService::class)->processRenewals();
         })->dailyAt('03:00')->name('process-subscription-renewals');
 
+        // Send subscription expiration reminders daily at 8 AM
+        $schedule->call(function () {
+            app(\App\Services\SubscriptionService::class)->sendExpirationReminders();
+        })->dailyAt('08:00')->name('send-subscription-expiration-reminders');
+
         // Monitor backup health
         $schedule->command('backup:monitor')
             ->daily()
