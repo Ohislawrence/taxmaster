@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Business;
 use App\Models\GetStartedProgress;
 use App\Models\BankAccount;
+use App\Models\Transaction;
 use App\Models\CitReturn;
 use App\Models\PayeReturn;
 use App\Models\VATReturn;
@@ -169,10 +170,31 @@ class GetStartedController extends Controller
                 ],
             ],
             [
-                'id' => 'link_bank',
+                'id' => 'import_transactions',
                 'order' => 2,
-                'title' => 'Link Your Bank Account',
-                'description' => 'Connect your bank account for automatic transaction tracking and categorization',
+                'title' => 'Import Your First Transactions',
+                'description' => 'Upload your bank statements or transaction data to start tracking income and expenses',
+                'benefits' => [
+                    'Track income and expenses',
+                    'Categorize for tax purposes',
+                    'Build your financial records',
+                    'Works with all plans',
+                ],
+                'action_label' => 'Import Transactions',
+                'action_url' => route('business.transactions.import.form'),
+                'is_completed' => $progress->isStepCompleted('import_transactions'),
+                'icon' => 'upload',
+                'estimated_time' => '5 min',
+                'priority' => 'high',
+                'progress_indicators' => [
+                    'Transactions imported: ' . Transaction::where('business_id', $business->id)->count(),
+                ],
+            ],
+            [
+                'id' => 'link_bank',
+                'order' => 3,
+                'title' => 'Link Your Bank Account (Optional)',
+                'description' => 'Connect your bank account for automatic transaction sync and real-time updates',
                 'benefits' => [
                     'Automatic transaction imports',
                     'Real-time account balances',
@@ -184,14 +206,14 @@ class GetStartedController extends Controller
                 'is_completed' => $progress->isStepCompleted('link_bank'),
                 'icon' => 'university',
                 'estimated_time' => '3 min',
-                'priority' => 'high',
+                'priority' => 'medium',
                 'progress_indicators' => [
                     'Connected accounts: ' . $bankAccountCount,
                 ],
             ],
             [
                 'id' => 'choose_plan',
-                'order' => 3,
+                'order' => 4,
                 'title' => 'Choose Your Subscription Plan',
                 'description' => 'Upgrade to unlock more features like VAT filing, AI analysis, and team management',
                 'benefits' => [
@@ -212,7 +234,7 @@ class GetStartedController extends Controller
             ],
             [
                 'id' => 'add_staff',
-                'order' => 4,
+                'order' => 5,
                 'title' => 'Add Your Team Members',
                 'description' => 'Invite accountants, bookkeepers, or team members to manage taxes collaboratively',
                 'benefits' => [
@@ -233,7 +255,7 @@ class GetStartedController extends Controller
             ],
             [
                 'id' => 'file_first_return',
-                'order' => 5,
+                'order' => 6,
                 'title' => 'File Your First Tax Return',
                 'description' => 'Start with a simple PAYE or WHT return to get comfortable with the filing process',
                 'benefits' => [
@@ -257,7 +279,7 @@ class GetStartedController extends Controller
             ],
             [
                 'id' => 'sync_transactions',
-                'order' => 6,
+                'order' => 7,
                 'title' => 'Enable Transaction Sync',
                 'description' => 'Sync your bank transactions in real-time for accurate expense and income tracking',
                 'benefits' => [
@@ -280,7 +302,7 @@ class GetStartedController extends Controller
             ],
             [
                 'id' => 'check_limits',
-                'order' => 7,
+                'order' => 8,
                 'title' => 'Check Your Usage & Limits',
                 'description' => 'Review your subscription limits and plan accordingly as your business grows',
                 'benefits' => [

@@ -9,7 +9,7 @@ class GetStartedProgress extends Model
 {
     protected $table = 'get_started_progress';
 
-    public const TOTAL_STEPS = 7;
+    public const TOTAL_STEPS = 8;
 
     protected $fillable = [
         'business_id',
@@ -54,7 +54,15 @@ class GetStartedProgress extends Model
             }
         }
 
-        // Step 2: Link bank account
+        // Step 2: Import transactions (manual or via import)
+        if (Transaction::where('business_id', $business->id)->exists()) {
+            if (!in_array('import_transactions', $completedSteps)) {
+                $completedSteps[] = 'import_transactions';
+                $changed = true;
+            }
+        }
+
+        // Step 3: Link bank account
         if (BankAccount::where('business_id', $business->id)->where('is_active', true)->exists()) {
             if (!in_array('link_bank', $completedSteps)) {
                 $completedSteps[] = 'link_bank';
@@ -62,7 +70,7 @@ class GetStartedProgress extends Model
             }
         }
 
-        // Step 3: Choose subscription plan (non-Free)
+        // Step 4: Choose subscription plan (non-Free)
         $subscription = $business->activeSubscription();
         if ($subscription && $subscription->plan && $subscription->plan->name !== 'Free') {
             if (!in_array('choose_plan', $completedSteps)) {
@@ -71,7 +79,7 @@ class GetStartedProgress extends Model
             }
         }
 
-        // Step 4: Set up staff
+        // Step 5: Set up staff
         if (BusinessStaff::where('business_id', $business->id)->count() > 0) {
             if (!in_array('add_staff', $completedSteps)) {
                 $completedSteps[] = 'add_staff';
@@ -79,7 +87,7 @@ class GetStartedProgress extends Model
             }
         }
 
-        // Step 5: File first tax return (PAYE, WHT, VAT or CIT)
+        // Step 6: File first tax return (PAYE, WHT, VAT or CIT)
         $hasReturns = PayeReturn::where('business_id', $business->id)->exists()
             || WhtReturn::where('business_id', $business->id)->exists()
             || VATReturn::where('business_id', $business->id)->exists()
@@ -89,7 +97,7 @@ class GetStartedProgress extends Model
             $changed = true;
         }
 
-        // Step 6: Enable transaction sync (Mono bank API)
+        // Step 7: Enable transaction sync (Mono bank API)
         if (BankAccount::where('business_id', $business->id)->whereNotNull('last_synced_at')->exists()) {
             if (!in_array('sync_transactions', $completedSteps)) {
                 $completedSteps[] = 'sync_transactions';
@@ -97,7 +105,7 @@ class GetStartedProgress extends Model
             }
         }
 
-        // Step 7: Check subscription limits
+        // Step 8: Check subscription limits
         if (BusinessStaff::where('business_id', $business->id)->count() >= 3 ||
             CitReturn::where('business_id', $business->id)->count() >= 2) {
             if (!in_array('check_limits', $completedSteps)) {
