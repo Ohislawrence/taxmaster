@@ -197,8 +197,8 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
             Route::patch('/settings', [App\Http\Controllers\Business\ZohoController::class, 'updateSettings'])->name('update-settings');
         });
 
-        // Transactions
-        Route::prefix('transactions')->name('transactions.')->middleware('subscription.features:link_bank_account')->group(function () {
+        // Transactions - Open to all plans (basic transaction tracking is included in Free plan)
+        Route::prefix('transactions')->name('transactions.')->group(function () {
             // Transaction import (CSV/Excel) with AI mapping
             Route::get('/import', [App\Http\Controllers\Business\TransactionImportController::class, 'showImportForm'])->name('import.form');
             Route::post('/import/parse', [App\Http\Controllers\Business\TransactionImportController::class, 'parseFile'])->name('import.parse');
@@ -215,6 +215,7 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
             Route::post('/reconciliations/{reconciliation}/reject', [App\Http\Controllers\Business\ReconciliationController::class, 'reject'])->name('reconciliations.reject');
                 // Signed URLs for attachments and PDFs
                 Route::get('/reconciliations/{reconciliation}/attachment/{index}/signed', [App\Http\Controllers\Business\FileController::class, 'reconciliationAttachment'])->name('reconciliations.attachment.signed');
+            // Export requires Basic+ plan
             Route::middleware('subscription.features:export_pdf')->get('/export', [TransactionController::class, 'export'])->name('export');
         });
 
