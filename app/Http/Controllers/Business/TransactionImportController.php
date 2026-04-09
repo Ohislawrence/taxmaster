@@ -489,36 +489,82 @@ class TransactionImportController extends Controller
 
     /**
      * Simple fuzzy mapping for transaction columns
+     * Priority: exact match > specific deposit/withdrawal terms > partial contains > fallback
      */
     protected function fuzzyMapColumns(array $headers): array
     {
-        $aliases = [
-            'transaction_date' => ['date', 'transaction date', 'posted', 'value date', 'booking date'],
-            'description' => ['description', 'narration', 'details', 'memo', 'particulars'],
-            'amount' => ['amount', 'amt', 'value', 'amount (ngn)'],
-            'deposit' => ['deposit', 'deposits', 'credit', 'credit amount', 'money in', 'receipts', 'credits'],
-            'withdrawal' => ['withdrawal', 'withdrawals', 'debit', 'debit amount', 'money out', 'payments', 'debits'],
-            'type' => ['type', 'debit/credit', 'dr/cr', 'credit/debit', 'transaction type'],
-            'balance' => ['balance', 'running balance', 'acct balance', 'account balance'],
-            'counterparty' => ['merchant', 'counterparty', 'payee', 'payer', 'beneficiary'],
-            'reference' => ['reference', 'txn ref', 'transaction id', 'id', 'mono id', 'transaction reference'],
-            'category' => ['category', 'merchant category', 'mcc', 'tag'],
+        // Separate aliases by specificity to avoid conflicts
+        $exactAliases = [
+            'transaction_date' => ['date', 'transaction date', 'posted', 'value date', 'booking date', 'trans date'],
+            'description' => ['description', 'narration', 'details', 'memo', 'particulars', 'remarks'],
+            'amount' => ['amount', 'amt', 'value', 'amount (ngn)', 'transaction amount'],
+            'type' => ['type', 'debit/credit', 'dr/cr', 'credit/debit', 'transaction type', 'txn type'],
+            'balance' => ['balance', 'running balance', 'acct balance', 'account balance', 'closing balance'],
+            'counterparty' => ['merchant', 'counterparty', 'payee', 'payer', 'beneficiary', 'beneficiary name'],
+            'reference' => ['reference', 'txn ref', 'transaction id', 'transaction reference', 'ref no', 'ref'],
+            'category' => ['category', 'merchant category', 'mcc', 'tag', 'expense category'],
         ];
 
+        // Deposit/withdrawal specific aliases (higher priority for bank statements)
+        $depositAliases = ['deposit', 'deposits', 'credit', 'credits', 'credit amount', 'money in', 'receipts', 'cr', 'income', 'inflow'];
+        $withdrawalAliases = ['withdrawal', 'withdrawals', 'debit', 'debits', 'debit amount', 'money out', 'payments', 'dr', 'expense', 'outflow'];
+
         $mapping = [];
+
         foreach ($headers as $h) {
             $norm = strtolower(trim($h));
             $found = false;
-            foreach ($aliases as $field => $words) {
+
+            // Step 1: Check for exact matches first
+            foreach ($exactAliases as $field => $words) {
                 foreach ($words as $w) {
-                    if ($norm === $w || str_contains($norm, $w) || str_contains($w, $norm)) {
+                    if ($norm === $w) {
                         $mapping[$h] = $field;
                         $found = true;
                         break 2;
                     }
                 }
             }
-            if (!$found) $mapping[$h] = 'skip';
+
+            if ($found) continue;
+
+            // Step 2: Check for deposit-specific terms (only if not already mapped)
+            foreach ($depositAliases as $w) {
+                if ($norm === $w || str_contains($norm, $w)) {
+                    $mapping[$h] = 'deposit';
+                    $found = true;
+                    break;
+                }
+            }
+
+            if ($found) continue;
+
+            // Step 3: Check for withdrawal-specific terms
+            foreach ($withdrawalAliases as $w) {
+                if ($norm === $w || str_contains($norm, $w)) {
+                    $mapping[$h] = 'withdrawal';
+                    $found = true;
+                    break;
+                }
+            }
+
+            if ($found) continue;
+
+            // Step 4: Partial contains matching for other fields
+            foreach ($exactAliases as $field => $words) {
+                foreach ($words as $w) {
+                    if (str_contains($norm, $w) || str_contains($w, $norm)) {
+                        $mapping[$h] = $field;
+                        $found = true;
+                        break 2;
+                    }
+                }
+            }
+
+            // Step 5: If still not found, mark as skip
+            if (!$found) {
+                $mapping[$h] = 'skip';
+            }
         }
 
         return $mapping;

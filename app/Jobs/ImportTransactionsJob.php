@@ -125,32 +125,46 @@ class ImportTransactionsJob implements ShouldQueue
                     $mapped[$field] = $row[$header] ?? null;
                 }
             } else {
-                // try to infer by header names
+                // try to infer by header names with priority-based matching
                 foreach ($row as $colHeader => $val) {
                     $k = strtolower(preg_replace('/[^a-z0-9]/', '_', $colHeader));
-                    if (str_contains($k, 'deposit') && !str_contains($k, 'withdrawal')) {
-                        $mapped['deposit'] = $val;
-                    } elseif (str_contains($k, 'withdrawal') || str_contains($k, 'withdraw')) {
-                        $mapped['withdrawal'] = $val;
-                    } elseif (str_contains($k, 'amount') || str_contains($k, 'amt') || str_contains($k, 'value')) {
-                        $mapped['amount'] = $val;
-                    } elseif (str_contains($k, 'date')) {
+                    $orig = strtolower(trim($colHeader));
+
+                    // Priority 1: Date (essential field)
+                    if (!isset($mapped['transaction_date']) && (str_contains($k, 'date') && !str_contains($k, 'update'))) {
                         $mapped['transaction_date'] = $val;
-                    } elseif (str_contains($k, 'desc') || str_contains($k, 'narr')) {
+                    }
+                    // Priority 2: Deposit/Withdrawal (bank statement format)
+                    elseif (!isset($mapped['deposit']) && (str_contains($orig, 'deposit') || ($orig === 'credit' || $orig === 'credits' || str_contains($orig, 'money in') || str_contains($orig, 'cr amt')))) {
+                        $mapped['deposit'] = $val;
+                    }
+                    elseif (!isset($mapped['withdrawal']) && (str_contains($orig, 'withdrawal') || str_contains($orig, 'withdraw') || ($orig === 'debit' || $orig === 'debits' || str_contains($orig, 'money out') || str_contains($orig, 'dr amt')))) {
+                        $mapped['withdrawal'] = $val;
+                    }
+                    // Priority 3: Single amount field (if deposit/withdrawal not found)
+                    elseif (!isset($mapped['amount']) && !isset($mapped['deposit']) && !isset($mapped['withdrawal']) && (str_contains($k, 'amount') || str_contains($k, 'amt') || $k === 'value')) {
+                        $mapped['amount'] = $val;
+                    }
+                    // Priority 4: Description
+                    elseif (!isset($mapped['description']) && (str_contains($k, 'desc') || str_contains($k, 'narr') || str_contains($k, 'detail') || str_contains($k, 'particular'))) {
                         $mapped['description'] = $val;
-                    } elseif (str_contains($k, 'ref') || str_contains($k, 'transaction') || str_contains($k, 'id')) {
+                    }
+                    // Priority 5: Reference
+                    elseif (!isset($mapped['reference']) && (str_contains($k, 'ref') && !str_contains($k, 'pref'))) {
                         $mapped['reference'] = $val;
-                    } elseif (str_contains($k, 'from') || str_contains($k, 'to') || str_contains($k, 'counterparty') || str_contains($k, 'payee') || str_contains($k, 'payer')) {
+                    }
+                    // Priority 6: Other fields
+                    elseif (!isset($mapped['counterparty']) && (str_contains($k, 'counterparty') || str_contains($k, 'payee') || str_contains($k, 'payer') || str_contains($k, 'beneficiary'))) {
                         $mapped['counterparty'] = $val;
-                    } elseif (str_contains($k, 'balance')) {
+                    }
+                    elseif (!isset($mapped['balance']) && str_contains($k, 'balance')) {
                         $mapped['balance'] = $val;
-                    } elseif (str_contains($k, 'currency')) {
+                    }
+                    elseif (!isset($mapped['currency']) && str_contains($k, 'currency')) {
                         $mapped['currency'] = $val;
-                    } elseif (str_contains($k, 'type')) {
+                    }
+                    elseif (!isset($mapped['type']) && str_contains($k, 'type') && !str_contains($k, 'subtype')) {
                         $mapped['type'] = $val;
-                    } else {
-                        // keep as fallback in description if empty
-                        if (empty($mapped['description'])) $mapped['description'] = $mapped['description'] ?? $val;
                     }
                 }
             }
