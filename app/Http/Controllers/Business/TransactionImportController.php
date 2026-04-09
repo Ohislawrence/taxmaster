@@ -154,6 +154,8 @@ class TransactionImportController extends Controller
             'description' => 'Transaction description or narration',
             'amount' => 'Amount of the transaction (positive number)',
             'type' => "Transaction type: 'credit' or 'debit'",
+            'deposit' => 'Deposit amount (credit/incoming money)',
+            'withdrawal' => 'Withdrawal amount (debit/outgoing money)',
             'balance' => 'Account balance after transaction',
             'counterparty' => 'Counterparty or merchant name',
             'reference' => 'Payment or transaction reference',
@@ -255,14 +257,53 @@ class TransactionImportController extends Controller
         foreach ($mappedRows as $i => $row) {
             $rowNum = $i + 1;
 
-            // Normalize values
-            $rawAmount = isset($row['amount']) ? (string)$row['amount'] : '';
-            $cleanAmount = preg_replace('/[^0-9\.\-]/', '', $rawAmount);
-            if ($cleanAmount === '' || !is_numeric($cleanAmount)) {
-                $errors[] = "Row {$rowNum}: missing or invalid amount";
-                continue;
+            // Handle deposit/withdrawal columns OR single amount column
+            $amount = null;
+            $type = null;
+
+            // Check for deposit/withdrawal columns first
+            if (isset($row['deposit']) || isset($row['withdrawal'])) {
+                $depositVal = isset($row['deposit']) ? preg_replace('/[^0-9\.\-]/', '', (string)$row['deposit']) : '';
+                $withdrawalVal = isset($row['withdrawal']) ? preg_replace('/[^0-9\.\-]/', '', (string)$row['withdrawal']) : '';
+
+                $depositAmount = ($depositVal !== '' && is_numeric($depositVal)) ? floatval($depositVal) : 0;
+                $withdrawalAmount = ($withdrawalVal !== '' && is_numeric($withdrawalVal)) ? floatval($withdrawalVal) : 0;
+
+                // Determine which column has the value (prioritize non-zero)
+                if ($depositAmount > 0 && $withdrawalAmount == 0) {
+                    $amount = $depositAmount;
+                    $type = 'credit';
+                } elseif ($withdrawalAmount > 0 && $depositAmount == 0) {
+                    $amount = $withdrawalAmount;
+                    $type = 'debit';
+                } elseif ($depositAmount > 0 && $withdrawalAmount > 0) {
+                    // Both have values - use the larger one and log a warning
+                    if ($depositAmount >= $withdrawalAmount) {
+                        $amount = $depositAmount;
+                        $type = 'credit';
+                    } else {
+                        $amount = $withdrawalAmount;
+                        $type = 'debit';
+                    }
+                    Log::warning("Row {$rowNum}: both deposit and withdrawal have values, using larger amount", [
+                        'deposit' => $depositAmount,
+                        'withdrawal' => $withdrawalAmount
+                    ]);
+                } else {
+                    // Both are zero or empty
+                    $errors[] = "Row {$rowNum}: both deposit and withdrawal are empty or zero";
+                    continue;
+                }
+            } else {
+                // Fall back to single amount column
+                $rawAmount = isset($row['amount']) ? (string)$row['amount'] : '';
+                $cleanAmount = preg_replace('/[^0-9\.\-]/', '', $rawAmount);
+                if ($cleanAmount === '' || !is_numeric($cleanAmount)) {
+                    $errors[] = "Row {$rowNum}: missing or invalid amount";
+                    continue;
+                }
+                $amount = floatval($cleanAmount);
             }
-            $amount = floatval($cleanAmount);
 
             if (empty($row['transaction_date'])) {
                 $errors[] = "Row {$rowNum}: missing transaction_date";
@@ -330,7 +371,10 @@ class TransactionImportController extends Controller
                 $description = 'Imported: ' . implode(' • ', $fallbackParts);
             }
 
-            $type = isset($row['type']) ? strtolower($row['type']) : ($amount >= 0 ? 'credit' : 'debit');
+            // Determine type if not already set from deposit/withdrawal columns
+            if ($type === null) {
+                $type = isset($row['type']) ? strtolower($row['type']) : ($amount >= 0 ? 'credit' : 'debit');
+            }
             if (!in_array($type, ['credit', 'debit'])) {
                 $type = $amount >= 0 ? 'credit' : 'debit';
             }
@@ -451,9 +495,11 @@ class TransactionImportController extends Controller
         $aliases = [
             'transaction_date' => ['date', 'transaction date', 'posted', 'value date', 'booking date'],
             'description' => ['description', 'narration', 'details', 'memo', 'particulars'],
-            'amount' => ['amount', 'amt', 'value', 'credit', 'debit', 'amount (ngn)'],
-            'type' => ['type', 'debit/credit', 'dr/cr', 'credit/debit'],
-            'balance' => ['balance', 'running balance', 'acct balance'],
+            'amount' => ['amount', 'amt', 'value', 'amount (ngn)'],
+            'deposit' => ['deposit', 'deposits', 'credit', 'credit amount', 'money in', 'receipts', 'credits'],
+            'withdrawal' => ['withdrawal', 'withdrawals', 'debit', 'debit amount', 'money out', 'payments', 'debits'],
+            'type' => ['type', 'debit/credit', 'dr/cr', 'credit/debit', 'transaction type'],
+            'balance' => ['balance', 'running balance', 'acct balance', 'account balance'],
             'counterparty' => ['merchant', 'counterparty', 'payee', 'payer', 'beneficiary'],
             'reference' => ['reference', 'txn ref', 'transaction id', 'id', 'mono id', 'transaction reference'],
             'category' => ['category', 'merchant category', 'mcc', 'tag'],

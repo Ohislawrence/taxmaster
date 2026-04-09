@@ -128,7 +128,11 @@ class ImportTransactionsJob implements ShouldQueue
                 // try to infer by header names
                 foreach ($row as $colHeader => $val) {
                     $k = strtolower(preg_replace('/[^a-z0-9]/', '_', $colHeader));
-                    if (str_contains($k, 'amount') || str_contains($k, 'amt') || str_contains($k, 'value')) {
+                    if (str_contains($k, 'deposit') && !str_contains($k, 'withdrawal')) {
+                        $mapped['deposit'] = $val;
+                    } elseif (str_contains($k, 'withdrawal') || str_contains($k, 'withdraw')) {
+                        $mapped['withdrawal'] = $val;
+                    } elseif (str_contains($k, 'amount') || str_contains($k, 'amt') || str_contains($k, 'value')) {
                         $mapped['amount'] = $val;
                     } elseif (str_contains($k, 'date')) {
                         $mapped['transaction_date'] = $val;
@@ -142,7 +146,7 @@ class ImportTransactionsJob implements ShouldQueue
                         $mapped['balance'] = $val;
                     } elseif (str_contains($k, 'currency')) {
                         $mapped['currency'] = $val;
-                    } elseif (str_contains($k, 'type') || str_contains($k, 'debit') || str_contains($k, 'credit')) {
+                    } elseif (str_contains($k, 'type')) {
                         $mapped['type'] = $val;
                     } else {
                         // keep as fallback in description if empty
@@ -151,15 +155,41 @@ class ImportTransactionsJob implements ShouldQueue
                 }
             }
 
+            // Handle deposit/withdrawal columns OR single amount column
+            $amount = null;
+            $type = null;
+
+            if (isset($mapped['deposit']) || isset($mapped['withdrawal'])) {
+                $depositVal = isset($mapped['deposit']) ? preg_replace('/[^0-9\.\-]/', '', (string)$mapped['deposit']) : '';
+                $withdrawalVal = isset($mapped['withdrawal']) ? preg_replace('/[^0-9\.\-]/', '', (string)$mapped['withdrawal']) : '';
+
+                $depositAmount = ($depositVal !== '' && is_numeric($depositVal)) ? floatval($depositVal) : 0;
+                $withdrawalAmount = ($withdrawalVal !== '' && is_numeric($withdrawalVal)) ? floatval($withdrawalVal) : 0;
+
+                if ($depositAmount > 0 && $withdrawalAmount == 0) {
+                    $amount = $depositAmount;
+                    $type = 'credit';
+                } elseif ($withdrawalAmount > 0 && $depositAmount == 0) {
+                    $amount = $withdrawalAmount;
+                    $type = 'debit';
+                } elseif ($depositAmount > 0 && $withdrawalAmount > 0) {
+                    $amount = $depositAmount >= $withdrawalAmount ? $depositAmount : $withdrawalAmount;
+                    $type = $depositAmount >= $withdrawalAmount ? 'credit' : 'debit';
+                } else {
+                    $errors[] = "Row {$rowNum}: both deposit and withdrawal are empty";
+                    continue;
+                }
+            } elseif (!empty($mapped['amount'])) {
+                $amount = floatval(preg_replace('/[^0-9\.\-]/', '', (string)$mapped['amount']));
+            }
+
             // Basic required checks
-            if (empty($mapped['amount']) || empty($mapped['transaction_date'])) {
+            if ($amount === null || empty($mapped['transaction_date'])) {
                 $errors[] = "Row {$rowNum}: missing amount or transaction_date";
                 continue;
             }
 
             try {
-                // normalize amount
-                $amount = floatval(preg_replace('/[^0-9\.\-]/', '', (string)$mapped['amount']));
 
                 // normalize date
                 try {
@@ -188,7 +218,7 @@ class ImportTransactionsJob implements ShouldQueue
                     'business_id' => $this->businessId,
                     'bank_account_id' => $this->bankAccountId,
                     'mono_transaction_id' => $monoId,
-                    'type' => $mapped['type'] ?? ($amount >= 0 ? 'credit' : 'debit'),
+                    'type' => $type ?? ($mapped['type'] ?? ($amount >= 0 ? 'credit' : 'debit')),
                     'amount' => abs($amount),
                     'currency' => $mapped['currency'] ?? 'NGN',
                     'description' => $mapped['description'] ?? null,
