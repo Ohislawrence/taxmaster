@@ -258,10 +258,21 @@ class TransactionImportController extends Controller
             $rowNum = $i + 1;
 
             // Handle deposit/withdrawal columns OR single amount column
+            //
+            // TWO MODES:
+            // 1. Bank Statement Format: Has 'deposit' AND 'withdrawal' columns
+            //    - Typically only ONE column has value per row (the other is 0/empty)
+            //    - Type is AUTO-INFERRED: deposit > 0 → credit, withdrawal > 0 → debit
+            //    - Type column is NOT needed (ignored even if present)
+            //
+            // 2. Traditional Format: Has single 'amount' column + 'type' column
+            //    - Amount column has the value
+            //    - Type column explicitly states 'credit' or 'debit'
+            //    - Fallback mode if deposit/withdrawal not found
             $amount = null;
             $type = null;
 
-            // Check for deposit/withdrawal columns first
+            // Check for deposit/withdrawal columns first (bank statement format)
             if (isset($row['deposit']) || isset($row['withdrawal'])) {
                 $depositVal = isset($row['deposit']) ? preg_replace('/[^0-9\.\-]/', '', (string)$row['deposit']) : '';
                 $withdrawalVal = isset($row['withdrawal']) ? preg_replace('/[^0-9\.\-]/', '', (string)$row['withdrawal']) : '';
@@ -269,13 +280,14 @@ class TransactionImportController extends Controller
                 $depositAmount = ($depositVal !== '' && is_numeric($depositVal)) ? floatval($depositVal) : 0;
                 $withdrawalAmount = ($withdrawalVal !== '' && is_numeric($withdrawalVal)) ? floatval($withdrawalVal) : 0;
 
-                // Determine which column has the value (prioritize non-zero)
+                // Determine which column has the value (typically only one has value per row)
+                // Most bank statements: deposit OR withdrawal, not both
                 if ($depositAmount > 0 && $withdrawalAmount == 0) {
                     $amount = $depositAmount;
-                    $type = 'credit';
+                    $type = 'credit'; // Auto-inferred from deposit column
                 } elseif ($withdrawalAmount > 0 && $depositAmount == 0) {
                     $amount = $withdrawalAmount;
-                    $type = 'debit';
+                    $type = 'debit'; // Auto-inferred from withdrawal column
                 } elseif ($depositAmount > 0 && $withdrawalAmount > 0) {
                     // Both have values - use the larger one and log a warning
                     if ($depositAmount >= $withdrawalAmount) {
@@ -290,12 +302,13 @@ class TransactionImportController extends Controller
                         'withdrawal' => $withdrawalAmount
                     ]);
                 } else {
-                    // Both are zero or empty
+                    // Both are zero or empty - invalid row
                     $errors[] = "Row {$rowNum}: both deposit and withdrawal are empty or zero";
                     continue;
                 }
             } else {
-                // Fall back to single amount column
+                // Fall back to single amount column (traditional format)
+                // This runs when file has 'amount' column instead of deposit/withdrawal
                 $rawAmount = isset($row['amount']) ? (string)$row['amount'] : '';
                 $cleanAmount = preg_replace('/[^0-9\.\-]/', '', $rawAmount);
                 if ($cleanAmount === '' || !is_numeric($cleanAmount)) {
@@ -372,9 +385,12 @@ class TransactionImportController extends Controller
             }
 
             // Determine type if not already set from deposit/withdrawal columns
+            // This only runs for traditional format (amount + type columns)
+            // For bank statements, $type is already set above (auto-inferred)
             if ($type === null) {
                 $type = isset($row['type']) ? strtolower($row['type']) : ($amount >= 0 ? 'credit' : 'debit');
             }
+            // Validate type value
             if (!in_array($type, ['credit', 'debit'])) {
                 $type = $amount >= 0 ? 'credit' : 'debit';
             }

@@ -170,6 +170,8 @@ class ImportTransactionsJob implements ShouldQueue
             }
 
             // Handle deposit/withdrawal columns OR single amount column
+            // Bank statements: typically only ONE column (deposit OR withdrawal) has value per row
+            // Type is auto-inferred: deposit > 0 → credit, withdrawal > 0 → debit
             $amount = null;
             $type = null;
 
@@ -180,20 +182,24 @@ class ImportTransactionsJob implements ShouldQueue
                 $depositAmount = ($depositVal !== '' && is_numeric($depositVal)) ? floatval($depositVal) : 0;
                 $withdrawalAmount = ($withdrawalVal !== '' && is_numeric($withdrawalVal)) ? floatval($withdrawalVal) : 0;
 
+                // Standard case: only one column has value (the other is 0/empty)
                 if ($depositAmount > 0 && $withdrawalAmount == 0) {
                     $amount = $depositAmount;
-                    $type = 'credit';
+                    $type = 'credit'; // Auto-inferred from deposit column
                 } elseif ($withdrawalAmount > 0 && $depositAmount == 0) {
                     $amount = $withdrawalAmount;
-                    $type = 'debit';
+                    $type = 'debit'; // Auto-inferred from withdrawal column
                 } elseif ($depositAmount > 0 && $withdrawalAmount > 0) {
+                    // Edge case: both columns filled (unusual)
                     $amount = $depositAmount >= $withdrawalAmount ? $depositAmount : $withdrawalAmount;
                     $type = $depositAmount >= $withdrawalAmount ? 'credit' : 'debit';
                 } else {
+                    // Both empty/zero - invalid row
                     $errors[] = "Row {$rowNum}: both deposit and withdrawal are empty";
                     continue;
                 }
             } elseif (!empty($mapped['amount'])) {
+                // Traditional format: single amount column (type from separate column)
                 $amount = floatval(preg_replace('/[^0-9\.\-]/', '', (string)$mapped['amount']));
             }
 
