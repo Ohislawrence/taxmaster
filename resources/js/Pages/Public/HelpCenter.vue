@@ -790,6 +790,83 @@ onUnmounted(() => {
                                 </div>
                             </div>
 
+                            <!-- Shopify Integration -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-slate-900">Shopify</h3>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Available Now</span>
+                                    </div>
+                                </div>
+                                <p class="text-slate-600 mb-4">Sync orders and products from your Shopify store for Nigerian tax compliance with automatic VAT categorization.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-900 mb-3 text-sm">What syncs:</h4>
+                                        <ul class="space-y-2 text-sm text-slate-600">
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Orders (automatically categorized as VAT output at 7.5%)</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Products (for inventory reference)</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Customer information (for transaction records)</span>
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>Tax details (VAT amounts calculated from Shopify tax lines)</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-slate-900 mb-3 text-sm">How to connect:</h4>
+                                        <ol class="space-y-2 text-sm text-slate-700">
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">1.</span>
+                                                <span>Go to Integrations in Account menu</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">2.</span>
+                                                <span>Click "Connect" on Shopify card</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">3.</span>
+                                                <span>Enter your Shopify store domain (yourstore.myshopify.com)</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">4.</span>
+                                                <span>Provide your Admin API access token</span>
+                                            </li>
+                                            <li class="flex gap-2">
+                                                <span class="font-medium text-slate-500 flex-shrink-0">5.</span>
+                                                <span>Configure auto-sync settings (hourly, daily, or weekly)</span>
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                    <p class="text-xs text-slate-600">
+                                        <strong>Per-Business Connection:</strong> Each business connects their own Shopify store using their Admin API credentials. All orders are automatically categorized for Nigerian VAT compliance at 7.5%. Your data is encrypted and synced securely.
+                                    </p>
+                                </div>
+                            </div>
+
                             <!-- Sage Integration -->
                             <div>
                                 <div class="flex items-center gap-3 mb-4">

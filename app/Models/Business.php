@@ -203,6 +203,14 @@ class Business extends Model
     }
 
     /**
+     * Get Shopify connection
+     */
+    public function shopifyConnection()
+    {
+        return $this->hasOne(ShopifyConnection::class);
+    }
+
+    /**
      * Get compliance deadlines
      */
     public function complianceDeadlines(): HasMany

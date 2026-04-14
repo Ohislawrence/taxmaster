@@ -195,6 +195,16 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
             Route::patch('/settings', [App\Http\Controllers\Business\ZohoController::class, 'updateSettings'])->name('update-settings');
         });
 
+        // Shopify Integration (E-commerce Platform)
+        Route::prefix('integrations/shopify')->name('integrations.shopify.')->middleware('subscription.features:link_bank_account')->group(function () {
+            Route::get('/', [App\Http\Controllers\Business\ShopifyController::class, 'index'])->name('index');
+            Route::post('/credentials', [App\Http\Controllers\Business\ShopifyController::class, 'saveCredentials'])->name('save-credentials');
+            Route::post('/disconnect', [App\Http\Controllers\Business\ShopifyController::class, 'disconnect'])->name('disconnect');
+            Route::post('/sync', [App\Http\Controllers\Business\ShopifyController::class, 'sync'])->name('sync');
+            Route::patch('/settings', [App\Http\Controllers\Business\ShopifyController::class, 'updateSettings'])->name('update-settings');
+            Route::get('/logs/{log}', [App\Http\Controllers\Business\ShopifyController::class, 'getSyncLog'])->name('sync-log');
+        });
+
         // Transactions - Open to all plans (basic transaction tracking is included in Free plan)
         Route::prefix('transactions')->name('transactions.')->group(function () {
             // Transaction import (CSV/Excel) with AI mapping

@@ -7,12 +7,6 @@
                 <!-- Header -->
                 <div class="mb-8">
                     <div class="flex items-center gap-4 mb-4">
-                        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-600">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                            </svg>
-                        </div>
                         <div>
                             <h1 class="text-3xl font-bold text-gray-900">Get Started with TaxMaster</h1>
                             <p class="text-gray-600 mt-1">Follow these steps to unlock the full potential of your account</p>
@@ -29,7 +23,7 @@
                             <span class="text-2xl font-bold text-blue-600">{{ completionPercentage }}%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div 
+                            <div
                                 :class="[progressColor, 'h-2 rounded-full transition-all duration-300']"
                                 :style="{ width: completionPercentage + '%' }"
                             ></div>
@@ -92,7 +86,7 @@
                             <h2 class="text-lg font-semibold text-gray-900">Essential Setup (Start Here)</h2>
                         </div>
                         <div class="space-y-4">
-                            <StepCard 
+                            <StepCard
                                 v-for="step in stepsByPriority.high"
                                 :key="step.id"
                                 :step="step"
@@ -108,7 +102,7 @@
                             <h2 class="text-lg font-semibold text-gray-900">Optimize Your Setup</h2>
                         </div>
                         <div class="space-y-4">
-                            <StepCard 
+                            <StepCard
                                 v-for="step in stepsByPriority.medium"
                                 :key="step.id"
                                 :step="step"
@@ -124,7 +118,7 @@
                             <h2 class="text-lg font-semibold text-gray-900">Additional Resources</h2>
                         </div>
                         <div class="space-y-4">
-                            <StepCard 
+                            <StepCard
                                 v-for="step in stepsByPriority.low"
                                 :key="step.id"
                                 :step="step"
@@ -139,18 +133,18 @@
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Need Help?</h3>
                     <p class="text-gray-600 mb-6">Check out our documentation or contact our support team for guidance.</p>
                     <div class="flex gap-4 justify-center flex-wrap">
-                        <a href="https://docs.taxmaster.app" target="_blank" 
+                        <a href="https://docs.taxmaster.app" target="_blank"
                             class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-400 transition">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             Documentation
                         </a>
-                        <a href="mailto:support@taxmaster.app" 
+                        <a href="mailto:support@taxmaster.app"
                             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                             Contact Support

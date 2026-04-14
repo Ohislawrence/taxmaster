@@ -90,6 +90,13 @@ class VATReturn extends Model
         'attachments' => 'array',
     ];
 
+    protected $appends = [
+        'period_label',
+        'status_label',
+        'output_vat',
+        'net_vat',
+    ];
+
     /**
      * Accessor: expose vat_due as net_vat for backward compatibility
      */

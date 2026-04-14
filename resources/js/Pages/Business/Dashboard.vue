@@ -3,9 +3,6 @@
         <Head title="Dashboard" />
 
         <div class="py-4 sm:py-8 px-3 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
-            <!-- Subscription Status Banner -->
-            <SubscriptionBanner :currentSubscription="currentSubscription" :usageStats="usageStats" class="mb-2 sm:mb-4" />
-
             <!-- Get Started Widget -->
             <GetStartedWidget :showWidget="true" class="mb-2 sm:mb-6" />
 
@@ -42,26 +39,62 @@
                 </div>
             </div>
 
+            <!-- Subscription Plan & Usage -->
+            <div class="bg-white rounded-lg shadow p-3 sm:p-6 mb-4 sm:mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                    <div>
+                        <p class="text-gray-600 text-xs sm:text-sm font-medium">Plan & Usage</p>
+                        <h2 class="text-base sm:text-xl font-bold text-gray-900 mt-1">{{ formatPlanName(usageStats?.plan_name || currentSubscription?.plan?.name || currentSubscription?.plan_type || 'No Plan') }}</h2>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-1" v-if="usageStats?.renews_at || currentSubscription?.renews_at">
+                            Renews on {{ formatDate(usageStats?.renews_at || currentSubscription?.renews_at) }}
+                        </p>
+                    </div>
+                    <Link href="/business/subscription" class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Manage Plan
+                    </Link>
+                </div>
+
+                <div v-if="usageStats?.has_subscription" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div class="rounded-lg border border-gray-100 p-3">
+                        <p class="text-xs text-gray-500">Staff</p>
+                        <p class="text-sm sm:text-base font-semibold text-gray-900 mt-1">{{ formatUsage(usageStats?.staff_count, usageStats?.staff_limit) }}</p>
+                        <p v-if="!isUnlimitedLimit(usageStats?.staff_limit)" class="text-xs text-gray-500 mt-1">{{ usageStats?.staff_percentage || 0 }}% used</p>
+                        <p v-else class="text-xs text-emerald-600 mt-1 font-medium">Unlimited</p>
+                    </div>
+
+                    <div class="rounded-lg border border-gray-100 p-3">
+                        <p class="text-xs text-gray-500">Tax Returns (This Year)</p>
+                        <p class="text-sm sm:text-base font-semibold text-gray-900 mt-1">{{ formatUsage(usageStats?.returns_this_year, usageStats?.returns_limit) }}</p>
+                        <p v-if="!isUnlimitedLimit(usageStats?.returns_limit)" class="text-xs text-gray-500 mt-1">{{ usageStats?.returns_percentage || 0 }}% used</p>
+                        <p v-else class="text-xs text-emerald-600 mt-1 font-medium">Unlimited</p>
+                    </div>
+                </div>
+
+                <div v-else class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs sm:text-sm text-amber-800">
+                    No active subscription. Choose a plan to unlock premium tools.
+                </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8">
                 <Link :href="route('business.banks.index')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-4 py-2 rounded-lg text-center font-medium text-xs sm:text-sm">
-                    🏦 Bank Accounts
+                    Bank Accounts
                 </Link>
                 <Link :href="route('business.transactions.index')" class="bg-green-600 hover:bg-green-700 text-white px-2 sm:px-4 py-2 rounded-lg text-center font-medium text-xs sm:text-sm">
-                    + Transaction
+                    Transaction
                 </Link>
                 <Link :href="route('business.vat.index')" class="bg-purple-600 hover:bg-purple-700 text-white px-2 sm:px-4 py-2 rounded-lg text-center font-medium text-xs sm:text-sm">
-                    📊 VAT
+                    VAT
                 </Link>
                 <Link href="/business/compliance" class="bg-orange-600 hover:bg-orange-700 text-white px-2 sm:px-4 py-2 rounded-lg text-center font-medium text-xs sm:text-sm">
-                    📅 Compliance
+                    Compliance
                 </Link>
             </div>
 
             <!-- Upcoming Compliance Deadlines -->
             <div class="bg-white rounded-lg shadow p-3 sm:p-6 mb-4 sm:mb-6">
                 <div class="flex justify-between items-center mb-3 sm:mb-4">
-                    <h2 class="text-base sm:text-lg font-semibold text-gray-900">📅 Upcoming Deadlines</h2>
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-900">Upcoming Deadlines</h2>
                     <Link href="/business/compliance" class="text-blue-600 hover:text-blue-800 text-xs sm:text-sm">View Calendar</Link>
                 </div>
                 <div v-if="upcomingDeadlines.length > 0" class="space-y-2 sm:space-y-3">
@@ -86,7 +119,7 @@
                     </div>
                 </div>
                 <div v-else class="text-center py-6 sm:py-8 text-gray-500 text-sm">
-                    🎉 No upcoming deadlines! You're all caught up.
+                    No upcoming deadlines. You're all caught up.
                 </div>
             </div>
 
@@ -95,7 +128,7 @@
                 <!-- Bank Accounts -->
                 <div class="bg-white rounded-lg shadow p-3 sm:p-6">
                     <div class="flex justify-between items-center mb-3 sm:mb-4">
-                        <h2 class="text-base sm:text-lg font-semibold text-gray-900">🏦 Bank Accounts</h2>
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-900">Bank Accounts</h2>
                         <Link :href="route('business.banks.index')" class="text-blue-600 hover:text-blue-800 text-xs sm:text-sm">Manage</Link>
                     </div>
                     <div v-if="bankAccounts.length > 0" class="space-y-2 sm:space-y-3">
@@ -123,7 +156,7 @@
                 <!-- Recent Transactions -->
                 <div class="bg-white rounded-lg shadow p-3 sm:p-6">
                     <div class="flex justify-between items-center mb-3 sm:mb-4">
-                        <h2 class="text-base sm:text-lg font-semibold text-gray-900">💰 Recent Transactions</h2>
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-900">Recent Transactions</h2>
                         <Link href="/business/transactions" class="text-blue-600 hover:text-blue-800 text-xs sm:text-sm">View All</Link>
                     </div>
                     <div v-if="recentTransactions.length > 0" class="space-y-1 sm:space-y-2">
@@ -154,7 +187,7 @@
             <!-- Recent VAT Returns -->
             <div class="bg-white rounded-lg shadow p-3 sm:p-6">
                 <div class="flex justify-between items-center mb-3 sm:mb-4">
-                    <h2 class="text-base sm:text-lg font-semibold text-gray-900">📊 Recent VAT</h2>
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-900">Recent VAT</h2>
                     <Link :href="route('business.vat.index')" class="text-blue-600 hover:text-blue-800 text-xs sm:text-sm">View All</Link>
                 </div>
 
@@ -225,10 +258,9 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
-import SubscriptionBanner from '@/Components/Business/SubscriptionBanner.vue';
 import GetStartedWidget from '@/Components/GetStarted/Widget.vue';
 
-defineProps({
+const props = defineProps({
     business: Object,
     stats: Object,
     upcomingDeadlines: Array,
@@ -277,5 +309,29 @@ function getVatStatusClass(status) {
         overdue: 'bg-red-100 text-red-800',
     };
     return classes[status] || 'bg-gray-100 text-gray-800';
+}
+
+function formatPlanName(name) {
+    if (!name) return 'No Plan';
+    return String(name)
+        .replace(/[_-]+/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+function isUnlimitedLimit(limit) {
+    if ((props.currentSubscription?.plan_type || '').toLowerCase() === 'enterprise') {
+        return true;
+    }
+
+    const value = Number(limit);
+    return Number.isFinite(value) && value >= 999;
+}
+
+function formatLimit(limit) {
+    return isUnlimitedLimit(limit) ? 'Unlimited' : String(limit ?? 0);
+}
+
+function formatUsage(count, limit) {
+    return `${count ?? 0}/${formatLimit(limit)}`;
 }
 </script>

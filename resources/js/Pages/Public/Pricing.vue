@@ -95,7 +95,8 @@ const comparisonFeatures = [
     ]},
     { category: 'Integrations & Data', features: [
         { name: 'Bank Integration (Mono)', free: false, basic: true, professional: true, enterprise: true },
-        { name: 'QuickBooks Integration', free: false, basic: false, professional: true, enterprise: true },
+        { name: 'QuickBooks & Zoho Integration', free: false, basic: false, professional: true, enterprise: true },
+        { name: 'Shopify Integration', free: false, basic: false, professional: true, enterprise: true },
         { name: 'Sage & Xero Integration', free: false, basic: false, professional: false, enterprise: true },
         { name: 'API Access', free: false, basic: false, professional: true, enterprise: true },
     ]},

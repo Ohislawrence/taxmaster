@@ -25,6 +25,9 @@ class IntegrationsController extends Controller
         // Check Zoho connection status
         $zohoConnection = $business->zohoConnection;
 
+        // Check Shopify connection status
+        $shopifyConnection = $business->shopifyConnection;
+
         $integrations = [
             [
                 'name' => 'QuickBooks',
@@ -46,6 +49,17 @@ class IntegrationsController extends Controller
                 'connected_at' => $zohoConnection?->created_at,
                 'last_synced_at' => $zohoConnection?->last_synced_at,
                 'route' => '/business/integrations/zoho',
+                'available' => true,
+            ],
+            [
+                'name' => 'Shopify',
+                'slug' => 'shopify',
+                'description' => 'Sync orders and products from your Shopify store for Nigerian tax compliance',
+                'icon' => 'shopify',
+                'status' => $shopifyConnection && $shopifyConnection->isActive() ? 'connected' : 'available',
+                'connected_at' => $shopifyConnection?->created_at,
+                'last_synced_at' => $shopifyConnection?->last_synced_at,
+                'route' => '/business/integrations/shopify',
                 'available' => true,
             ],
             [

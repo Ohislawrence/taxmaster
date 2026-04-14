@@ -33,8 +33,8 @@ const features = ref([
         icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'
     },
     {
-        title: 'Bank & Accounting Integrations',
-        description: 'Connect your bank via Mono and sync with QuickBooks, Zoho Books, Sage, or Xero. Import transactions, reconcile receipts and expenses, and auto-categorize for tax purposes.',
+        title: 'Bank & E-commerce Integrations',
+        description: 'Connect your bank via Mono, sync with QuickBooks, Zoho Books, Sage, or Xero, and import orders from Shopify. Import transactions, reconcile receipts and expenses, and auto-categorize for tax purposes.',
         icon: 'M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4m-9 4v10'
     },
     {
@@ -94,7 +94,7 @@ const features = ref([
     },
     {
         title: 'Integrations & API',
-        description: 'Open API for integrations, webhooks for events, and built-in connectors for QuickBooks, Zoho Books, Sage, Xero, banks and payment processors.',
+        description: 'Open API for integrations, webhooks for events, and built-in connectors for QuickBooks, Zoho Books, Shopify, Sage, Xero, banks and payment processors.',
         icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4'
     },
     {

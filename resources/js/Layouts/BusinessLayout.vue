@@ -68,7 +68,7 @@
                     <div class="flex items-center gap-2 lg:gap-4">
                         <Link href="/business/dashboard" class="flex items-center gap-2 group">
                             <img src="/taxmaster-one.png" alt="TaxMaster" class="h-7 lg:h-8 w-auto transition-transform group-hover:scale-105" />
-                            <span class="text-sm lg:text-base font-medium text-gray-600 group-hover:text-gray-900 transition-colors">Business Portal</span>
+                            <span class="hidden sm:inline text-xs lg:text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">Business Portal</span>
                         </Link>
                     </div>
 
@@ -557,42 +557,28 @@
 
             <!-- Main Content -->
             <main :class="auth?.user ? 'flex-1 min-w-0' : 'w-full'">
+                <Link
+                    v-if="auth?.user"
+                    href="/business/ai/insights"
+                    class="fixed top-20 right-4 z-30 inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-white/90 px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-md backdrop-blur-sm transition-all hover:border-blue-300 hover:bg-white"
+                    title="AI automation is active"
+                >
+                    <span class="relative flex h-2 w-2">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                    </span>
+                    <span>AI Live</span>
+                </Link>
+
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-                    <!-- AI Automation Banner -->
-                    <div
-                        v-if="auth?.user"
-                        class="mb-8 rounded-2xl border border-blue-200/50 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm px-5 py-4 shadow-sm"
-                    >
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                            <div class="flex items-start gap-3 flex-1">
-                                <span class="inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700 shadow-sm">
-                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                    </svg>
-                                </span>
-                                <div class="text-sm text-blue-900">
-                                    <p class="font-semibold flex items-center gap-2">
-                                        AI Automation Active
-                                        <span class="px-1.5 py-0.5 text-xs bg-blue-200/50 text-blue-700 rounded-full">Live</span>
-                                    </p>
-                                    <p class="text-blue-700/90 mt-0.5">
-                                        Transactions auto-categorized • Compliance reminders • Payment recovery running
-                                        <Link href="/business/ai/insights" class="font-medium text-blue-700 underline decoration-blue-300 underline-offset-2 hover:decoration-blue-700 ml-1">
-                                            View insights →
-                                        </Link>
-                                    </p>
-                                </div>
-                            </div>
-                            <div v-if="auth.user.roles.includes('accountant')" class="flex items-center gap-2 sm:ml-auto">
-                                <button
-                                    v-if="page.props.current_business"
-                                    @click.prevent="showLeaveConfirm = true"
-                                    class="px-4 py-2 text-sm bg-white/80 border border-gray-200/80 text-gray-600 rounded-xl hover:bg-white hover:border-gray-300 transition-all active:scale-95 shadow-sm whitespace-nowrap"
-                                >
-                                    Return to accountant
-                                </button>
-                            </div>
-                        </div>
+                    <div v-if="auth?.user && auth.user.roles.includes('accountant')" class="mb-6 flex justify-end">
+                        <button
+                            v-if="page.props.current_business"
+                            @click.prevent="showLeaveConfirm = true"
+                            class="px-4 py-2 text-sm bg-white/80 border border-gray-200/80 text-gray-600 rounded-xl hover:bg-white hover:border-gray-300 transition-all active:scale-95 shadow-sm whitespace-nowrap"
+                        >
+                            Return to accountant
+                        </button>
                     </div>
 
                     <slot />

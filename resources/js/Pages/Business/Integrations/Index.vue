@@ -143,6 +143,7 @@ const getIconBgClass = (slug) => {
     const classMap = {
         'quickbooks': 'bg-green-100',
         'zoho': 'bg-orange-100',
+        'shopify': 'bg-green-100',
         'sage': 'bg-emerald-100',
         'xero': 'bg-sky-100',
     };
@@ -153,6 +154,7 @@ const getIconColorClass = (slug) => {
     const classMap = {
         'quickbooks': 'text-green-600',
         'zoho': 'text-orange-600',
+        'shopify': 'text-green-600',
         'sage': 'text-emerald-600',
         'xero': 'text-sky-600',
     };
@@ -180,6 +182,22 @@ const getIcon = (slug) => {
         }, [
             h('path', {
                 d: 'M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-9 12H7v-2h4v2zm0-4H7v-2h4v2zm0-4H7V6h4v2zm6 8h-4V6h4v10z'
+            })
+        ]);
+    }
+
+    // Shopify icon
+    if (slug === 'shopify') {
+        return () => h('svg', {
+            fill: 'none',
+            stroke: 'currentColor',
+            viewBox: '0 0 24 24',
+        }, [
+            h('path', {
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+                'stroke-width': '2',
+                d: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'
             })
         ]);
     }
