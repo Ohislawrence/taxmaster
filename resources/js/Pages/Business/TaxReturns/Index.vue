@@ -5,9 +5,42 @@
         <div class="py-8 px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl font-bold text-gray-900">Tax Returns</h1>
-                <Link href="/business/tax-returns/create" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
-                    + New Return
-                </Link>
+
+                <!-- New Return dropdown -->
+                <div class="relative" ref="dropdownRef">
+                    <button
+                        @click="showNewMenu = !showNewMenu"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium inline-flex items-center gap-2"
+                    >
+                        + New Return
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <transition
+                        enter-active-class="transition ease-out duration-100"
+                        enter-from-class="opacity-0 scale-95"
+                        enter-to-class="opacity-100 scale-100"
+                        leave-active-class="transition ease-in duration-75"
+                        leave-from-class="opacity-100 scale-100"
+                        leave-to-class="opacity-0 scale-95"
+                    >
+                        <div
+                            v-if="showNewMenu"
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50"
+                        >
+                            <Link
+                                v-for="item in taxReturnRoutes"
+                                :key="item.label"
+                                :href="item.href"
+                                class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                                @click="showNewMenu = false"
+                            >
+                                {{ item.label }}
+                            </Link>
+                        </div>
+                    </transition>
+                </div>
             </div>
 
             <!-- Filters -->
@@ -71,8 +104,17 @@
                     </table>
                 </div>
                 <div v-else class="p-8 text-center text-gray-500">
-                    <p>No tax returns found.</p>
-                    <Link href="/business/tax-returns/create" class="text-blue-600 hover:underline">Create your first return</Link>
+                    <p class="mb-3">No tax returns found.</p>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        <Link
+                            v-for="item in taxReturnRoutes"
+                            :key="item.label"
+                            :href="item.href"
+                            class="text-sm text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50"
+                        >
+                            {{ item.label }}
+                        </Link>
+                    </div>
                 </div>
             </div>
 
@@ -88,12 +130,31 @@
 
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
 
 defineProps({
     taxReturns: Object,
 });
+
+const taxReturnRoutes = [
+    { label: 'PAYE Return',          href: '/business/paye/create' },
+    { label: 'VAT Return',           href: '/business/vat/create' },
+    { label: 'Withholding Tax (WHT)', href: '/business/wht/create' },
+    { label: 'Company Income Tax',   href: '/business/cit/create' },
+];
+
+const showNewMenu = ref(false);
+const dropdownRef = ref(null);
+
+function handleOutsideClick(e) {
+    if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
+        showNewMenu.value = false;
+    }
+}
+
+onMounted(() => document.addEventListener('mousedown', handleOutsideClick));
+onUnmounted(() => document.removeEventListener('mousedown', handleOutsideClick));
 
 const filters = ref({
     search: '',

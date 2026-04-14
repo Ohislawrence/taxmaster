@@ -90,8 +90,8 @@ Route::middleware(['auth:sanctum', 'verified', EnsureBusinessOrManager::class, '
         Route::delete('/{workflow}', [App\Http\Controllers\Business\AiWorkflowController::class, 'destroy'])->name('destroy');
     });
 
-    // Tax Returns
-    Route::resource('tax-returns', TaxReturnController::class);
+    // Tax Returns (index + create/store removed — use per-type routes instead)
+    Route::resource('tax-returns', TaxReturnController::class)->except(['index', 'create', 'store']);
     Route::post('tax-returns/{taxReturn}/submit', [TaxReturnController::class, 'submit'])->name('tax-returns.submit');
     Route::get('tax-returns/{taxReturn}/analysis', [TaxReturnController::class, 'getAnalysis'])->name('tax-returns.analysis');
     Route::post('tax-returns/{taxReturn}/analyze', [TaxReturnController::class, 'analyze'])->name('tax-returns.analyze');

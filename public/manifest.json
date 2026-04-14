@@ -1,20 +1,53 @@
 {
+  "id": "/business/dashboard",
   "name": "TaxMaster",
   "short_name": "TaxMaster",
-  "start_url": ".",
+  "description": "Nigerian Tax Compliance & Management for Businesses",
+  "start_url": "/business/dashboard?source=pwa",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
+  "lang": "en-NG",
+  "categories": ["finance", "business", "productivity"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/taxmaster-icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/taxmaster-icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your business dashboard",
+      "url": "/business/dashboard",
+      "icons": [{ "src": "/taxmaster-icon.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Compliance",
+      "short_name": "Compliance",
+      "description": "View compliance calendar and deadlines",
+      "url": "/business/compliance",
+      "icons": [{ "src": "/taxmaster-icon.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "VAT Returns",
+      "short_name": "VAT",
+      "description": "Manage VAT filings",
+      "url": "/business/vat",
+      "icons": [{ "src": "/taxmaster-icon.png", "sizes": "96x96", "type": "image/png" }]
     }
   ]
 }

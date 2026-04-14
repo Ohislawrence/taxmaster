@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
+    <title>TaxMaster – Offline</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+            background: linear-gradient(145deg, #eff6ff 0%, #f0f9ff 60%, #fafafa 100%);
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            padding-bottom: max(24px, env(safe-area-inset-bottom));
+            text-align: center;
+            color: #111827;
+        }
+
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            margin: 0 auto 28px;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+        }
+
+        .signal-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 20px;
+            color: #93c5fd;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e3a5f;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        p {
+            font-size: 15px;
+            color: #6b7280;
+            max-width: 300px;
+            line-height: 1.6;
+            margin-bottom: 36px;
+        }
+
+        .retry-btn {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 15px 0;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.15s, transform 0.1s;
+            letter-spacing: -0.2px;
+        }
+
+        .retry-btn:active {
+            background: #1d4ed8;
+            transform: scale(0.97);
+        }
+
+        .tip {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #9ca3af;
+            max-width: 260px;
+            line-height: 1.5;
+        }
+
+        .brand {
+            position: fixed;
+            bottom: max(20px, env(safe-area-inset-bottom));
+            font-size: 12px;
+            color: #d1d5db;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <img src="/taxmaster-icon.png" alt="TaxMaster" class="app-icon">
+
+    <svg class="signal-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3 15.5A8.492 8.492 0 018.5 13M12 21a9 9 0 100-18 9 9 0 000 18zm0 0v-3m0 3a9 9 0 010-18M8.5 13A4.49 4.49 0 0112 12m3.5 1.5A4.49 4.49 0 0012 12m0 9v-9" />
+    </svg>
+
+    <h1>You're Offline</h1>
+    <p>Check your internet connection and try again. Your tax data is safely stored.</p>
+
+    <button class="retry-btn" onclick="window.location.reload()">Try Again</button>
+
+    <p class="tip">Once reconnected, everything will sync automatically.</p>
+
+    <span class="brand">TaxMaster</span>
+</body>
+</html>

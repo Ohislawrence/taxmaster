@@ -4,14 +4,14 @@
 
         <!-- Month Navigation -->
         <div class="flex items-center justify-between mb-6">
-            <button 
+            <button
                 @click="previousMonth"
                 class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
             >
                 ← Prev
             </button>
             <h4 class="text-xl font-semibold">{{ currentMonthName }} {{ currentYear }}</h4>
-            <button 
+            <button
                 @click="nextMonth"
                 class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
             >
@@ -22,7 +22,7 @@
         <!-- Calendar Grid -->
         <div class="grid grid-cols-7 gap-2">
             <!-- Day Headers -->
-            <div v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" 
+            <div v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']"
                  :key="day"
                  class="text-center text-sm font-medium text-gray-600 py-2"
             >
@@ -30,8 +30,8 @@
             </div>
 
             <!-- Calendar Days -->
-            <div 
-                v-for="(day, index) in calendarDays" 
+            <div
+                v-for="(day, index) in calendarDays"
                 :key="index"
                 class="aspect-square p-2 border rounded relative"
                 :class="{
@@ -42,11 +42,11 @@
                 @click="selectDay(day)"
             >
                 <div class="text-sm">{{ day.date }}</div>
-                
+
                 <!-- Deadline Indicators -->
                 <div v-if="day.deadlines && day.deadlines.length > 0" class="mt-1">
-                    <div 
-                        v-for="deadline in day.deadlines.slice(0, 2)" 
+                    <div
+                        v-for="deadline in day.deadlines.slice(0, 2)"
                         :key="deadline.id"
                         class="text-xs px-1 rounded mb-1"
                         :class="{
@@ -65,15 +65,15 @@
         </div>
 
         <!-- Selected Day Details -->
-        <div v-if="selectedDay && selectedDay.deadlines && selectedDay.deadlines.length > 0" 
+        <div v-if="selectedDay && selectedDay.deadlines && selectedDay.deadlines.length > 0"
              class="mt-6 p-4 bg-gray-50 rounded-lg"
         >
             <h4 class="font-semibold text-gray-900 mb-3">
                 Deadlines for {{ selectedDay.fullDate }}
             </h4>
             <div class="space-y-2">
-                <div 
-                    v-for="deadline in selectedDay.deadlines" 
+                <div
+                    v-for="deadline in selectedDay.deadlines"
                     :key="deadline.id"
                     class="p-3 bg-white border rounded"
                 >
@@ -82,8 +82,8 @@
                             <p class="font-medium text-gray-900">{{ deadline.tax_type?.name }}</p>
                             <p class="text-sm text-gray-600">{{ deadline.filing_type }} Filing</p>
                         </div>
-                        <Link 
-                            :href="`/business/tax-returns/create?tax_type=${deadline.tax_type_id}`"
+                        <Link
+                            :href="taxReturnRoute(deadline.tax_type?.code)"
                             class="text-sm text-blue-600 hover:underline"
                         >
                             File Now
@@ -134,11 +134,11 @@ const calendarDays = computed(() => {
     const firstDay = new Date(currentYear.value, currentMonth.value, 1);
     const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0);
     const prevLastDay = new Date(currentYear.value, currentMonth.value, 0);
-    
+
     const days = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // Previous month days
     const firstDayOfWeek = firstDay.getDay();
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
@@ -151,14 +151,14 @@ const calendarDays = computed(() => {
             deadlines: [],
         });
     }
-    
+
     // Current month days
     for (let i = 1; i <= lastDay.getDate(); i++) {
         const dayDate = new Date(currentYear.value, currentMonth.value, i);
         dayDate.setHours(0, 0, 0, 0);
-        
+
         const deadlinesForDay = getDeadlinesForDate(dayDate);
-        
+
         days.push({
             date: i,
             isCurrentMonth: true,
@@ -167,7 +167,7 @@ const calendarDays = computed(() => {
             deadlines: deadlinesForDay,
         });
     }
-    
+
     // Next month days
     const remainingDays = 42 - days.length; // 6 rows * 7 days
     for (let i = 1; i <= remainingDays; i++) {
@@ -179,7 +179,7 @@ const calendarDays = computed(() => {
             deadlines: [],
         });
     }
-    
+
     return days;
 });
 
@@ -221,13 +221,24 @@ const selectDay = (day) => {
     if (day.isCurrentMonth && day.deadlines.length > 0) {
         selectedDay.value = {
             ...day,
-            fullDate: day.fullDate.toLocaleDateString('en-NG', { 
+            fullDate: day.fullDate.toLocaleDateString('en-NG', {
                 weekday: 'long',
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             }),
         };
     }
 };
+
+const TAX_RETURN_ROUTES = {
+    paye: '/business/paye/create',
+    vat:  '/business/vat/create',
+    wht:  '/business/wht/create',
+    cit:  '/business/cit/create',
+};
+
+function taxReturnRoute(code) {
+    return TAX_RETURN_ROUTES[code?.toLowerCase()] ?? '/business/tax-returns';
+}
 </script>

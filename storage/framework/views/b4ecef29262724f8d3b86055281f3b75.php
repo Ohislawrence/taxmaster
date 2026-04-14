@@ -2,8 +2,21 @@
 <html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+
+        <!-- PWA: Apple / iOS -->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="TaxMaster">
+        <link rel="apple-touch-icon" href="<?php echo e(asset('taxmaster-icon.png')); ?>">
+        <link rel="apple-touch-startup-image" href="<?php echo e(asset('taxmaster-icon.png')); ?>">
+
+        <!-- PWA: Android / misc -->
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="format-detection" content="telephone=no, email=no">
+        <meta name="msapplication-TileColor" content="#2563eb">
+        <meta name="msapplication-TileImage" content="<?php echo e(asset('taxmaster-icon.png')); ?>">
         <meta name="theme-color" content="#2563eb">
 
         <title inertia><?php echo e($page['props']['title'] ?? 'Simplifying tax compliance for Nigerian businesses'); ?></title>

@@ -227,23 +227,6 @@
                             <span v-if="isActive('/business/dashboard')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
                         </Link>
 
-                        <!-- Tax Returns -->
-                        <Link
-                            href="/business/tax-returns"
-                            :class="[
-                                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
-                                isActive('/business/tax-returns')
-                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/50 text-blue-600'
-                                    : 'text-gray-600 hover:bg-gray-100/80'
-                            ]"
-                        >
-                            <svg class="w-5 h-5 transition-transform group-hover:scale-110" :class="isActive('/business/tax-returns') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span class="flex-1">Tax Returns</span>
-                            <span v-if="isActive('/business/tax-returns')" class="w-1 h-1 bg-blue-600 rounded-full"></span>
-                        </Link>
-
                         <!-- Payments - Hidden until tax payment functionality is available -->
                         <!-- <Link
                             href="/business/payments"
@@ -684,6 +667,9 @@
 
         <!-- Cookie Consent Banner -->
         <CookieConsent />
+
+        <!-- PWA Install Prompt -->
+        <PwaInstallPrompt />
     </div>
 </template>
 
@@ -694,6 +680,7 @@ import { usePage } from '@inertiajs/vue3';
 import TaxMasterChat from '@/Components/TaxMasterChat.vue';
 import CookieConsent from '@/Components/CookieConsent.vue';
 import RiskBadge from '@/Components/Shared/RiskBadge.vue';
+import PwaInstallPrompt from '@/Components/PwaInstallPrompt.vue';
 
 const page = usePage();
 const auth = computed(() => page.props.auth);
