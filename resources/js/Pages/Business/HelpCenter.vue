@@ -1,5 +1,6 @@
 <template>
     <BusinessLayout :title="`Help Center`">
+        <Head title="Help Center" />
         <div class="max-w-7xl mx-auto py-8">
             <!-- Header -->
             <div class="mb-8">
@@ -586,7 +587,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
-import { Link } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 
 const searchQuery = ref('');
 

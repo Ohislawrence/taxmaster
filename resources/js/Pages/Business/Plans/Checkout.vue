@@ -1,5 +1,6 @@
 <template>
   <BusinessLayout>
+    <Head title="Checkout" />
     <div class="bg-gray-50 py-6 sm:py-12 px-3 sm:px-4">
       <BillingGuardNotice />
       <div class="max-w-4xl mx-auto space-y-6 sm:space-y-8">
@@ -204,7 +205,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
 import BillingGuardNotice from '@/Components/BillingGuardNotice.vue';

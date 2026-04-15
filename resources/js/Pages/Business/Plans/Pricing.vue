@@ -1,5 +1,6 @@
 <template>
   <BusinessLayout>
+    <Head title="Pricing" />
     <div class="bg-gradient-to-b from-blue-50 to-white py-6 sm:py-12 px-3 sm:px-4">
       <div class="max-w-7xl mx-auto space-y-8 sm:space-y-12">
       <!-- Header -->
@@ -163,7 +164,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
 
 const page = usePage();

@@ -1,5 +1,6 @@
 <template>
     <BusinessLayout :title="`Invoice ${invoice.invoice_number}`">
+        <Head :title="`Invoice ${invoice.invoice_number}`" />
         <div class="py-6 lg:py-8 px-4 sm:px-6 lg:px-8">
             <div class="max-w-6xl mx-auto space-y-6">
                 <!-- Header Card -->
@@ -353,7 +354,7 @@
 
 <script>
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 export default {
     components: { BusinessLayout, Link },

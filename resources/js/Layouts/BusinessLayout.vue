@@ -660,10 +660,8 @@
             </div>
         </transition>
 
-        <!-- Floating AI Chat Widget (lifted above bottom nav on mobile) -->
-        <div class="fixed bottom-6 right-6 z-40 lg:bottom-6 mb-[calc(4rem+env(safe-area-inset-bottom))] lg:mb-0">
-            <TaxMasterChat v-if="auth?.user" />
-        </div>
+        <!-- Floating AI Chat Widget -->
+        <TaxMasterChat v-if="auth?.user" />
 
         <!-- Cookie Consent Banner -->
         <CookieConsent />

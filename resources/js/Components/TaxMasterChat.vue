@@ -1,6 +1,6 @@
 <template>
     <!-- Floating Chat Widget -->
-    <div class="fixed bottom-6 right-6 z-[95]">
+    <div class="fixed right-4 z-[95] bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-6">
         <!-- Chat Panel -->
         <transition
             enter-active-class="transition ease-out duration-200 origin-bottom-right"
@@ -12,7 +12,7 @@
         >
             <div
                 v-if="isOpen"
-                class="absolute bottom-16 right-0 w-[340px] sm:w-[380px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
+                class="absolute bottom-16 right-0 w-[calc(100vw-2rem)] sm:w-[380px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
                 style="max-height: 500px;"
             >
                 <!-- Header -->
@@ -142,12 +142,14 @@
         <!-- Floating Toggle Button -->
         <button
             @click="toggleChat"
-            class="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
-            :class="isOpen ? 'bg-gray-700 hover:bg-gray-800' : 'bg-blue-600 hover:bg-blue-700'"
+            class="w-10 h-10 lg:w-14 lg:h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+            :class="[
+                isOpen ? 'bg-gray-700 hover:bg-gray-800 opacity-100' : 'bg-blue-600 hover:bg-blue-700 opacity-60 hover:opacity-100 lg:opacity-100',
+            ]"
             :title="isOpen ? 'Close TaxMaster' : 'Ask TaxMaster'"
         >
             <!-- Chat icon (when closed) -->
-            <svg v-if="!isOpen" class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg v-if="!isOpen" class="w-5 h-5 lg:w-7 lg:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
             <!-- X icon (when open) -->

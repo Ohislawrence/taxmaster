@@ -1,5 +1,6 @@
 <template>
     <BusinessLayout>
+        <Head title="Transactions" />
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -267,6 +268,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { Head } from '@inertiajs/vue3'
 import BusinessLayout from '@/Layouts/BusinessLayout.vue'
 
 const props = defineProps({

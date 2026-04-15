@@ -1,6 +1,7 @@
 <template>
   <BusinessLayout>
     <template #default>
+      <Head title="Business Profile" />
       <h1 class="text-2xl font-bold">Business Profile</h1>
       <div class="mt-4 bg-white p-6 rounded-lg border">
         <p class="font-medium">{{ user.name }}</p>
@@ -11,9 +12,10 @@
 </template>
 
 <script>
+import { Head } from '@inertiajs/vue3';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
 export default {
   props: { user: Object },
-  components: { BusinessLayout }
+  components: { BusinessLayout, Head }
 }
 </script>

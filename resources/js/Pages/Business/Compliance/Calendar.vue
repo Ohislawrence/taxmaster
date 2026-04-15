@@ -1,5 +1,6 @@
 <template>
     <BusinessLayout>
+        <Head title="Compliance Calendar" />
         <div class="space-y-4 sm:space-y-6 px-3 sm:px-0">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -244,6 +245,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { Head } from '@inertiajs/vue3'
 import BusinessLayout from '@/Layouts/BusinessLayout.vue'
 
 const props = defineProps({

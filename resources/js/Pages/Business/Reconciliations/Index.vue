@@ -1,5 +1,5 @@
 <script setup>
-import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref, reactive } from 'vue';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
 
@@ -97,6 +97,7 @@ const reject = (id) => {
 </script>
 
 <template>
+  <Head title="Reconciliations" />
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold">Reconciliations</h1>
