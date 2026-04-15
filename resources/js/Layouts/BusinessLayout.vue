@@ -553,7 +553,7 @@
                     <span>AI Live</span>
                 </Link>
 
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-24 lg:pb-8">
                     <div v-if="auth?.user && auth.user.roles.includes('accountant')" class="mb-6 flex justify-end">
                         <button
                             v-if="page.props.current_business"
@@ -660,8 +660,8 @@
             </div>
         </transition>
 
-        <!-- Floating AI Chat Widget -->
-        <div class="fixed bottom-6 right-6 z-40">
+        <!-- Floating AI Chat Widget (lifted above bottom nav on mobile) -->
+        <div class="fixed bottom-6 right-6 z-40 lg:bottom-6 mb-[calc(4rem+env(safe-area-inset-bottom))] lg:mb-0">
             <TaxMasterChat v-if="auth?.user" />
         </div>
 
@@ -670,6 +670,97 @@
 
         <!-- PWA Install Prompt -->
         <PwaInstallPrompt />
+
+        <!-- Mobile Bottom Navigation Bar (logged-in users only, hidden on lg+) -->
+        <nav
+            v-if="auth?.user"
+            class="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
+            style="padding-bottom: env(safe-area-inset-bottom);"
+        >
+            <!-- frosted glass bar -->
+            <div class="bg-white/90 backdrop-blur-md border-t border-gray-200/60 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]">
+                <div class="grid grid-cols-6 h-16">
+
+                    <!-- Dashboard -->
+                    <Link
+                        href="/business/dashboard"
+                        class="flex flex-col items-center justify-center gap-0.5 transition-colors"
+                        :class="isActive('/business/dashboard') ? 'text-blue-600' : 'text-gray-400'"
+                    >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <span class="text-[10px] font-medium leading-none">Home</span>
+                        <span v-if="isActive('/business/dashboard')" class="w-1 h-1 rounded-full bg-blue-600 mt-0.5"></span>
+                    </Link>
+
+                    <!-- Compliance -->
+                    <Link
+                        href="/business/compliance"
+                        class="flex flex-col items-center justify-center gap-0.5 transition-colors"
+                        :class="isActive('/business/compliance') ? 'text-blue-600' : 'text-gray-400'"
+                    >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="text-[10px] font-medium leading-none">Calendar</span>
+                        <span v-if="isActive('/business/compliance')" class="w-1 h-1 rounded-full bg-blue-600 mt-0.5"></span>
+                    </Link>
+
+                    <!-- VAT -->
+                    <Link
+                        href="/business/vat"
+                        class="flex flex-col items-center justify-center gap-0.5 transition-colors"
+                        :class="isActive('/business/vat') ? 'text-blue-600' : 'text-gray-400'"
+                    >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+                        </svg>
+                        <span class="text-[10px] font-medium leading-none">VAT</span>
+                        <span v-if="isActive('/business/vat')" class="w-1 h-1 rounded-full bg-blue-600 mt-0.5"></span>
+                    </Link>
+
+                    <!-- Transactions -->
+                    <Link
+                        href="/business/transactions"
+                        class="flex flex-col items-center justify-center gap-0.5 transition-colors"
+                        :class="isActive('/business/transactions') ? 'text-blue-600' : 'text-gray-400'"
+                    >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                        </svg>
+                        <span class="text-[10px] font-medium leading-none">Txns</span>
+                        <span v-if="isActive('/business/transactions')" class="w-1 h-1 rounded-full bg-blue-600 mt-0.5"></span>
+                    </Link>
+
+                    <!-- Invoices -->
+                    <Link
+                        href="/business/invoices"
+                        class="flex flex-col items-center justify-center gap-0.5 transition-colors"
+                        :class="isActive('/business/invoices') ? 'text-blue-600' : 'text-gray-400'"
+                    >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-[10px] font-medium leading-none">Invoices</span>
+                        <span v-if="isActive('/business/invoices')" class="w-1 h-1 rounded-full bg-blue-600 mt-0.5"></span>
+                    </Link>
+
+                    <!-- More (opens sidebar) -->
+                    <button
+                        @click="showMobileMenu = !showMobileMenu"
+                        class="flex flex-col items-center justify-center gap-0.5 transition-colors w-full"
+                        :class="showMobileMenu ? 'text-blue-600' : 'text-gray-400'"
+                    >
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <span class="text-[10px] font-medium leading-none">More</span>
+                    </button>
+
+                </div>
+            </div>
+        </nav>
     </div>
 </template>
 
